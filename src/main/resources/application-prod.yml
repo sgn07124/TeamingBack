@@ -2,9 +2,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://my-db:3306/teaming2?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://teamingdb.c9m4k24eqcs9.ap-northeast-2.rds.amazonaws.com:3306/teaming2?useSSL=false&allowPublicKeyRetrieval=true&useUnicode=true&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: root
-    password: pwd1234
+    password: pwd1234!!
 
   data:
     redis:
