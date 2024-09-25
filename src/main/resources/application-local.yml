@@ -5,6 +5,7 @@ spring:
     username: teaming
     password: 00000000
 
+
   jpa:
     hibernate:
       ddl-auto: create
