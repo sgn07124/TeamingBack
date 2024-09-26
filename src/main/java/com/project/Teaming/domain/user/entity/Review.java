@@ -13,10 +13,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Review extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reviewId")
     private Long id;  // 리뷰 ID
+
     @Column(name = "rating")
     private int rating;  // 별점(1~5)
     @Column(name = "reviewText", columnDefinition = "TEXT")
