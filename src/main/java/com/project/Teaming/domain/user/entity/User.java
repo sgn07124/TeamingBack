@@ -27,14 +27,17 @@ public class User extends BaseTimeEntity {
     @Column(name = "userEmail", nullable = false, unique = true, length = 100)
     private String email;  // 사용자 이메일
 
-    @Column(name = "password")
-    private String password;  // 사용자 비밀번호
-
-    @Column(name = "userName", nullable = false, length = 50)
+    @Column(name = "userName", length = 50)
     private String name;  // 사용자 이름
 
     @Column(name = "warningCnt", nullable = false)
     private int warningCnt;  // 사용자가 받은 경고 횟수
+
+    @Column(name = "userRole")
+    private String userRole;
+
+    @Column(name = "provider")
+    private String provider;
 
     @OneToMany(mappedBy = "user")
     private List<ProjectParticipation> projectParticipations = new ArrayList<>();
@@ -48,4 +51,16 @@ public class User extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "user")
     private List<MentoringParticipation> mentoringParticipations = new ArrayList<>();
+
+    public User(String email, String provider, String role) {
+        this.email = email;
+        this.provider = provider;
+        this.userRole = role;
+        this.warningCnt = 0;  // 처음 경고 횟수는 0으로 설정
+    }
+
+    // 추가 정보 기입
+    public void updateUserInfo(String name) {
+        this.name = name;
+    }
 }
