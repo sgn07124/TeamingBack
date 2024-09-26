@@ -1,5 +1,0 @@
-# application.yml
-spring:
-  profiles:
-    active: local
-    # default로 사용할 프로필 선택 (local)
