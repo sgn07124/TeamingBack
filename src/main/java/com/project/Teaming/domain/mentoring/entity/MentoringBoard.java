@@ -33,8 +33,4 @@ public class MentoringBoard {
     @Enumerated(EnumType.STRING)
     private RecruitingStatus status;  // 멘토링 모집 상태
 
-    // 멘토링 팀 ID
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mentoringTeamId")
-    private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }
