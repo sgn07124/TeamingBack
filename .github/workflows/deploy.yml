@@ -28,6 +28,21 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
+      - name: application-prod.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_PROD_YML }}" | base64 --decode > src/main/resources/application-prod.yml
+          find src
+
+      - name: application-app.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_APP_YML }}" | base64 --decode > src/main/resources/application-app.yml
+          find src
+
+      - name: application-oauth.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_OAUTH_YML }}" | base64 --decode > src/main/resources/application-oauth.yml
+          find src
+
       - name: gradlew에 실행 권한 추가
         run: chmod +x ./gradlew
 

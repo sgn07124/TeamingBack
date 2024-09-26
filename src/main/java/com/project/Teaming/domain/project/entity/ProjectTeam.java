@@ -14,26 +14,26 @@ import java.util.List;
 
 @Getter
 @Entity
-@Table(name = "ProjectTeam")
+@Table(name = "project_team")
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectTeam extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "projectId")
+    @Column(name = "project_id")
     private Long id;  // 프로젝트 팀 ID
 
-    @Column(name = "projectName", nullable = false)
+    @Column(name = "project_name", nullable = false)
     private String name;  // 프로젝트 명
 
-    @Column(name = "startDate", length = 50)
+    @Column(name = "start_date", length = 50)
     private String startDate;  // 프로젝트 시작일
 
-    @Column(name = "endDate", length = 50)
+    @Column(name = "end_date", length = 50)
     private String endDate;  // 프로젝트 종료일
 
-    @Column(name = "membersCnt")
+    @Column(name = "members_cnt")
     private int membersCnt;  // 모집 인원
 
     @Column(name = "link", length = 1000)
@@ -45,15 +45,15 @@ public class ProjectTeam extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
 
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "project_team")
     private List<ProjectParticipation> teams = new ArrayList<>();
 
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "project_team")
     private List<ProjectBoard> projectBoards = new ArrayList<>();
 
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "project_team")
     private List<Review> reviews = new ArrayList<>();
 
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "project_team")
     private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 }

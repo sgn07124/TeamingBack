@@ -10,14 +10,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "Report")
+@Table(name = "report")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Report extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "reportId")
+    @Column(name = "report_id")
     private Long id;  // 신고 ID
 
     @Column(name = "status")
@@ -27,14 +27,14 @@ public class Report extends BaseTimeEntity {
     // 외래키 : 신청 ID, 신고한 사용자 ID, 신고 당한 사용자 ID, 프로젝트 ID
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "projectTeamId", referencedColumnName = "projectId")
+    @JoinColumn(name = "project_team_id", referencedColumnName = "project_id")
     private ProjectTeam projectTeam;  // 프로젝트 팀 ID (FK)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reportedUserId", referencedColumnName = "userId")
+    @JoinColumn(name = "reported_user_id", referencedColumnName = "user_id")
     private User reportedUser;  // 신고 당한 사용자 ID (FK)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reportingUserId", referencedColumnName = "userId")
+    @JoinColumn(name = "reporting_user_id", referencedColumnName = "user_id")
     private User reportingUser;  // 신고한 사용자 ID (FK)
 }
