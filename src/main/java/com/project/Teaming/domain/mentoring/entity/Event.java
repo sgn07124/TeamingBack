@@ -30,4 +30,8 @@ public class Event extends BaseEntity {
     @Column(name = "end_date", length = 50)
     private String endDate;  // 종료 날짜
 
+    // 외래키 : 멘토링 팀 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentoring_team_id")
+    private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }

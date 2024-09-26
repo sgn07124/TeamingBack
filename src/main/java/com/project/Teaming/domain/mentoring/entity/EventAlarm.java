@@ -28,4 +28,11 @@ public class EventAlarm {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;  // 알림 내용
 
+    // 외래키 : 멘토링팀 ID, 일정 ID
+    @OneToOne
+    @JoinColumns({
+            @JoinColumn(name = "eventId", referencedColumnName = "eventId"),
+            @JoinColumn(name = "mentoringTeamId", referencedColumnName = "mentoringTeamId")
+    })
+    private Event event;
 }
