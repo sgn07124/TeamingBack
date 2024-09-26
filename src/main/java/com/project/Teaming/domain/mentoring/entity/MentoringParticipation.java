@@ -40,4 +40,7 @@ public class MentoringParticipation {
     @JoinColumn(name = "userId")
     private User user;  // 신청한 사용자 ID (주인)
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentoringTeamId")
+    private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }
