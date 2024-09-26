@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 @EnableJpaAuditing
 public class TeamingApplication {
 
-
 	public static void main(String[] args) {
 		SpringApplication.run(TeamingApplication.class, args);
 	}
