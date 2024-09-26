@@ -35,5 +35,12 @@ public class MentoringParticipation {
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 역할
 
+    // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "userId")
+    private User user;  // 신청한 사용자 ID (주인)
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mentoringTeamId")
+    private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }
