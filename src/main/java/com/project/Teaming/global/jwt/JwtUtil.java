@@ -70,11 +70,10 @@ public class JwtUtil {
         Date now = new Date();
         return
                 Jwts.builder()
-                        // Payload를 구성하는 속성들을 정의한다.
                         .setClaims(claims)
-                        // 발행일자를 넣는다.
+                        // 발행일자
                         .setIssuedAt(now)
-                        // 토큰의 만료일시를 설정한다.
+                        // 토큰의 만료일시를 설정
                         .setExpiration(new Date(now.getTime() + tokenPeriod))
                         // 지정된 서명 알고리즘과 비밀 키를 사용하여 토큰을 서명한다.
                         .signWith(SignatureAlgorithm.HS256, secretKey)
@@ -82,11 +81,10 @@ public class JwtUtil {
 
     }
 
-
     public boolean verifyToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser()
-                    .setSigningKey(secretKey) // 비밀키를 설정하여 파싱한다.
+                    .setSigningKey(secretKey) // 비밀키를 설정하여 파싱
                     .parseClaimsJws(token);  // 주어진 토큰을 파싱하여 Claims 객체를 얻는다.
             // 토큰의 만료 시간과 현재 시간비교
             return claims.getBody()
@@ -97,13 +95,12 @@ public class JwtUtil {
         }
     }
 
-
-    // 토큰에서 Email을 추출한다.
+    // 토큰에서 Email을 추출
     public String getUid(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    // 토큰에서 ROLE(권한)만 추출한다.
+    // 토큰에서 ROLE(권한)만 추출
     public String getRole(String token) {
         return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().get("role", String.class);
     }
