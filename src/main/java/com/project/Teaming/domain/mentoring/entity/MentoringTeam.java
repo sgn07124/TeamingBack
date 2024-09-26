@@ -30,13 +30,5 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "endDate", length = 50)
     private String endDate;  // 멘토링 종료일
 
-    @OneToMany(mappedBy = "mentoringTeam")
-    private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "mentoringTeam")
-    private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "mentoringTeam")
-    private List<Event> eventList = new ArrayList<>();
 
 }
