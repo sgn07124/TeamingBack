@@ -12,14 +12,14 @@ import java.time.LocalDateTime;
 
 @Getter
 @Entity
-@Table(name = "MentoringParticipation")
+@Table(name = "mentoring_participation")
 @NoArgsConstructor
 @AllArgsConstructor
 public class MentoringParticipation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "mpId")
+    @Column(name = "mp_id")
     private Long id;  // 신청 ID
 
     @Column(name = "status")
@@ -37,10 +37,10 @@ public class MentoringParticipation {
 
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private User user;  // 신청한 사용자 ID (주인)
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mentoringTeamId")
+    @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }
