@@ -11,32 +11,24 @@ import java.util.List;
 
 @Getter
 @Entity
-@Table(name = "mentoring_team")
+@Table(name = "MentoringTeam")
 @NoArgsConstructor
 @AllArgsConstructor
 public class MentoringTeam extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "mentoring_team_id")
+    @Column(name = "mentoringTeamId")
     private Long id;  // 멘토링 팀 ID
-
-    @Column(name = "mentoring_name", length = 100)
+    @Column(name = "mentoringName", length = 100)
     private String name;  // 멘토링 명
-
-    @Column(name = "start_date", length = 50)
+    @Column(name = "startDate", length = 50)
     private String startDate;  // 멘토링 시작일
-
-    @Column(name = "end_date", length = 50)
+    @Column(name = "endDate", length = 50)
     private String endDate;  // 멘토링 종료일
-
-    @OneToMany(mappedBy = "mentoring_team")
+    @OneToMany(mappedBy = "mentoringTeam")
     private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "mentoring_team")
+    @OneToMany(mappedBy = "mentoringTeam")
     private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
-
-    @OneToMany(mappedBy = "mentoring_team")
+    @OneToMany(mappedBy = "mentoringTeam")
     private List<Event> eventList = new ArrayList<>();
-
 }

@@ -8,27 +8,22 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "project_event_alarm")
+@Table(name = "ProjectEventAlarm")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Alarm extends BaseEntity {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "event_alarm_id")
+    @Column(name = "eventAlarmId")
     private Long id;  // 일정 알람 ID
-
-    @Column(name = "time_set", nullable = false)
+    @Column(name = "timeSet", nullable = false)
     private int timeSet;  // 알림 설정 시간
-
-    @Column(name = "is_sent")
+    @Column(name = "isSent")
     @Enumerated(EnumType.STRING)
     private AlarmStatus isSent;  // 전송 여부
-
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;  // 알림 내용
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "par_id")
+    @JoinColumn(name = "parId")
     private ProjectParticipation projectParticipation;  // 주인
 }
