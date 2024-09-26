@@ -21,6 +21,7 @@ public class MentoringBoard {
     @Column(name = "title", nullable = false, length = 100)
     private String title;  // 모집글 제목
 
+
     @Column(name = "contents", columnDefinition = "TEXT")
     private String contents;  // 모집글 내용
 
