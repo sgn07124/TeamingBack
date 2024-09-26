@@ -21,19 +21,19 @@ public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
+    @Column(name = "user_id")
     private Long id;  // 사용자Id
 
-    @Column(name = "userEmail", nullable = false, unique = true, length = 100)
+    @Column(name = "user_email", nullable = false, unique = true, length = 100)
     private String email;  // 사용자 이메일
 
-    @Column(name = "userName", length = 50)
+    @Column(name = "user_name", length = 50)
     private String name;  // 사용자 이름
 
-    @Column(name = "warningCnt", nullable = false)
+    @Column(name = "warning_cnt", nullable = false)
     private int warningCnt;  // 사용자가 받은 경고 횟수
 
-    @Column(name = "userRole")
+    @Column(name = "user_role")
     private String userRole;
 
     @Column(name = "provider")
@@ -42,11 +42,11 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<ProjectParticipation> projectParticipations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "reportedUser")
+    @OneToMany(mappedBy = "reported_user")
     private List<Report> reports = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "portfolioId")
+    @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
 
     @OneToMany(mappedBy = "user")
