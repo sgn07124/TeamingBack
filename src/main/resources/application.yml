@@ -3,3 +3,10 @@ spring:
   profiles:
     active: local
     # default로 사용할 프로필 선택 (local)
+    include: oauth, app
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: 0000
