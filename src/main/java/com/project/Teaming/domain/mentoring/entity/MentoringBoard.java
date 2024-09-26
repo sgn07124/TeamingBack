@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "MentoringBoard")
+@Table(name = "mentoring_board")
 @NoArgsConstructor
 @AllArgsConstructor
 public class MentoringBoard {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "mentoringId")
+    @Column(name = "mentoring_id")
     private Long id;  // 멘토링 모집글 ID
     @Column(name = "title", nullable = false, length = 100)
     private String title;  // 모집글 제목
@@ -28,6 +28,6 @@ public class MentoringBoard {
     private RecruitingStatus status;  // 멘토링 모집 상태
     // 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mentoringTeamId")
+    @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 }
