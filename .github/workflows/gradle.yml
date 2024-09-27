@@ -72,4 +72,4 @@ jobs:
           script: |
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
-            docker compose up --build -d
+            docker compose -f ./docker-compose.yml up -d
