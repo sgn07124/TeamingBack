@@ -40,7 +40,7 @@ jobs:
 
       - name: application-oauth.yml 파일 만들기
         run: |
-          echo "${{ secrets.APPLICATION_OAUTH_YML }}" | base64 --decode > src/main/resources/application-oauth.yml
+          echo "${{ secrets.APPLICATION_APP_YML }}" | base64 --decode > src/main/resources/application-app.yml
           find src
 
       - name: gradlew에 실행 권한 추가
@@ -50,17 +50,17 @@ jobs:
         run: ./gradlew clean build
 
 
-      - name: DockerHub에 로그인하기
+      - name: DockerHub 에 로그인하기
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker 이미지 생성
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
 
 
-      - name: Docker 이미지 Push하기
+      - name: ECR에 Docker 이미지 Push하기
         run: docker push ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
 
       - name: SSH로 EC2에 접속하기
@@ -71,8 +71,9 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script_stop: true
           script: |
-            sudo docker stop ${{ secrets.DOCKER_USERNAME }}/teaming-server || true
-            sudo docker rm ${{ secrets.DOCKER_USERNAME }}/teaming-server || true
-            sudo docker rmi ${{ secrets.DOCKER_USERNAME }}/teaming-server || true
+            sudo docker login --username ${{ secrets.DOCKER_USERNAME }} --password ${{ secrets.DOCKER_TOKEN }}
+            sudo docker ps -q | xargs —no-run-if-empty sudo docker stop
+            sudo docker ps -a -q | xargs —no-run-if-empty sudo docker rm
+            sudo docker rmi teaming-server || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
-            docker compose up --build -d
+            sudo docker compose up --build -d
