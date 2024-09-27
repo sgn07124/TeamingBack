@@ -57,7 +57,7 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker 이미지 생성
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest .
 
 
       - name: Docker 이미지 Push하기
