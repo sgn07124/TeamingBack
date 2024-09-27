@@ -49,6 +49,14 @@ jobs:
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
 
+      - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-northeast-2
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+
 
       - name: DockerHub 에 로그인하기
         uses: docker/login-action@v2
@@ -72,8 +80,8 @@ jobs:
           script_stop: true
           script: |
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-            sudo docker ps -q | xargs —no-run-if-empty sudo docker stop
-            sudo docker ps -a -q | xargs —no-run-if-empty sudo docker rm
+            sudo docker stop teaming-server || true
+            sudo docker rm teaming-server || true
             sudo docker rmi teaming-server || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
-            sudo docker compose up --build -d
+            docker compose up --build -d
