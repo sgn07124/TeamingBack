@@ -36,12 +36,12 @@ public class ProjectTeam extends BaseTimeEntity {
     private String contents;  // 프로젝트 설명
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
-    @OneToMany(mappedBy = "project_team")
+    @OneToMany(mappedBy = "projectTeam")
     private List<ProjectParticipation> teams = new ArrayList<>();
-    @OneToMany(mappedBy = "project_team")
+    @OneToMany(mappedBy = "projectTeam")
     private List<ProjectBoard> projectBoards = new ArrayList<>();
-    @OneToMany(mappedBy = "project_team")
+    @OneToMany(mappedBy = "projectTeam")
     private List<Review> reviews = new ArrayList<>();
-    @OneToMany(mappedBy = "project_team")
+    @OneToMany(mappedBy = "projectTeam")
     private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 }
