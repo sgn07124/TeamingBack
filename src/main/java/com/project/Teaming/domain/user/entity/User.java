@@ -42,7 +42,7 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<ProjectParticipation> projectParticipations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "reported_user")
+    @OneToMany(mappedBy = "reportedUser")
     private List<Report> reports = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
