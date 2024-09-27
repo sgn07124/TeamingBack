@@ -27,6 +27,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
