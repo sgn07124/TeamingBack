@@ -73,4 +73,4 @@ jobs:
           script: |
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
-            docker compose -f ./compose/docker-compose.yml up -d
+            docker compose -f /home/compose/docker-compose.yml up -d
