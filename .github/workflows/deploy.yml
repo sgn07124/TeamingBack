@@ -28,31 +28,40 @@ jobs:
           echo "${{ secrets.APPLICATION_YML }}" | base64 --decode > src/main/resources/application.yml
           find src
 
+      - name: application-prod.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_PROD_YML }}" | base64 --decode > src/main/resources/application-prod.yml
+          find src
+
+      - name: application-app.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_APP_YML }}" | base64 --decode > src/main/resources/application-app.yml
+          find src
+
+      - name: application-oauth.yml 파일 만들기
+        run: |
+          echo "${{ secrets.APPLICATION_OAUTH_YML }}" | base64 --decode > src/main/resources/application-oauth.yml
+          find src
+
       - name: gradlew에 실행 권한 추가
         run: chmod +x ./gradlew
 
       - name: 테스트 및 빌드하기
         run: ./gradlew clean build
 
-      - name: AWS Resource에 접근할 수 있게 AWS credentials 설정
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: ap-northeast-2
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: ECR에 로그인하기
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+      - name: DockerHub에 로그인하기
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Docker 이미지 생성
-        run: docker build -t teaming-server .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
 
-      - name: Docker 이미지에 Tag 붙이기
-        run: docker tag teaming-server ${{ steps.login-ecr.outputs.registry }}/teaming-server:latest
 
-      - name: ECR에 Docker 이미지 Push하기
-        run: docker push ${{ steps.login-ecr.outputs.registry }}/teaming-server:latest
+      - name: Docker 이미지 Push하기
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
 
       - name: SSH로 EC2에 접속하기
         uses: appleboy/ssh-action@v1.0.3
@@ -64,5 +73,5 @@ jobs:
           script: |
             docker stop teaming-server || true
             docker rm teaming-server || true
-            docker pull ${{ steps.login-ecr.outputs.registry }}/teaming-server:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
             docker compose up --build -d
