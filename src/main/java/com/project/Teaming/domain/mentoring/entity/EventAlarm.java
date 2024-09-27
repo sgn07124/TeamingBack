@@ -23,5 +23,11 @@ public class EventAlarm {
     private AlarmStatus isSent;  // 전송 여부
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;  // 알림 내용
-
+    // 외래키 : 멘토링팀 ID, 일정 ID
+    @OneToOne
+    @JoinColumns({
+            @JoinColumn(name = "event_id", referencedColumnName = "event_id"),
+            @JoinColumn(name = "mentoring_team_id", referencedColumnName = "mentoring_team")
+    })
+    private Event event;
 }
