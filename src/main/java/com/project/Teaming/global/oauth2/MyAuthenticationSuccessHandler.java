@@ -61,7 +61,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // 회원이 추가 정보까지 기입을 완료했다면, 홈 화면으로 리다이렉트
             if (user.getName() != null) {
                 // accessToken을 쿼리스트링에 담는 url을 만들어준다.
-                String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/loginSuccess")
+                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/loginSuccess")
                         .queryParam("accessToken", token.getAccessToken())
                         .build()
                         .encode(StandardCharsets.UTF_8)
@@ -70,7 +70,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
             } else {
                 // 회원이 추가 정보 기입을 완료하지 않았다면, 추가 정보 기입 페이지로 리다이렉트
-                String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/signup")
+                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/signup")
                         .queryParam("accessToken", token.getAccessToken()) // 토큰을 함께 전달
                         .build()
                         .encode(StandardCharsets.UTF_8)
