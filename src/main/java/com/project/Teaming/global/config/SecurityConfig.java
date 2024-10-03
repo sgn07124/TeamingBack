@@ -35,9 +35,6 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable()); // HTTP 기본 인증 비활성화
 
         http
-                .cors(withDefaults()); // CORS 활성화
-
-        http
                 .csrf(csrf -> csrf.disable()); // CSRF 보호 기능 비활성화
 
         http
