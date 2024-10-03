@@ -89,7 +89,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             log.info("jwtToken = {}", token.getAccessToken());
 
             // 회원이 존재하지 않을경우, accessToken을 쿼리스트링에 담고, 추가 정보 입력페이지로 리디렉트되는 url을 만들어준다.
-            String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:8080/signup")
+            String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/signup")
                     .queryParam("accessToken", token.getAccessToken())
                     .build()
                     .encode(StandardCharsets.UTF_8)
