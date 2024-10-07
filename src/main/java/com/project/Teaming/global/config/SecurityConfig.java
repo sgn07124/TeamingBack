@@ -48,7 +48,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/token/**").permitAll() // 토큰 발급 경로 허용
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/user", "/swagger-ui/**", "/v3/api-docs/**").permitAll() // 특정 경로 허용
-                        .requestMatchers("/user/portfolio/save").hasRole("USER")
+                        .requestMatchers("/user/portfolio/save", "/user/portfolio").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 

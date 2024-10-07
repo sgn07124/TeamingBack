@@ -29,4 +29,12 @@ public class PortfolioService {
         portfolio.updatePortfolioInfo(dto.getIntroduce(), dto.getSkills());
         portfolioRepository.save(portfolio);
     }
+
+    public PortfolioDto getPortfolio(String email) {
+        Portfolio portfolio = findPortfolio(email);
+        PortfolioDto dto = new PortfolioDto();
+        dto.setIntroduce(portfolio.getIntroduce());
+        dto.setSkills(portfolio.getSkills());
+        return dto;
+    }
 }
