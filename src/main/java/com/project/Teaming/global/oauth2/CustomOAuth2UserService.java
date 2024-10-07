@@ -65,6 +65,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         memberAttribute.put("exist", true);
         // 회원의 권한과, 회원속성, 속성이름을 이용해 DefaultOAuth2User 객체를 생성해 반환한다.
         log.info("6.2");
-        return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("ROLE_".concat(findMember.get().getUserRole()))), memberAttribute, "email");
+        // 회원들의 권한이 하나 뿐이므로 첫 로그인 이후에도 기본 권한이 저장되도록 수정
+        return new DefaultOAuth2User(Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")), memberAttribute, "email");
     }
 }

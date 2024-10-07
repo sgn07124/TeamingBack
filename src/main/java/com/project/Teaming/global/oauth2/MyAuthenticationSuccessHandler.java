@@ -56,6 +56,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
 
             // 회원이 존재하면 jwt token 발행을 시작한다.
             GeneratedToken token = jwtUtil.generateToken(email, role);
+            log.debug("MyAuthenticationSuccessHandler 권한 처리 후 role : " + role);
             log.info("jwtToken = {}", token.getAccessToken());
 
             // 회원이 추가 정보까지 기입을 완료했다면, 홈 화면으로 리다이렉트
