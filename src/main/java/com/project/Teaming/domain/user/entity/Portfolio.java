@@ -27,4 +27,10 @@ public class Portfolio extends BaseTimeEntity {
     public void assignUser(User user) {
         this.user = user;
     }
+
+    // 추가 정보 기입
+    public void updatePortfolioInfo(String introduce, String skills) {
+        this.introduce = introduce;
+        this.skills = skills;
+    }
 }
