@@ -1,7 +1,9 @@
 package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
+import com.project.Teaming.domain.user.entity.Portfolio;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.user.repository.PortfolioRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PortfolioRepository portfolioRepository;
 
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -31,6 +34,10 @@ public class UserService {
         User user = findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다 : " + email));
 
         user.updateUserInfo(dto.getName());
+        Portfolio portfolio = new Portfolio();
+        user.linkPortlolio(portfolio);
+
+        portfolioRepository.save(portfolio);
         userRepository.save(user);
     }
 
