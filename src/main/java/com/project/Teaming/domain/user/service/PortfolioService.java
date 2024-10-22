@@ -9,10 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class PortfolioService {
 
     private final PortfolioRepository portfolioRepository;
@@ -24,6 +26,7 @@ public class PortfolioService {
         return user.getPortfolio();
     }
 
+    @Transactional
     public void savePortfolio(String email, PortfolioDto dto) {
         Portfolio portfolio = findPortfolio(email);
         portfolio.updatePortfolioInfo(dto.getIntroduce(), dto.getSkills());
@@ -36,5 +39,11 @@ public class PortfolioService {
         dto.setIntroduce(portfolio.getIntroduce());
         dto.setSkills(portfolio.getSkills());
         return dto;
+    }
+
+    @Transactional
+    public void updatePortfolio(String email, PortfolioDto dto) {
+        Portfolio portfolio = findPortfolio(email);
+        portfolio.updatePortfolioInfo(dto.getIntroduce(), dto.getSkills());
     }
 }

@@ -3,8 +3,10 @@ package com.project.Teaming.domain.user.entity;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
+import com.project.Teaming.domain.user.dto.request.PortfolioDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -70,5 +72,10 @@ public class User extends BaseTimeEntity {
     public void linkPortlolio(Portfolio portfolio) {
         this.portfolio = portfolio;
         portfolio.assignUser(this);
+    }
+
+    public void update(String name, Portfolio portfolio) {
+        this.name = name;
+        this.portfolio = portfolio;
     }
 }
