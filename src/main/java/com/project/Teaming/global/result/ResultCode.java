@@ -20,7 +20,8 @@ public enum ResultCode {
     GET_USER_PORTFOLIO(200, "P002", "사용자 포트폴리오 조회 완료"),
     UPDATE_USER_PORTFOLIO(200, "P003", "사용자 포트폴리오 수정 완료"),
 
-    REGISTER_PROJECT_TEAM(200, "PT001", "프로젝트 팀 생성 완료");
+    REGISTER_PROJECT_TEAM(200, "PT001", "프로젝트 팀 생성 완료"),
+    GET_PROJECT_TEAM(200, "PT002", "프로젝트 팀 정보 조회 완료");
 
 
     private int status;

@@ -21,4 +21,9 @@ public class ProjectTeamService {
         return projectTeamRepository.save(projectTeam);
 
     }
+
+    public ProjectTeam getTeam(Long teamId) {
+        return projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+    }
 }
