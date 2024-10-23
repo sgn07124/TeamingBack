@@ -58,7 +58,7 @@ public class PortfolioController {
 
     }
 
-    @PutMapping("/user/portfolio")
+    @PostMapping("/user/portfolio")
     @Operation(summary = "포트폴리오 수정", description = "로그인 한 사용자는 본인의 포트폴리오를 수정할 수 있다.")
     public ResultResponse<PortfolioDto> updatePortfolio(@RequestBody PortfolioDto portfolioDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -66,7 +66,7 @@ public class UserController {
         return new ResultResponse<>(ResultCode.GET_USER_WARNING_CNT, List.of(cnt));
     }
 
-    @PutMapping("/user")
+    @PostMapping("/user")
     @Operation(summary = "사용자 정보 업데이트", description = "사용자 닉네임 정보를 수정할 때 사용하는 API")
     public ResultResponse<UserInfoDto> updateUser(@RequestBody RegisterDto registerDto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
