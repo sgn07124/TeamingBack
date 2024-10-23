@@ -39,17 +39,7 @@ public class ProjectTeamController {
     @GetMapping("/project/team/{team_id}")
     @Operation(summary = "프로젝트 팀 정보 조회", description = "프로젝트 팀의 정보를 조회한다.")
     public ResultResponse<ProjectTeamInfoDto> getTeam(@PathVariable Long team_id) {
-        ProjectTeam projectTeam = projectTeamService.getTeam(team_id);
-        ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
-        dto.setProjectId(projectTeam.getId());
-        dto.setProjectName(projectTeam.getName());
-        dto.setStartDate(projectTeam.getStartDate());
-        dto.setEndDate(projectTeam.getEndDate());
-        dto.setMemberCnt(projectTeam.getMembersCnt());
-        dto.setLink(projectTeam.getLink());
-        dto.setContents(projectTeam.getContents());
-        dto.setCreatedDate(projectTeam.getCreatedDate());
-        dto.setLastModifiedDate(projectTeam.getLastModifiedDate());
+        ProjectTeamInfoDto dto = projectTeamService.getTeam(team_id);
         return new ResultResponse<>(ResultCode.GET_PROJECT_TEAM, List.of(dto));
     }
 }
