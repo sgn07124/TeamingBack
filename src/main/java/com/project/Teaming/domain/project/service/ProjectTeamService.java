@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
+import com.project.Teaming.domain.project.dto.request.UpdateTeamDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamInfoDto;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.repository.ProjectTeamRepository;
@@ -38,5 +39,12 @@ public class ProjectTeamService {
         dto.setCreatedDate(projectTeam.getCreatedDate());
         dto.setLastModifiedDate(projectTeam.getLastModifiedDate());
         return dto;
+    }
+
+    public void editTeam(Long teamId, UpdateTeamDto dto) {
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+
+        projectTeam.updateProjectTeam(dto);
     }
 }

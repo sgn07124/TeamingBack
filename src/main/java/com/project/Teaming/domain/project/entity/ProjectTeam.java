@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
+import com.project.Teaming.domain.project.dto.request.UpdateTeamDto;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
@@ -37,7 +38,7 @@ public class ProjectTeam extends BaseTimeEntity {
     private String contents;  // 프로젝트 설명
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "projectTeam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectParticipation> teams = new ArrayList<>();
     @OneToMany(mappedBy = "projectTeam")
     private List<ProjectBoard> projectBoards = new ArrayList<>();
@@ -56,5 +57,15 @@ public class ProjectTeam extends BaseTimeEntity {
         projectTeam.contents = dto.getContents();
         projectTeam.status = ProjectStatus.RECRUITING;
         return projectTeam;
+    }
+
+    public void updateProjectTeam(UpdateTeamDto dto) {
+        this.name = dto.getProjectName();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.membersCnt = dto.getMemberCnt();
+        this.link = dto.getLink();
+        this.contents = dto.getContents();
+        this.status = dto.getStatus();
     }
 }
