@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,5 +51,12 @@ public class ProjectTeamController {
     public ResultResponse<Void> editTeam(@PathVariable Long team_id, @RequestBody UpdateTeamDto updateTeamDto) {
         projectTeamService.editTeam(team_id, updateTeamDto);
         return new ResultResponse<>(ResultCode.UPDATE_PROJECT_TEAM, null);
+    }
+
+    @DeleteMapping("project/team/{team_id}/delete")
+    @Operation(summary = "프로젝트 팀 삭제", description = "프로젝트 팀을 삭제한다.")
+    public ResultResponse<Void> deleteTeam(@PathVariable Long team_id) {
+        projectTeamService.deleteTeam(team_id);
+        return new ResultResponse<>(ResultCode.DELETE_PROJECT_TEAM, null);
     }
 }

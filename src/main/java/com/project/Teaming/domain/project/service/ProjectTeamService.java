@@ -47,4 +47,11 @@ public class ProjectTeamService {
 
         projectTeam.updateProjectTeam(dto);
     }
+
+    public void deleteTeam(Long teamId) {
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+
+        projectTeamRepository.delete(projectTeam);
+    }
 }
