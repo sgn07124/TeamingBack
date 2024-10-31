@@ -71,7 +71,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                 getRedirectStrategy().sendRedirect(request, response, targetUrl);
             } else {
                 // 회원이 추가 정보 기입을 완료하지 않았다면, 추가 정보 기입 페이지로 리다이렉트
-                String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth")
+                String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/auth")
                         .queryParam("accessToken", token.getAccessToken()) // 토큰을 함께 전달
                         .build()
                         .encode(StandardCharsets.UTF_8)
