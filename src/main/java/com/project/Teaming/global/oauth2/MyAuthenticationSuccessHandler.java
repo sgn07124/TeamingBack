@@ -58,7 +58,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // 회원이 존재하면 jwt token 발행을 시작한다.
             GeneratedToken token = jwtUtil.generateToken(email, role);
             log.debug("MyAuthenticationSuccessHandler 권한 처리 후 role : " + role);
-            log.info("jwtToken = {}", token.getAccessToken());
+            log.info("accessToken={}", token.getAccessToken());
 
             // accessToken 을 HttpOnly 쿠키에 저장
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
@@ -110,7 +110,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
 
             // jwt token 발행
             GeneratedToken token = jwtUtil.generateToken(email, role);
-            log.info("jwtToken = {}", token.getAccessToken());
+            log.info("accessToken={}", token.getAccessToken());
 
             // accessToken 을 HttpOnly 쿠키에 저장
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())

@@ -24,10 +24,20 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("token/logout")
-    public ResponseEntity<StatusResponseDto> logout(@RequestHeader("Authorization") final String accessToken) {
+    public ResponseEntity<StatusResponseDto> logout(HttpServletResponse response, @CookieValue(value = "accessToken" , required = false) String accessToken) {
+        if (accessToken != null) {
+            // Redis에서 RefreshToken 정보 삭제
+            tokenService.removeRefreshToken(accessToken);
 
-        // 엑세스 토큰으로 현재 Redis 정보 삭제
-        tokenService.removeRefreshToken(accessToken);
+            // AccessToken 쿠키 삭제 설정
+            ResponseCookie deleteCookie = ResponseCookie.from("accessToken", null)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(0)  // 즉시 만료
+                    .build();
+            response.addHeader("Set-Cookie", deleteCookie.toString());
+        }
         return ResponseEntity.ok(StatusResponseDto.addStatus(200));
     }
 
@@ -48,6 +58,7 @@ public class AuthController {
 
             // 권한과 아이디를 추출해 새로운 액세스토큰을 만든다.
             String newAccessToken = jwtUtil.generateAccessToken(resultToken.getId(), jwtUtil.getRole(resultToken.getRefreshToken()));
+            log.info("accessToken={}", newAccessToken);
 
             // 액세스 토큰의 값을 수정해준다.
             resultToken.updateAccessToken(newAccessToken);
