@@ -2,9 +2,12 @@ package com.project.Teaming.global.jwt.controller;
 
 import com.project.Teaming.global.jwt.*;
 import com.project.Teaming.global.jwt.dto.StatusResponseDto;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,11 +32,14 @@ public class AuthController {
     }
 
     @PostMapping("token/refresh")
-    public ResponseEntity<TokenResponseStatus> refresh(@RequestHeader("Authorization") final String accessToken) {
+    public ResponseEntity<TokenResponseStatus> refresh(@CookieValue(value = "accessToken", required = false) String accessToken, HttpServletResponse response) {
 
+        if (accessToken == null) {
+            return ResponseEntity.badRequest().body(TokenResponseStatus.addStatus(400, null));
+        }
         // 액세스 토큰으로 Refresh 토큰 객체를 조회
         Optional<RefreshToken> refreshToken = tokenRepository.findByAccessToken(accessToken);
-        log.info("Access Token: {}", accessToken);
+        log.info("Access Token from Cookie: {}", accessToken);
 
         // RefreshToken이 존재하고 유효하다면 실행
         if (refreshToken.isPresent() && jwtUtil.verifyToken(refreshToken.get().getRefreshToken())) {
@@ -46,6 +52,16 @@ public class AuthController {
             // 액세스 토큰의 값을 수정해준다.
             resultToken.updateAccessToken(newAccessToken);
             tokenRepository.save(resultToken);
+
+            // 새로운 AccessToken을 HttpOnly 쿠키로 설정
+            ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
+                    .httpOnly(true)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(1800) // 유효 기간 설정
+                    .build();
+            response.addHeader("Set-Cookie", newAccessTokenCookie.toString());
+
             // 새로운 액세스 토큰을 반환해준다.
             return ResponseEntity.ok(TokenResponseStatus.addStatus(200, newAccessToken));
         }
