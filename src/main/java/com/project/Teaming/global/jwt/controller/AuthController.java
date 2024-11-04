@@ -32,7 +32,7 @@ public class AuthController {
             // AccessToken 쿠키 삭제 설정
             ResponseCookie deleteCookie = ResponseCookie.from("accessToken", null)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .path("/")
                     .maxAge(0)  // 즉시 만료
                     .build();
@@ -67,7 +67,7 @@ public class AuthController {
             // 새로운 AccessToken을 HttpOnly 쿠키로 설정
             ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .path("/")
                     .maxAge(1800) // 유효 기간 설정
                     .build();

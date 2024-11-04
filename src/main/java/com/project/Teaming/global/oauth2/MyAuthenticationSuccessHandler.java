@@ -63,7 +63,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // accessToken 을 HttpOnly 쿠키에 저장
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .path("/")
                     .maxAge(1800)  // 30분 유효
                     .build();
@@ -90,7 +90,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // accessToken 을 HttpOnly 쿠키에 저장
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
                     .httpOnly(true)
-                    .secure(false)
+                    .secure(true)
                     .path("/")
                     .maxAge(1800)  // 30분 유효
                     .build();
