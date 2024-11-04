@@ -79,31 +79,6 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                 log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트");
             }
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
-
-            /*
-            // 회원이 추가 정보까지 기입을 완료했다면, 홈 화면으로 리다이렉트
-            if (user.getName() != null) {
-                // accessToken을 쿼리스트링에 담는 url을 만들어준다.
-                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/loginSuccess")
-                        .queryParam("accessToken", token.getAccessToken())
-                        .build()
-                        .encode(StandardCharsets.UTF_8)
-                        .toUriString();
-                log.info("추가 정보 기입 완료");
-                getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            } else {
-                // 회원이 추가 정보 기입을 완료하지 않았다면, 추가 정보 기입 페이지로 리다이렉트
-                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/loginSuccess")
-                        .queryParam("accessToken", token.getAccessToken()) // 토큰을 함께 전달
-                        .build()
-                        .encode(StandardCharsets.UTF_8)
-                        .toUriString();
-
-                log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트 준비");
-                getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            }
-
-             */
         } else {
             // 로그인한 회원 필수 정보 저장
             userService.saveUser(email, provider, role);
@@ -125,25 +100,6 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             String targetUrl = "https://myspringserver.shop/signup";
             log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트");
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
-            /*
-            // 로그인한 회원 필수 정보 저장
-            userService.saveUser(email, provider, role);
-
-            // jwt token 발행
-            GeneratedToken token = jwtUtil.generateToken(email, role);
-            log.info("jwtToken = {}", token.getAccessToken());
-
-            // 회원이 존재하지 않을경우, accessToken을 쿼리스트링에 담고, 추가 정보 입력페이지로 리디렉트되는 url을 만들어준다.
-            String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/signup")
-                    .queryParam("accessToken", token.getAccessToken())
-                    .build()
-                    .encode(StandardCharsets.UTF_8)
-                    .toUriString();
-            // 회원가입 페이지로 리다이렉트 시킨다.
-            log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트 시킨다.");
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
-
-             */
         }
     }
 }
