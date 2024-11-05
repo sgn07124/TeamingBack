@@ -33,6 +33,7 @@ public class AuthController {
             ResponseCookie deleteCookie = ResponseCookie.from("accessToken", null)
                     .httpOnly(true)
                     .secure(true)
+                    .sameSite("None")   // 교차 출처 요청 허용
                     .path("/")
                     .maxAge(0)  // 즉시 만료
                     .build();
@@ -68,6 +69,7 @@ public class AuthController {
             ResponseCookie newAccessTokenCookie = ResponseCookie.from("accessToken", newAccessToken)
                     .httpOnly(true)
                     .secure(true)
+                    .sameSite("None")   // 교차 출처 요청 허용
                     .path("/")
                     .maxAge(1800) // 유효 기간 설정
                     .build();
