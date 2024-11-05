@@ -17,7 +17,7 @@ public class CorsConfig {
 
         config.setAllowCredentials(true); // 쿠키 전송 허용
         config.addAllowedOrigin("https://myspringserver.shop");
-        config.addAllowedOrigin("https://myspringserver.shop:3000/"); // 두 도메인 모두 허용
+        config.addAllowedOrigin("https://localhost:3000"); // 두 도메인 모두 허용
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.setExposedHeaders(List.of("Authorization", "accessToken")); // 필요한 경우 노출할 헤더
