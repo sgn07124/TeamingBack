@@ -5,6 +5,7 @@ import com.project.Teaming.global.jwt.filter.JwtExceptionFilter;
 import com.project.Teaming.global.oauth2.CustomOAuth2UserService;
 import com.project.Teaming.global.oauth2.MyAuthenticationFailureHandler;
 import com.project.Teaming.global.oauth2.MyAuthenticationSuccessHandler;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -60,6 +64,22 @@ public class SecurityConfig {
                         .failureHandler(oAuth2LoginFailureHandler) // 로그인 실패 핸들러
                         .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 핸들러
                 );
+
+        // CORS 설정 추가
+        http.cors(cors -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowCredentials(true); // 쿠키 전송 허용
+            config.addAllowedOrigin("https://myspringserver.shop"); // 백엔드 도메인
+            config.addAllowedOrigin("https://localhost:3000"); // 프론트엔드 도메인
+            config.addAllowedHeader("*");
+            config.addAllowedMethod("*");
+            config.setExposedHeaders(List.of("Authorization", "accessToken")); // 클라이언트에서 접근할 수 있도록 노출할 헤더
+
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", config);
+            CorsFilter corsFilter = new CorsFilter(source);
+            http.addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class);
+        });
 
         // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
         return http
