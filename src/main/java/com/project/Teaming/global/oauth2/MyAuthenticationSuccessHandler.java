@@ -69,14 +69,15 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                     .maxAge(1800)  // 30분 유효
                     .build();
             response.addHeader("Set-Cookie", accessTokenCookie.toString());
+            log.info("Set-Cookie Header: " + accessTokenCookie.toString());
 
             // 추가 정보 기입 여부에 따라 리다이렉트 경로 설정
             String targetUrl;
             if (user.getName() != null) {
-                targetUrl = "https://localhost:3000/loginSuccess";
+                targetUrl = "http://localhost:3000/loginSuccess";
                 log.info("추가 정보 기입 완료. 홈 화면으로 리다이렉트");
             } else {
-                targetUrl = "https://localhost:3000/auth";
+                targetUrl = "http://localhost:3000/auth";
                 log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트");
             }
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -97,9 +98,10 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                     .maxAge(1800)  // 30분 유효
                     .build();
             response.addHeader("Set-Cookie", accessTokenCookie.toString());
+            log.info("Set-Cookie Header: " + accessTokenCookie.toString());
 
             // 회원가입 페이지로 리다이렉트
-            String targetUrl = "https://localhost:3000/auth";
+            String targetUrl = "http://localhost:3000/auth";
             log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트");
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
         }
