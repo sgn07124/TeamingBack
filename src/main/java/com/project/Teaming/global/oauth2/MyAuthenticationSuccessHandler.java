@@ -92,6 +92,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // accessToken 을 HttpOnly 쿠키에 저장
             ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
                     .httpOnly(true)
+                    .domain("myspringserver.shop")
                     .secure(true)
                     .sameSite("None")   // 교차 출처 요청 허용
                     .path("/")
