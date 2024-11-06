@@ -65,6 +65,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                     .httpOnly(true)
                     .secure(true)
                     .sameSite("None")   // 교차 출처 요청 허용
+                    .domain("myspringserver.shop")
                     .path("/")
                     .maxAge(1800)  // 30분 유효
                     .build();
@@ -94,6 +95,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                     .httpOnly(true)
                     .secure(true)
                     .sameSite("None")   // 교차 출처 요청 허용
+                    .domain("myspringserver.shop")
                     .path("/")
                     .maxAge(1800)  // 30분 유효
                     .build();
