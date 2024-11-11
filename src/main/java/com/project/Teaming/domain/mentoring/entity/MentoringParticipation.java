@@ -1,9 +1,8 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,7 +13,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "mentoring_participation")
 @NoArgsConstructor
-@AllArgsConstructor
 public class MentoringParticipation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,13 +20,17 @@ public class MentoringParticipation {
     private Long id;  // 신청 ID
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private ParticipationStatus participationStatus;  // 신청 상태
+    private MentoringParticipationStatus participationStatus;  // 신청 상태
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime requestDate;  // 신청 날짜
     private LocalDateTime decisionDate;  // 신청 수락/거절 날짜
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 역할
+    @Enumerated(EnumType.STRING)  //리더, 크루
+    private MentoringAuthority authority;
+    @Column(name = "reporting_cnt")
+    private int reportingCnt;
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -36,4 +38,32 @@ public class MentoringParticipation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
+
+    @Builder
+    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, User user, MentoringTeam mentoringTeam) {
+        this.id = id;
+        this.participationStatus = participationStatus;
+        this.requestDate = requestDate;
+        this.decisionDate = decisionDate;
+        this.role = role;
+        this.authority = authority;
+        this.reportingCnt = reportingCnt;
+        this.user = user;
+        this.mentoringTeam = mentoringTeam;
+    }
+
+
+    /**
+     *연관관계 편의 메서드
+     */
+
+    public void setUser(User user) {
+        this.user = user;
+        user.getMentoringParticipations().add(this);
+    }
+
+    public void addMentoringMember(MentoringTeam mentoringTeam) {
+        this.mentoringTeam = mentoringTeam;
+        mentoringTeam.getMentoringParticipationList().add(this);
+    }
 }
