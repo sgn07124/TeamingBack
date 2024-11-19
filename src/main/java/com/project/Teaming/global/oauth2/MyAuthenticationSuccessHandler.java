@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -58,53 +57,46 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             // 회원이 존재하면 jwt token 발행을 시작한다.
             GeneratedToken token = jwtUtil.generateToken(email, role);
             log.debug("MyAuthenticationSuccessHandler 권한 처리 후 role : " + role);
-            log.info("accessToken={}", token.getAccessToken());
+            log.info("jwtToken = {}", token.getAccessToken());
 
-            // accessToken 을 HttpOnly 쿠키에 저장
-            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
-                    .httpOnly(true)
-                    .secure(true)
-                    .sameSite("None")   // 교차 출처 요청 허용
-                    .domain("myspringserver.shop")
-                    .path("/")
-                    .maxAge(1800)  // 30분 유효
-                    .build();
-            response.addHeader("Set-Cookie", accessTokenCookie.toString());
-            log.info("Set-Cookie Header: " + accessTokenCookie.toString());
-
-            // 추가 정보 기입 여부에 따라 리다이렉트 경로 설정
-            String targetUrl;
+            // 회원이 추가 정보까지 기입을 완료했다면, 홈 화면으로 리다이렉트
             if (user.getName() != null) {
-                targetUrl = "https://front.myspringserver.shop:3000/loginSuccess";
-                log.info("추가 정보 기입 완료. 홈 화면으로 리다이렉트");
+                // accessToken을 쿼리스트링에 담는 url을 만들어준다.
+                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/loginSuccess")
+                        .queryParam("accessToken", token.getAccessToken())
+                        .build()
+                        .encode(StandardCharsets.UTF_8)
+                        .toUriString();
+                log.info("추가 정보 기입 완료");
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
             } else {
-                targetUrl = "https://front.myspringserver.shop:3000/auth";
-                log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트");
+                // 회원이 추가 정보 기입을 완료하지 않았다면, 추가 정보 기입 페이지로 리다이렉트
+                String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/signup")
+                        .queryParam("accessToken", token.getAccessToken()) // 토큰을 함께 전달
+                        .build()
+                        .encode(StandardCharsets.UTF_8)
+                        .toUriString();
+
+                log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트 준비");
+                getRedirectStrategy().sendRedirect(request, response, targetUrl);
             }
-            getRedirectStrategy().sendRedirect(request, response, targetUrl);
         } else {
+
             // 로그인한 회원 필수 정보 저장
             userService.saveUser(email, provider, role);
 
             // jwt token 발행
             GeneratedToken token = jwtUtil.generateToken(email, role);
-            log.info("accessToken={}", token.getAccessToken());
+            log.info("jwtToken = {}", token.getAccessToken());
 
-            // accessToken 을 HttpOnly 쿠키에 저장
-            ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", token.getAccessToken())
-                    .httpOnly(true)
-                    .secure(true)
-                    .sameSite("None")   // 교차 출처 요청 허용
-                    .domain("myspringserver.shop")
-                    .path("/")
-                    .maxAge(1800)  // 30분 유효
-                    .build();
-            response.addHeader("Set-Cookie", accessTokenCookie.toString());
-            log.info("Set-Cookie Header: " + accessTokenCookie.toString());
-
-            // 회원가입 페이지로 리다이렉트
-            String targetUrl = "https://front.myspringserver.shop:3000/auth";
-            log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트");
+            // 회원이 존재하지 않을경우, accessToken을 쿼리스트링에 담고, 추가 정보 입력페이지로 리디렉트되는 url을 만들어준다.
+            String targetUrl = UriComponentsBuilder.fromUriString("https://myspringserver.shop/signup")
+                    .queryParam("accessToken", token.getAccessToken())
+                    .build()
+                    .encode(StandardCharsets.UTF_8)
+                    .toUriString();
+            // 회원가입 페이지로 리다이렉트 시킨다.
+            log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트 시킨다.");
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
         }
     }

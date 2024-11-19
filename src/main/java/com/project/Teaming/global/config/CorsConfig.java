@@ -1,6 +1,5 @@
 package com.project.Teaming.global.config;
 
-import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -13,19 +12,14 @@ public class CorsConfig {
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
+        CorsConfiguration config  = new CorsConfiguration();
+        config.setAllowCredentials(true); // 내 서버가 응답을 할 때 json을 자바스크립트에서 처리할 수 있게 할지를 설정하는 것
+        config.addAllowedOrigin("*"); // 모든 ip에 응답을 허용하겠다.
+        config.addAllowedHeader("*"); // 모든 header에 응답을 허용하겠다.
+        config.addAllowedMethod("*"); // 모든 post, get, put, delete, patch 요청을 허용하겠다.
+        config.addExposedHeader("*");
 
-        config.setAllowCredentials(true); // 쿠키 전송 허용
-        config.addAllowedOrigin("https://myspringserver.shop");
-        config.addAllowedOrigin("https://localhost:3000");
-        config.addAllowedOrigin("https://front.myspringserver.shop:3000");
-        config.addAllowedOrigin("http://localhost:3000");
-        config.addAllowedOrigin("http://localhost:8080"); // 도메인 모두 허용
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
-        config.setExposedHeaders(List.of("Authorization", "accessToken")); // 필요한 경우 노출할 헤더
-
-        source.registerCorsConfiguration("/**", config);
-        return new CorsFilter(source);
+        source.registerCorsConfiguration("**", config); // 들어오는 모든 요청은 이 config를 따르게 한다.
+        return new org.springframework.web.filter.CorsFilter(source);
     }
 }
