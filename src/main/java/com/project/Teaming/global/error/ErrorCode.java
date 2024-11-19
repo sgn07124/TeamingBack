@@ -23,12 +23,7 @@ public enum ErrorCode {
     USER_ALREADY_LOGOUT(400, "U006", "member already logout"),
 
     // Auth
-    REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),
-
-    //Mentoring
-    MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),
-    MENTORING_PARTICIPATION_NOT_EXIST(404, "M002", "mentoring participation not exist"),
-    MENTORING_POST_NOT_EXIST(404, "M003", "mentoring post not exist");
+    REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid");
 
     private int status;
     private final String code;

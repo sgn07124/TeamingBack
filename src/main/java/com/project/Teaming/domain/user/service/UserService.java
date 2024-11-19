@@ -44,7 +44,7 @@ public class UserService {
 
         user.updateUserInfo(dto.getName());
         Portfolio portfolio = new Portfolio();
-        user.linkPortfolio(portfolio);
+        user.linkPortlolio(portfolio);
 
         portfolioRepository.save(portfolio);
         userRepository.save(user);
