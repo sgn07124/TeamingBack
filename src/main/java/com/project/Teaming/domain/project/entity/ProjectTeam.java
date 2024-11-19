@@ -44,4 +44,8 @@ public class ProjectTeam extends BaseTimeEntity {
     private List<Review> reviews = new ArrayList<>();
     @OneToMany(mappedBy = "projectTeam")
     private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
+    @OneToMany(mappedBy = "projectTeam")
+    private List<TeamStack> stacks = new ArrayList<>();
+    @OneToMany(mappedBy = "projectTeam")
+    private List<TeamRecruitCategory> recruitCategories = new ArrayList<>();
 }
