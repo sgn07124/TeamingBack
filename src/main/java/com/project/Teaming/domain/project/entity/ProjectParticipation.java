@@ -3,6 +3,7 @@ package com.project.Teaming.domain.project.entity;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,7 @@ public class ProjectParticipation {
     @Column(name = "par_id")
     private Long id;  // 신청 ID
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private ParticipationStatus participationStatus;  // 신청 상태
     @Column(name = "is_deleted")
     private Boolean isDeleted;  // 탈퇴 여부 (초기값 : false)
@@ -40,4 +42,14 @@ public class ProjectParticipation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectTeam projectTeam;  // 프로젝트 팀 ID (주인)
+
+    public void createProjectParticipation(User user, ProjectTeam team) {
+        this.participationStatus = ParticipationStatus.ACCEPTED;
+        this.isDeleted = false;
+        this.requestDate = LocalDateTime.now();
+        this.decisionDate = LocalDateTime.now();
+        this.role = ProjectRole.OWNER;
+        this.user = user;
+        this.projectTeam = team;
+    }
 }
