@@ -13,8 +13,8 @@ public class BusinessException extends RuntimeException{
     private ErrorCode errorCode;
     private List<ErrorResponse.FieldError> errors = new ArrayList<>();
 
-    public BusinessException(String mesage, ErrorCode errorCode) {
-        super(mesage);
+    public BusinessException(String message, ErrorCode errorCode) {
+        super(message);
         this.errorCode = errorCode;
     }
 

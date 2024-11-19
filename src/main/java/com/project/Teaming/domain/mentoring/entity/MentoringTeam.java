@@ -1,8 +1,10 @@
 package com.project.Teaming.domain.mentoring.entity;
 
+import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
+import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.global.auditing.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,8 +15,8 @@ import java.util.List;
 @Entity
 @Table(name = "mentoring_team")
 @NoArgsConstructor
-@AllArgsConstructor
 public class MentoringTeam extends BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mentoring_team_id")
@@ -25,11 +27,63 @@ public class MentoringTeam extends BaseEntity {
     private String startDate;  // 멘토링 시작일
     @Column(name = "end_date", length = 50)
     private String endDate;  // 멘토링 종료일
+    @Column(name = "mentoring_cnt")
+    private int mentoringCnt;
+    @Column(name = "content")
+    private String content;
+    @Column(name = "status")
+    private MentoringStatus status;
+    @Column(name = "link")
+    private String link;
+    @Column(name = "flag")
+    private Status flag;
     @OneToMany(mappedBy = "mentoringTeam")
     private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
     @OneToMany(mappedBy = "mentoringTeam")
     private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
-
     @OneToMany(mappedBy = "mentoringTeam")
     private List<Event> eventList = new ArrayList<>();
+
+    @Builder
+    public MentoringTeam(Long id, String name, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList) {
+        this.id = id;
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.mentoringCnt = mentoringCnt;
+        this.content = content;
+        this.status = status;
+        this.link = link;
+        this.flag = flag;
+        this.mentoringParticipationList = mentoringParticipationList;
+        this.mentoringBoardList = mentoringBoardList;
+        this.eventList = eventList;
+    }
+    public void setFlag(Status flag) {
+        this.flag = flag;
+    }
+
+    public RsTeamDto toDto() {
+        RsTeamDto dto = RsTeamDto.builder()
+                .id(this.getId())
+                .name(this.getName())
+                .startDate(this.getStartDate())
+                .mentoringCnt(this.getMentoringCnt())
+                .endDate(this.getEndDate())
+                .content(this.getContent())
+                .status(this.getStatus())
+                .link(this.getLink())
+                .build();
+        return dto;
+    }
+
+    public void mentoringTeamUpdate(RqTeamDto dto) {
+        this.name = dto.getName();
+        this.startDate = dto.getStartDate();
+        this.endDate = dto.getEndDate();
+        this.mentoringCnt = dto.getMentoringCnt();
+        this.content = dto.getContent();
+        this.status = dto.getStatus();
+        this.link = dto.getLink();
+    }
 }
