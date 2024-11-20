@@ -78,7 +78,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
                 targetUrl = "https://front.myspringserver.shop:3000/";
                 log.info("추가 정보 기입 완료. 홈 화면으로 리다이렉트");
             } else {
-                targetUrl = "https://front.myspringserver.shop:3000/sign-in";
+                targetUrl = "https://front.myspringserver.shop:3000/sign-up";
                 log.info("추가 정보 미기입. 추가 정보 기입 페이지로 리다이렉트");
             }
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
@@ -103,7 +103,7 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
             log.info("Set-Cookie Header: " + accessTokenCookie.toString());
 
             // 회원가입 페이지로 리다이렉트
-            String targetUrl = "https://front.myspringserver.shop:3000/sign-in";
+            String targetUrl = "https://front.myspringserver.shop:3000/sign-up";
             log.info("첫 로그인 성공. 추가 정보 기입 페이지로 리다이렉트");
             getRedirectStrategy().sendRedirect(request, response, targetUrl);
         }
