@@ -1,10 +1,15 @@
 package com.project.Teaming.domain.user.entity;
 
+import com.project.Teaming.domain.project.entity.UserStack;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.w3c.dom.stylesheets.LinkStyle;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -23,6 +28,8 @@ public class Portfolio extends BaseTimeEntity {
     // 외래키 : 사용자 id
     @OneToOne(mappedBy = "portfolio")
     private User user;
+    @OneToMany(mappedBy = "portfolio")
+    private List<UserStack> userStacks = new ArrayList<>();
 
     public void assignUser(User user) {
         this.user = user;

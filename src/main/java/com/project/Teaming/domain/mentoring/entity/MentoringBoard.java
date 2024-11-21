@@ -8,6 +8,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Getter
 @Entity
 @Table(name = "mentoring_board")
@@ -15,7 +20,7 @@ import lombok.NoArgsConstructor;
 public class MentoringBoard extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "mentoring_id")
+    @Column(name = "mentoring_board_id")
     private Long id;  // 멘토링 모집글 ID
     @Column(name = "title", nullable = false, length = 100)
     private String title;  // 모집글 제목
