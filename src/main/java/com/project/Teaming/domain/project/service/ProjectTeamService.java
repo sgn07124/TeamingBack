@@ -14,6 +14,7 @@ import com.project.Teaming.domain.project.repository.StackRepository;
 import com.project.Teaming.domain.project.repository.TeamRecruitCategoryRepository;
 import com.project.Teaming.domain.project.repository.TeamStackRepository;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -58,16 +59,32 @@ public class ProjectTeamService {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
 
+        // 기술 스택 이름 리스트 생성
+        List<String> stackNames = projectTeam.getStacks().stream()
+                .map(teamStack -> teamStack.getStack().getStackName())
+                .collect(Collectors.toList());
+
+        List<String> recruitCategoryNames = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getName())
+                .collect(Collectors.toList());
+
+        return getProjectTeamInfoDto(projectTeam, stackNames, recruitCategoryNames);
+    }
+
+    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<String> stackNames, List<String> recruitCategoryNames) {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
         dto.setProjectId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());
         dto.setStartDate(projectTeam.getStartDate());
         dto.setEndDate(projectTeam.getEndDate());
+        dto.setDeadline(projectTeam.getDeadline());
         dto.setMemberCnt(projectTeam.getMembersCnt());
         dto.setLink(projectTeam.getLink());
         dto.setContents(projectTeam.getContents());
         dto.setCreatedDate(projectTeam.getCreatedDate());
         dto.setLastModifiedDate(projectTeam.getLastModifiedDate());
+        dto.setStacks(stackNames);
+        dto.setRecruitCategories(recruitCategoryNames);
         return dto;
     }
 
