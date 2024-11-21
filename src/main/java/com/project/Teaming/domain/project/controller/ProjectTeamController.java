@@ -32,7 +32,7 @@ public class ProjectTeamController {
     private final ProjectParticipationService projectParticipationService;
 
     @PostMapping("/project/team")
-    @Operation(summary = "프로젝트 팀 생성", description = "프로젝트를 생성하고 싶은 사용자는 프로젝트 팀 생성을 통해 프로젝트를 생성할 수 있고 해당 프로젝트의 팀장이 된다.")
+    @Operation(summary = "프로젝트 팀 생성", description = "프로젝트를 생성하고 싶은 사용자는 프로젝트 팀 생성을 통해 프로젝트를 생성할 수 있고 해당 프로젝트의 팀장이 된다. \n기술 스택과 모집 구분은 [1, 2]와 같이 리스트 형태로 작성한다.(project_stack과 project_recruit_category의 id 값")
     public ResultResponse<Void> createTeam(@RequestBody CreateTeamDto createTeamDto, BindingResult bindingResult) {
         ProjectTeam projectTeam = projectTeamService.createTeam(createTeamDto);
         projectParticipationService.createParticipation(projectTeam);
