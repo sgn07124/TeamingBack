@@ -18,10 +18,10 @@ public class UserStack {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_stack_id",referencedColumnName = "stack_id")
+    @JoinColumn(name = "stack_id",nullable = false)
     private Stack stack;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_portfolio_id", referencedColumnName = "portfolio_id")
+    @JoinColumn(name = "portfolio_id",nullable = false)
     private Portfolio portfolio;
 }

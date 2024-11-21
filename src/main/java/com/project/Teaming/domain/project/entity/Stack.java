@@ -19,8 +19,9 @@ public class Stack {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stack_id")
     private Long id;
-    @Column(name = "stack_name")
-    private String stackName;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stack_name",unique = true)
+    private ProjectStack stackName;
     @OneToMany(mappedBy = "stack")
     private List<TeamStack> teamStacks = new ArrayList<>();
     @OneToMany(mappedBy = "stack")
