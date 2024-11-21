@@ -1,4 +1,4 @@
-package com.project.Teaming.domain.project.entity;
+package com.project.Teaming.domain.mentoring.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -7,18 +7,19 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Table(name = "project_team_recruit_category")
+@Table(name = "team_category")
 @NoArgsConstructor
 @AllArgsConstructor
-public class TeamRecruitCategory {
-
+public class TeamCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "team_category_id")
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruit_category_id",nullable = false)
-    private RecruitCategory recruitCategory;
+    @JoinColumn(name = "category_id",nullable = false)
+    private Category category;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id",nullable = false)
-    private ProjectTeam projectTeam;
+    @JoinColumn(name = "mentoring_team_id",nullable = false)
+    private MentoringTeam mentoringTeam;
+
 }

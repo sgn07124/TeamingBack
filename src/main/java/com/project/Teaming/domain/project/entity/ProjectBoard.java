@@ -36,12 +36,4 @@ public class ProjectBoard {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectTeam projectTeam;  // 주인
-    @ElementCollection
-    @CollectionTable(name = "board_stack", joinColumns = @JoinColumn(name = "pj_post_id"))
-    @Column(name = "stack_name")
-    private List<String> stackNames = new ArrayList<>();
-    @ElementCollection
-    @CollectionTable(name = "board_recruit_category", joinColumns = @JoinColumn(name = "pj_post_id"))
-    @Column(name = "category_name")
-    private List<String> categoryNames = new ArrayList<>();
 }

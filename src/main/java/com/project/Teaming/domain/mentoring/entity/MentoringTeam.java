@@ -29,7 +29,6 @@ public class MentoringTeam extends BaseEntity {
     private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
     @OneToMany(mappedBy = "mentoringTeam")
     private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
-
     @OneToMany(mappedBy = "mentoringTeam")
     private List<Event> eventList = new ArrayList<>();
 }
