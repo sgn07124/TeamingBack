@@ -28,6 +28,11 @@ public class TeamStack {
     @JoinColumn(name = "project_id",nullable = false)
     private ProjectTeam projectTeam;
 
+    public TeamStack(Stack stack, ProjectTeam projectTeam) {
+        this.stack = stack;
+        this.projectTeam = projectTeam;
+    }
+
     public static TeamStack addStacks(ProjectTeam projectTeam, Stack stack) {
         TeamStack teamStack = new TeamStack();
         teamStack.projectTeam = projectTeam;

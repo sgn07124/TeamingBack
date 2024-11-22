@@ -92,7 +92,19 @@ public class ProjectTeamService {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
                 .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
 
+        List<Stack> stacks = stackRepository.findAllById(dto.getStackIds());
+        if (stacks.isEmpty()) {
+            throw new IllegalArgumentException("유효하지 않은 스택 id가 포함되어 있습니다.");
+        }
+
+        List<RecruitCategory> recruitCategories = recruitCategoryRepository.findAllById(dto.getRecruitCategoryIds());
+        if (recruitCategories.isEmpty()) {
+            throw new IllegalArgumentException("유효하지 않은 모집 구분 id가 포함되어 있습니다.");
+        }
+
         projectTeam.updateProjectTeam(dto);
+        projectTeam.updateStacks(stacks);
+        projectTeam.updateRecruitCategories(recruitCategories);
     }
 
     public void deleteTeam(Long teamId) {
