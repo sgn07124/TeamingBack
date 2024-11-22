@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,4 +27,16 @@ public class TeamStack {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id",nullable = false)
     private ProjectTeam projectTeam;
+
+    public TeamStack(Stack stack, ProjectTeam projectTeam) {
+        this.stack = stack;
+        this.projectTeam = projectTeam;
+    }
+
+    public static TeamStack addStacks(ProjectTeam projectTeam, Stack stack) {
+        TeamStack teamStack = new TeamStack();
+        teamStack.projectTeam = projectTeam;
+        teamStack.stack = stack;
+        return teamStack;
+    }
 }
