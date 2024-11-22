@@ -23,7 +23,14 @@ public enum ErrorCode {
     USER_ALREADY_LOGOUT(400, "U006", "member already logout"),
 
     // Auth
-    REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid");
+    REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),
+
+    // ProjectParticipation
+
+    NOT_FOUND_PROJECT_TEAM(404, "PP001", "해당 프로젝트 팀을 찾을 수 없습니다"),
+    NOT_FOUND_USER(404, "PP002", "사용자를 찾을 수 없습니다"),
+    ALREADY_PARTICIPATED_OWNER(404, "PP003", "해당 팀의 팀장입니다. 신청할 수 없습니다."),
+    ALREADY_PARTICIPATED_MEMBER(404, "PP004", "해당 팀의 팀원입니다. 신청할 수 없습니다.");
 
     private int status;
     private final String code;
