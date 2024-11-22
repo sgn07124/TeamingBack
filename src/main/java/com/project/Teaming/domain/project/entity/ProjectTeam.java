@@ -42,7 +42,7 @@ public class ProjectTeam extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;  // 프로젝트 상태 (모집중, 진행 중, 완료)
 
-    @OneToMany(mappedBy = "projectTeam")
+    @OneToMany(mappedBy = "projectTeam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProjectParticipation> teams = new ArrayList<>();
     @OneToMany(mappedBy = "projectTeam")
     private List<ProjectBoard> projectBoards = new ArrayList<>();
