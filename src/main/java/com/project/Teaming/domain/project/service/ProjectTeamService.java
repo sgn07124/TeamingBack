@@ -13,6 +13,8 @@ import com.project.Teaming.domain.project.repository.RecruitCategoryRepository;
 import com.project.Teaming.domain.project.repository.StackRepository;
 import com.project.Teaming.domain.project.repository.TeamRecruitCategoryRepository;
 import com.project.Teaming.domain.project.repository.TeamStackRepository;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,14 @@ public class ProjectTeamService {
         List<Long> stackIds = dto.getStackIds();
         List<Stack> stacks = stackRepository.findAllById(stackIds);
 
+        // 누락된 기술 스택 ID 검증
+        List<Long> missingStackIds = stackIds.stream()
+                .filter(id -> stacks.stream().noneMatch(stack -> stack.getId().equals(id)))
+                .collect(Collectors.toList());
+        if (!missingStackIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_STACK_ID);
+        }
+
         for (Stack stack : stacks) {
             TeamStack teamStack = TeamStack.addStacks(projectTeam, stack);
             teamStackRepository.save(teamStack);
@@ -46,6 +56,14 @@ public class ProjectTeamService {
 
         List<Long> recruitCategoryIds = dto.getRecruitCategoryIds();
         List<RecruitCategory> recruitCategories = recruitCategoryRepository.findAllById(recruitCategoryIds);
+
+        // 누락된 모집 카테고리 ID 검증
+        List<Long> missingRecruitCategoryIds = recruitCategoryIds.stream()
+                .filter(id -> recruitCategories.stream().noneMatch(category -> category.getId().equals(id)))
+                .collect(Collectors.toList());
+        if (!missingRecruitCategoryIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_RECRUIT_CATEGORY_ID);
+        }
 
         for (RecruitCategory recruitCategory : recruitCategories) {
             TeamRecruitCategory teamRecruitCategory = TeamRecruitCategory.addRecruitCategories(projectTeam, recruitCategory);
@@ -57,7 +75,7 @@ public class ProjectTeamService {
 
     public ProjectTeamInfoDto getTeam(Long teamId) {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         // 기술 스택 이름 리스트 생성
         List<String> stackNames = projectTeam.getStacks().stream()
@@ -90,16 +108,22 @@ public class ProjectTeamService {
 
     public void editTeam(Long teamId, UpdateTeamDto dto) {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         List<Stack> stacks = stackRepository.findAllById(dto.getStackIds());
-        if (stacks.isEmpty()) {
-            throw new IllegalArgumentException("유효하지 않은 스택 id가 포함되어 있습니다.");
+        List<Long> missingStackIds = dto.getStackIds().stream()
+                .filter(id -> stacks.stream().noneMatch(stack -> stack.getId().equals(id)))
+                .collect(Collectors.toList());
+        if (!missingStackIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_STACK_ID);
         }
 
         List<RecruitCategory> recruitCategories = recruitCategoryRepository.findAllById(dto.getRecruitCategoryIds());
-        if (recruitCategories.isEmpty()) {
-            throw new IllegalArgumentException("유효하지 않은 모집 구분 id가 포함되어 있습니다.");
+        List<Long> missingCategoryIds = dto.getRecruitCategoryIds().stream()
+                .filter(id -> recruitCategories.stream().noneMatch(category -> category.getId().equals(id)))
+                .collect(Collectors.toList());
+        if (!missingCategoryIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_RECRUIT_CATEGORY_ID);
         }
 
         projectTeam.updateProjectTeam(dto);
@@ -109,7 +133,7 @@ public class ProjectTeamService {
 
     public void deleteTeam(Long teamId) {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new IllegalArgumentException("프로젝트 팀 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         projectTeamRepository.delete(projectTeam);
     }
