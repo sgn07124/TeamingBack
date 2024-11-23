@@ -2,11 +2,9 @@ package com.project.Teaming.domain.user.entity;
 
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
-import com.project.Teaming.domain.project.entity.ProjectTeam;
-import com.project.Teaming.domain.user.dto.request.PortfolioDto;
+import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -47,7 +45,7 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "reportedUser")
     private List<Report> reports = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
 
@@ -69,9 +67,10 @@ public class User extends BaseTimeEntity {
     /**
      * 포트폴리오 설정 비즈니스 로직
      */
-    public void linkPortlolio(Portfolio portfolio) {
+    public void linkPortfolio(Portfolio portfolio, RegisterDto dto) {
         this.portfolio = portfolio;
         portfolio.assignUser(this);
+        portfolio.updatePortfolioInfo(dto.getIntroduce());
     }
 
     public void update(String name, Portfolio portfolio) {

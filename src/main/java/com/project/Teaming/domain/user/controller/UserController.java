@@ -35,14 +35,14 @@ public class UserController {
 
 
     @PostMapping("/user")
-    @Operation(summary = "추가 정보 기입", description = "첫 로그인 후 추가 정보 기입할 때(또는 추가 정보 기입이 안되어 있을 때) 사용하는 Api")
-    public ResponseEntity<StatusResponseDto> addUserInfo(@RequestBody RegisterDto dto) {
+    @Operation(summary = "추가 정보 기입", description = "첫 로그인 후 추가 정보 기입할 때(또는 추가 정보 기입이 안되어 있을 때) 사용하는 Api. 닉네임은 필수, 소개와 기술스택은 선택")
+    public ResultResponse<Void> addUserInfo(@RequestBody RegisterDto dto) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         String email = securityUser.getEmail();
         log.info("email : " + email);
         userService.saveUserInfo(email, dto);
-        return ResponseEntity.ok(StatusResponseDto.addStatus(200));
+        return new ResultResponse<>(ResultCode.REGISTER_ADDITIONAL_USER_INFO, null);
     }
 
     @GetMapping("/user")

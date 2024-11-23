@@ -29,7 +29,7 @@ public class PortfolioService {
     @Transactional
     public void savePortfolio(String email, PortfolioDto dto) {
         Portfolio portfolio = findPortfolio(email);
-        portfolio.updatePortfolioInfo(dto.getIntroduce(), dto.getSkills());
+        portfolio.updatePortfolioInfo(dto.getIntroduce());
         portfolioRepository.save(portfolio);
     }
 
@@ -37,13 +37,12 @@ public class PortfolioService {
         Portfolio portfolio = findPortfolio(email);
         PortfolioDto dto = new PortfolioDto();
         dto.setIntroduce(portfolio.getIntroduce());
-        dto.setSkills(portfolio.getSkills());
         return dto;
     }
 
     @Transactional
     public void updatePortfolio(String email, PortfolioDto dto) {
         Portfolio portfolio = findPortfolio(email);
-        portfolio.updatePortfolioInfo(dto.getIntroduce(), dto.getSkills());
+        portfolio.updatePortfolioInfo(dto.getIntroduce());
     }
 }
