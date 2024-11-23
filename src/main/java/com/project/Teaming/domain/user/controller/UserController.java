@@ -60,8 +60,8 @@ public class UserController {
         return new ResultResponse<>(ResultCode.GET_USER_WARNING_CNT, List.of(cnt));
     }
 
-    @PutMapping("/user/update")
-    @Operation(summary = "사용자 정보 수정", description = "사용자 닉네임 정보를 수정할 때 사용하는 API")
+    @PutMapping("/user/update/info")
+    @Operation(summary = "사용자 정보 수정(닉네임, 소개)", description = "마이페이지에서 사용자의 닉네임과 소개를 수정할 때 사용하는 API")
     public ResultResponse<Void> updateUser(@Valid @RequestBody UpdateUserInfoDto updateUserInfoDto) {
         userService.updateUser(updateUserInfoDto);
         return new ResultResponse<>(ResultCode.UPDATE_USER_NICKNAME, null);
