@@ -51,8 +51,10 @@ public class UserService {
     }
 
 
-    public void saveUserInfo(String email, RegisterDto dto) {
-        User user = findByEmail(email).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+    public void saveUserInfo(RegisterDto dto) {
+        SecurityUserDto securityUser = getSecurityUserDto();
+        log.info("email : " + securityUser.getEmail());
+        User user = findByEmail(securityUser.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         user.updateUserInfo(dto.getName());  // 유저에 닉네임 저장
         Portfolio portfolio = new Portfolio();
@@ -93,8 +95,7 @@ public class UserService {
 
 
     public UserInfoDto getUserInfo(UserInfoDto dto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+        SecurityUserDto securityUser = getSecurityUserDto();
         User user = findByEmail(securityUser.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId())
@@ -107,5 +108,11 @@ public class UserService {
 
         dto.setUserInfoDto(user, portfolio, stackNames);
         return dto;
+    }
+
+    private static SecurityUserDto getSecurityUserDto() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+        return securityUser;
     }
 }
