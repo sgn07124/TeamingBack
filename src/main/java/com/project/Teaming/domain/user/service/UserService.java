@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
+import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.UserStack;
@@ -89,9 +90,11 @@ public class UserService {
     }
 
     @Transactional
-    public void updateUser(String email, RegisterDto dto) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("업데이트 할 사용자를 찾을 수 없습니다 : " + email));
+    public void updateUser(UpdateUserInfoDto dto) {
+        User user = userRepository.findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
         user.updateUserInfo(dto.getName());
+        portfolio.updatePortfolioInfo(dto.getIntroduce());
     }
 
 

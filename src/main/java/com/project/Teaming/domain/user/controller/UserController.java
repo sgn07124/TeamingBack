@@ -3,6 +3,7 @@ package com.project.Teaming.domain.user.controller;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.project.Teaming.domain.user.dto.request.PortfolioDto;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
+import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.User;
@@ -16,6 +17,7 @@ import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.query.results.ResultBuilderEmbeddable;
@@ -34,12 +36,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final PortfolioService portfolioService;
 
 
     @PostMapping("/user")
     @Operation(summary = "추가 정보 기입", description = "첫 로그인 후 추가 정보 기입할 때(또는 추가 정보 기입이 안되어 있을 때) 사용하는 Api. 닉네임은 필수, 소개와 기술스택은 선택")
-    public ResultResponse<Void> addUserInfo(@RequestBody RegisterDto dto) {
+    public ResultResponse<Void> addUserInfo(@Valid @RequestBody RegisterDto dto) {
         userService.saveUserInfo(dto);
         return new ResultResponse<>(ResultCode.REGISTER_ADDITIONAL_USER_INFO, null);
     }
@@ -59,17 +60,11 @@ public class UserController {
         return new ResultResponse<>(ResultCode.GET_USER_WARNING_CNT, List.of(cnt));
     }
 
-    @PostMapping("/user/update")
-    @Operation(summary = "사용자 정보 업데이트", description = "사용자 닉네임 정보를 수정할 때 사용하는 API")
-    public ResultResponse<UserInfoDto> updateUser(@RequestBody RegisterDto registerDto) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
-        User user = userService.findByEmail(securityUser.getEmail()).orElseThrow(() -> new UsernameNotFoundException("업데이트 할 사용자를 찾을 수 없음"));
-        userService.updateUser(user.getEmail(),registerDto);
-        UserInfoDto dto = new UserInfoDto();
-        //dto.toDto(user);
-        //dto.setPortfolioDto(portfolioService.getPortfolio(securityUser.getEmail()));
-        return new ResultResponse<>(ResultCode.UPDATE_USER_NICKNAME, List.of(dto));
+    @PutMapping("/user/update")
+    @Operation(summary = "사용자 정보 수정", description = "사용자 닉네임 정보를 수정할 때 사용하는 API")
+    public ResultResponse<Void> updateUser(@Valid @RequestBody UpdateUserInfoDto updateUserInfoDto) {
+        userService.updateUser(updateUserInfoDto);
+        return new ResultResponse<>(ResultCode.UPDATE_USER_NICKNAME, null);
     }
 }
 
