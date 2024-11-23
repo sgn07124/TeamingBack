@@ -1,5 +1,7 @@
 package com.project.Teaming.domain.user.entity;
 
+import com.project.Teaming.domain.project.entity.Stack;
+import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,5 +38,16 @@ public class Portfolio extends BaseTimeEntity {
     // 추가 정보 기입
     public void updatePortfolioInfo(String introduce) {
         this.introduce = introduce;
+    }
+
+    public void updateStacks(List<Stack> stacks) {
+        // 기존 스택 제거
+        this.userStacks.clear();
+
+        // 새로 입력된 기술 스택 추가
+        for (Stack stack : stacks) {
+            UserStack userStack = new UserStack(stack, this);
+            this.userStacks.add(userStack);
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.project.Teaming.domain.user.dto.request.PortfolioDto;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
+import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.User;
@@ -36,7 +37,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-
+    private final PortfolioService portfolioService;
 
     @PostMapping("/user")
     @Operation(summary = "추가 정보 기입", description = "첫 로그인 후 추가 정보 기입할 때(또는 추가 정보 기입이 안되어 있을 때) 사용하는 Api. 닉네임은 필수, 소개와 기술스택은 선택")
@@ -64,7 +65,15 @@ public class UserController {
     @Operation(summary = "사용자 정보 수정(닉네임, 소개)", description = "마이페이지에서 사용자의 닉네임과 소개를 수정할 때 사용하는 API")
     public ResultResponse<Void> updateUser(@Valid @RequestBody UpdateUserInfoDto updateUserInfoDto) {
         userService.updateUser(updateUserInfoDto);
-        return new ResultResponse<>(ResultCode.UPDATE_USER_NICKNAME, null);
+        return new ResultResponse<>(ResultCode.UPDATE_USER_INFO, null);
     }
+
+    @PutMapping("/user/update/stack")
+    @Operation(summary = "사용자 정보 수정(기술 스택)", description = "마이페이지에서 사용자의 기술 스택을 수정할 때 사용하는 API")
+    public ResultResponse<Void> updateUserStack(@Valid @RequestBody UpdateUserStackDto updateUserStackDto) {
+        userService.updateUserStack(updateUserStackDto);
+        return new ResultResponse<>(ResultCode.UPDATE_USER_INFO_STACK, null);
+    }
+
 }
 

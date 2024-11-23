@@ -2,6 +2,7 @@ package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
+import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.UserStack;
@@ -95,6 +96,22 @@ public class UserService {
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
         user.updateUserInfo(dto.getName());
         portfolio.updatePortfolioInfo(dto.getIntroduce());
+    }
+
+    @Transactional
+    public void updateUserStack(UpdateUserStackDto dto) {
+        User user = userRepository.findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
+
+        List<Stack> stacks = stackRepository.findAllById(dto.getStackIds());
+        List<Long> missingStackIds = dto.getStackIds().stream()
+                .filter(id -> stacks.stream().noneMatch(stack -> stack.getId().equals(id)))
+                .collect(Collectors.toList());
+        if (!missingStackIds.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_STACK_ID);
+        }
+
+        portfolio.updateStacks(stacks);
     }
 
 
