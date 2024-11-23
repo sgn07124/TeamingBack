@@ -2,6 +2,7 @@ package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
+import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.UserStack;
 import com.project.Teaming.domain.project.repository.StackRepository;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
@@ -108,6 +109,13 @@ public class UserService {
 
         dto.setUserInfoDto(user, portfolio, stackNames);
         return dto;
+    }
+
+    public UserReportCnt getWarningCnt() {
+        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        UserReportCnt userReportCnt = new UserReportCnt();
+        userReportCnt.setReportCnt(user.getWarningCnt());
+        return userReportCnt;
     }
 
     private static SecurityUserDto getSecurityUserDto() {

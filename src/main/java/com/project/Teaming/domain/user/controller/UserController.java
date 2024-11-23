@@ -4,6 +4,7 @@ import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.project.Teaming.domain.user.dto.request.PortfolioDto;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
+import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.PortfolioService;
 import com.project.Teaming.domain.user.service.UserService;
@@ -51,12 +52,10 @@ public class UserController {
         return new ResultResponse<>(ResultCode.GET_USER_INFO, List.of(userInfoDto));
     }
 
-    @GetMapping("/user/{id}/report")
+    @GetMapping("/user/report")
     @Operation(summary = "사용자의 경고 횟수 조회", description = "특정유저의 경고 누적 횟수를 조회하는 API")
-    public ResultResponse<Integer> userReportInfo(@PathVariable Long id) {
-        User user = userService.findById(id).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없음"));
-        int cnt = user.getWarningCnt();
-        log.info("유저id = {}, 유저의 경고누적횟수 = {}", id, cnt);
+    public ResultResponse<UserReportCnt> userReportInfo() {
+        UserReportCnt cnt = userService.getWarningCnt();
         return new ResultResponse<>(ResultCode.GET_USER_WARNING_CNT, List.of(cnt));
     }
 
