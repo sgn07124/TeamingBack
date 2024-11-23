@@ -7,6 +7,8 @@ import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.PortfolioService;
 import com.project.Teaming.domain.user.service.UserService;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.jwt.dto.StatusResponseDto;
 import com.project.Teaming.global.result.ResultCode;
@@ -47,14 +49,10 @@ public class UserController {
 
     @GetMapping("/user")
     @Operation(summary = "회원 정보 조회", description = "회원 정보(이메일, 이름, 가입경로, 포트폴리오, 경고누적횟수) 조회하는 Api(AccessToken 기입 필요)")
-    public ResponseEntity<?> getUserInfo() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+    public ResultResponse<UserInfoDto> getUserInfo() {
         UserInfoDto dto = new UserInfoDto();
-        User user = userService.findByEmail(securityUser.getEmail()).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없음"));
-        dto.toDto(user);
-        dto.setPortfolioDto(portfolioService.getPortfolio(securityUser.getEmail()));
-        return ResponseEntity.ok(StatusResponseDto.success(dto));
+        UserInfoDto userInfoDto = userService.getUserInfo(dto);
+        return new ResultResponse<>(ResultCode.GET_USER_INFO, List.of(userInfoDto));
     }
 
     @GetMapping("/user/{id}/report")
@@ -74,8 +72,8 @@ public class UserController {
         User user = userService.findByEmail(securityUser.getEmail()).orElseThrow(() -> new UsernameNotFoundException("업데이트 할 사용자를 찾을 수 없음"));
         userService.updateUser(user.getEmail(),registerDto);
         UserInfoDto dto = new UserInfoDto();
-        dto.toDto(user);
-        dto.setPortfolioDto(portfolioService.getPortfolio(securityUser.getEmail()));
+        //dto.toDto(user);
+        //dto.setPortfolioDto(portfolioService.getPortfolio(securityUser.getEmail()));
         return new ResultResponse<>(ResultCode.UPDATE_USER_NICKNAME, List.of(dto));
     }
 }

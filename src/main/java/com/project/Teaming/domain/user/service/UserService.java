@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
+import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.entity.UserStack;
 import com.project.Teaming.domain.project.repository.StackRepository;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
@@ -11,10 +12,13 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.domain.user.repository.UserStackRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -88,4 +92,20 @@ public class UserService {
     }
 
 
+    public UserInfoDto getUserInfo(UserInfoDto dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+        User user = findByEmail(securityUser.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+
+        Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId())
+                        .orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
+
+        // 기술 스택 이름 리스트 생성
+        List<String> stackNames = portfolio.getUserStacks().stream()
+                .map(userStack -> userStack.getStack().getStackName())
+                .collect(Collectors.toList());
+
+        dto.setUserInfoDto(user, portfolio, stackNames);
+        return dto;
+    }
 }
