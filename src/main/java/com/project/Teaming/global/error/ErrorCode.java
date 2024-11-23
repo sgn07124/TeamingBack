@@ -25,6 +25,9 @@ public enum ErrorCode {
     // Auth
     REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),
 
+    // Portfolio
+    PORTFOLIO_NOT_EXIST(404, "P001", "포트폴리오를 찾을 수 없습니다."),
+
     // ProjectTeam
     NOT_VALID_STACK_ID(400, "PT001", "유효하지 않은 스택 id가 포함되어 있습니다."),
     NOT_VALID_RECRUIT_CATEGORY_ID(400, "PT002", "유효하지 않은 모집 구분 id가 포함되어 있습니다."),

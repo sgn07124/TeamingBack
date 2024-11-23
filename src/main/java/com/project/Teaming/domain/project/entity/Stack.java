@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import com.project.Teaming.domain.user.entity.UserStack;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
