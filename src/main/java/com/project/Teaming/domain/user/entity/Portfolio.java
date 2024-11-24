@@ -1,7 +1,6 @@
 package com.project.Teaming.domain.user.entity;
 
 import com.project.Teaming.domain.project.entity.Stack;
-import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

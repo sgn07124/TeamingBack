@@ -1,19 +1,11 @@
 package com.project.Teaming.domain.user.controller;
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.project.Teaming.domain.user.dto.request.PortfolioDto;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
-import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
-import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.PortfolioService;
 import com.project.Teaming.domain.user.service.UserService;
-import com.project.Teaming.global.error.ErrorCode;
-import com.project.Teaming.global.error.exception.BusinessException;
-import com.project.Teaming.global.jwt.dto.SecurityUserDto;
-import com.project.Teaming.global.jwt.dto.StatusResponseDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,11 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.query.results.ResultBuilderEmbeddable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -61,19 +48,10 @@ public class UserController {
         return new ResultResponse<>(ResultCode.GET_USER_WARNING_CNT, List.of(cnt));
     }
 
-    @PutMapping("/user/update/info")
-    @Operation(summary = "사용자 정보 수정(닉네임, 소개)", description = "마이페이지에서 사용자의 닉네임과 소개를 수정할 때 사용하는 API")
+    @PutMapping("/user/update")
+    @Operation(summary = "사용자 정보 수정(닉네임, 소개, 기술 스택)", description = "마이페이지에서 사용자의 닉네임과 소개, 기술 스택을 수정할 때 사용하는 API")
     public ResultResponse<Void> updateUser(@Valid @RequestBody UpdateUserInfoDto updateUserInfoDto) {
         userService.updateUser(updateUserInfoDto);
         return new ResultResponse<>(ResultCode.UPDATE_USER_INFO, null);
     }
-
-    @PutMapping("/user/update/stack")
-    @Operation(summary = "사용자 정보 수정(기술 스택)", description = "마이페이지에서 사용자의 기술 스택을 수정할 때 사용하는 API")
-    public ResultResponse<Void> updateUserStack(@Valid @RequestBody UpdateUserStackDto updateUserStackDto) {
-        userService.updateUserStack(updateUserStackDto);
-        return new ResultResponse<>(ResultCode.UPDATE_USER_INFO_STACK, null);
-    }
-
 }
-
