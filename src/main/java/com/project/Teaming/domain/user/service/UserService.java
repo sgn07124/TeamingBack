@@ -2,7 +2,6 @@ package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
-import com.project.Teaming.domain.user.dto.request.UpdateUserStackDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.UserStack;
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,14 +92,9 @@ public class UserService {
     public void updateUser(UpdateUserInfoDto dto) {
         User user = userRepository.findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
+
         user.updateUserInfo(dto.getName());
         portfolio.updatePortfolioInfo(dto.getIntroduce());
-    }
-
-    @Transactional
-    public void updateUserStack(UpdateUserStackDto dto) {
-        User user = userRepository.findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
-        Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
 
         List<Stack> stacks = stackRepository.findAllById(dto.getStackIds());
         List<Long> missingStackIds = dto.getStackIds().stream()
@@ -113,7 +106,6 @@ public class UserService {
 
         portfolio.updateStacks(stacks);
     }
-
 
     public UserInfoDto getUserInfo(UserInfoDto dto) {
         SecurityUserDto securityUser = getSecurityUserDto();
