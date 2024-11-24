@@ -21,4 +21,16 @@ public class TeamRecruitCategory {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id",nullable = false)
     private ProjectTeam projectTeam;
+
+    public TeamRecruitCategory(RecruitCategory recruitCategory, ProjectTeam projectTeam) {
+        this.recruitCategory = recruitCategory;
+        this.projectTeam = projectTeam;
+    }
+
+    public static TeamRecruitCategory addRecruitCategories(ProjectTeam projectTeam, RecruitCategory recruitCategory) {
+        TeamRecruitCategory teamRecruitCategory = new TeamRecruitCategory();
+        teamRecruitCategory.projectTeam = projectTeam;
+        teamRecruitCategory.recruitCategory = recruitCategory;
+        return teamRecruitCategory;
+    }
 }

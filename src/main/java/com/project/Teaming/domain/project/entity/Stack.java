@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import com.project.Teaming.domain.user.entity.UserStack;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,11 +20,15 @@ public class Stack {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stack_id")
     private Long id;
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "stack_name",unique = true)
-    private ProjectStack stackName;
+    private String stackName;
     @OneToMany(mappedBy = "stack")
     private List<TeamStack> teamStacks = new ArrayList<>();
     @OneToMany(mappedBy = "stack")
     private List<UserStack> userStacks = new ArrayList<>();
+
+    public Stack(String stackName) {
+        this.stackName = stackName;
+    }
 }

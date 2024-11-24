@@ -19,9 +19,14 @@ public class RecruitCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recruit_category_id")
     private Long id;
-    @Enumerated(EnumType.STRING)
+
     @Column(name = "name")
-    private ProjectCategory name;
+    private String name;
+
     @OneToMany(mappedBy = "recruitCategory")
     private List<TeamRecruitCategory> teamRecruitCategories = new ArrayList<>();
+
+    public RecruitCategory(String name) {
+        this.name = name;
+    }
 }
