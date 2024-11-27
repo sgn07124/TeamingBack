@@ -22,4 +22,28 @@ public class TeamCategory {
     @JoinColumn(name = "mentoring_team_id",nullable = false)
     private MentoringTeam mentoringTeam;
 
+    public void setCategory(Category category) {
+        this.category = category;
+        category.getCategories().add(this);
+    }
+
+    public void removeCategory(Category category) {
+        if (this.category != null) {
+            this.category.getCategories().remove(this);
+            this.category = null;
+        }
+    }
+
+    public void setMentoringTeam(MentoringTeam mentoringTeam) {
+        this.mentoringTeam = mentoringTeam;
+        mentoringTeam.getCategories().add(this);
+    }
+
+    public void removeMentoringTeam(MentoringTeam mentoringTeam) {
+        if (this.mentoringTeam != null) {
+            this.mentoringTeam.getCategories().remove(this);
+            this.mentoringTeam = null;
+        }
+    }
+
 }

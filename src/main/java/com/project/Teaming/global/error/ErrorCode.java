@@ -36,7 +36,12 @@ public enum ErrorCode {
     NOT_FOUND_PROJECT_TEAM(404, "PP001", "해당 프로젝트 팀을 찾을 수 없습니다"),
     NOT_FOUND_USER(404, "PP002", "사용자를 찾을 수 없습니다"),
     ALREADY_PARTICIPATED_OWNER(404, "PP003", "해당 팀의 팀장입니다. 신청할 수 없습니다."),
-    ALREADY_PARTICIPATED_MEMBER(404, "PP004", "해당 팀의 팀원입니다. 신청할 수 없습니다.");
+    ALREADY_PARTICIPATED_MEMBER(404, "PP004", "해당 팀의 팀원입니다. 신청할 수 없습니다."),
+
+    //Mentoring
+    MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),
+    MENTORING_PARTICIPATION_NOT_EXIST(404, "M002", "mentoring participation not exist"),
+    MENTORING_POST_NOT_EXIST(404, "M003", "mentoring post not exist");
 
     private int status;
     private final String code;
