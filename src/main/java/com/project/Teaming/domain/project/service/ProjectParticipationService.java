@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.service;
 
+import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
@@ -11,7 +12,9 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -116,5 +119,11 @@ public class ProjectParticipationService {
         } else {
             throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
         }
+    }
+
+    public List<ProjectParticipationInfoDto> getAllParticipationDtos(Long teamId) {
+        return projectParticipationRepository.findByProjectTeamId(teamId).stream()
+                .map(ProjectParticipationInfoDto::new)
+                .collect(Collectors.toList());
     }
 }

@@ -1,13 +1,17 @@
 package com.project.Teaming.domain.project.controller;
 
+import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
+import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -54,5 +58,12 @@ public class ProjectParticipateController {
     public ResultResponse<Void> rejectedTeamMember(@PathVariable Long team_id, @PathVariable Long user_id) {
         projectParticipationService.rejectedMember(team_id, user_id);
         return new ResultResponse<>(ResultCode.REJECT_JOIN_MEMBER, null);
+    }
+
+    @GetMapping("/project/team/{team_id}/participations")
+    @Operation(summary = "프로젝트 팀 지원자 목록(대기열) 조회", description = "해당 프로젝트 팀의 지원자들을 조회한다.")
+    public ResultResponse<ProjectParticipationInfoDto> getParticipations(@PathVariable Long team_id){
+        List<ProjectParticipationInfoDto> list = projectParticipationService.getAllParticipationDtos(team_id);
+        return  new ResultResponse<>(ResultCode.GET_PARTICIPATION_LIST, list);
     }
 }
