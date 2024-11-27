@@ -32,6 +32,11 @@ public enum ResultCode {
 
     // ProjectParticipate
     JOIN_MEMBER_PROJECT_TEAM(200, "PP001", "프로젝트에 멤버로 신청 완료"),
+    CANCEL_PROJECT_TEAM(200, "PP002", "프로젝트 신청 취소 완료"),
+    QUIT_PROJECT_TEAM(200, "PP003", "프로젝트 탈퇴 완료"),
+    ACCEPT_JOIN_MEMBER(200, "PP004", "팀원으로 수락 완료"),
+    REJECT_JOIN_MEMBER(200, "PP005", "팀원 거절 완료"),
+    GET_PARTICIPATION_LIST(200, "PP006", "신청자 목록 조회 완료"),
     //Mentoring
     REGISTER_MENTORING_TEAM(200,"M001","멘토링 팀 등록 완료"),
     UPDATE_MENTORING_TEAM(200,"M002","멘토링 팀 수정 완료"),

@@ -52,9 +52,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/token/**").permitAll() // 토큰 발급 경로 허용
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/user", "/swagger-ui/**", "/v3/api-docs/**",
-                                "/project/team/{team_id}").permitAll() // 특정 경로 허용
+                                "/project/team/{team_id}", "/project/team/{team_id}/participations").permitAll() // 특정 경로 허용
                         .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
-                                "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**").hasRole("USER")
+                                "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
+                                "/project/team/{team_id}/{user_id}/**").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 

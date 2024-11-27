@@ -1,5 +1,7 @@
 package com.project.Teaming.domain.project.service;
 
+import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
@@ -10,7 +12,9 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -65,5 +69,61 @@ public class ProjectParticipationService {
         ProjectParticipation newParticipation = new ProjectParticipation();
         newParticipation.joinTeamMember(user, projectTeam);
         projectParticipationRepository.save(newParticipation);
+    }
+
+    public void cancelTeam(Long teamId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.getParticipationStatus() == ParticipationStatus.PENDING && !participation.getIsDeleted()) {
+            projectParticipationRepository.delete(participation);
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
+
+    public void quitTeam(Long teamId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canQuit()) {
+            participation.quitTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
+
+    public void acceptedMember(Long teamId, Long userId) {
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canAccept()) {
+            participation.acceptTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
+
+    public void rejectedMember(Long teamId, Long userId) {
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canReject()) {
+            participation.rejectTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
+
+    public List<ProjectParticipationInfoDto> getAllParticipationDtos(Long teamId) {
+        return projectParticipationRepository.findByProjectTeamId(teamId).stream()
+                .map(ProjectParticipationInfoDto::new)
+                .collect(Collectors.toList());
     }
 }
