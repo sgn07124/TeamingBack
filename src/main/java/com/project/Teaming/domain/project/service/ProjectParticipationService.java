@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.service;
 
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
@@ -65,5 +66,19 @@ public class ProjectParticipationService {
         ProjectParticipation newParticipation = new ProjectParticipation();
         newParticipation.joinTeamMember(user, projectTeam);
         projectParticipationRepository.save(newParticipation);
+    }
+
+    public void cancelTeam(Long teamId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.getParticipationStatus() == ParticipationStatus.PENDING && !participation.getIsDeleted()) {
+            projectParticipationRepository.delete(participation);
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
     }
 }

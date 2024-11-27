@@ -37,6 +37,8 @@ public enum ErrorCode {
     NOT_FOUND_USER(404, "PP002", "사용자를 찾을 수 없습니다"),
     ALREADY_PARTICIPATED_OWNER(404, "PP003", "해당 팀의 팀장입니다. 신청할 수 없습니다."),
     ALREADY_PARTICIPATED_MEMBER(404, "PP004", "해당 팀의 팀원입니다. 신청할 수 없습니다."),
+    NOT_FOUND_PROJECT_PARTICIPATION(404, "PP005", "프로젝트 대기열을 찾을 수 없습니다."),
+    INVALID_PARTICIPATION_ERROR(500, "PP006", "취소할 수 없습니다."),
 
     //Mentoring
     MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),
