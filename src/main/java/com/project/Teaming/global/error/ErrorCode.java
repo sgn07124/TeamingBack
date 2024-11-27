@@ -39,6 +39,7 @@ public enum ErrorCode {
     ALREADY_PARTICIPATED_MEMBER(404, "PP004", "해당 팀의 팀원입니다. 신청할 수 없습니다."),
     NOT_FOUND_PROJECT_PARTICIPATION(404, "PP005", "프로젝트 대기열을 찾을 수 없습니다."),
     INVALID_PARTICIPATION_ERROR(500, "PP006", "취소할 수 없습니다."),
+    CANNOT_QUIT_TEAM(404, "PP007", "팀을 탈퇴할 수 없습니다."),
 
     //Mentoring
     MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),

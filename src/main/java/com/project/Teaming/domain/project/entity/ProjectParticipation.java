@@ -2,6 +2,8 @@ package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -68,5 +70,18 @@ public class ProjectParticipation {
         this.role = ProjectRole.MEMBER;
         this.user = user;
         this.projectTeam = projectTeam;
+    }
+
+    // 탈퇴 가능 여부 확인
+    public boolean canQuit() {
+        return this.participationStatus == ParticipationStatus.ACCEPTED && !this.isDeleted;
+    }
+
+    // 탈퇴 처리
+    public void quitTeam() {
+        if (!canQuit()) {
+            throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
+        }
+        this.isDeleted = true;
     }
 }

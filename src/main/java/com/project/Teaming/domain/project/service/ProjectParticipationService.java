@@ -81,4 +81,18 @@ public class ProjectParticipationService {
             throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
         }
     }
+
+    public void quitTeam(Long teamId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canQuit()) {
+            participation.quitTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
 }

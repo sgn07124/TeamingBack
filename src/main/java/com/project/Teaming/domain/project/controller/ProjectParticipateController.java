@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -32,5 +33,12 @@ public class ProjectParticipateController {
     public ResultResponse<Void> cancelProjectTeam(@PathVariable Long team_id) {
         projectParticipationService.cancelTeam(team_id);
         return new ResultResponse<>(ResultCode.CANCEL_PROJECT_TEAM, null);
+    }
+
+    @PutMapping("/project/{team_id}/quit")
+    @Operation(summary = "프로젝트 탈퇴", description = "프로젝트 팀의 정식 팀원이 팀에서 스스로 탈퇴할 수 있다.(만약 무단으로 나가는 경우 추후에 팀원들에게 신고를 당할 수 있다.)")
+    public ResultResponse<Void> quitProjectTeam(@PathVariable Long team_id) {
+        projectParticipationService.quitTeam(team_id);
+        return new ResultResponse<>(ResultCode.QUIT_PROJECT_TEAM, null);
     }
 }
