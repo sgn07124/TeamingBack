@@ -1,17 +1,10 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Entity
@@ -59,8 +52,6 @@ public class MentoringBoard extends BaseTimeEntity {
 
 
 
-
-
     public void setLink(String link) {
         this.link = link;
     }
@@ -69,27 +60,6 @@ public class MentoringBoard extends BaseTimeEntity {
         this.flag = flag;
     }
 
-    public RsBoardDto toDto() {
-        RsBoardDto dto = RsBoardDto.builder()
-                .id(this.getId())
-                .mentoringTeamId(this.getMentoringTeam().getId())
-                .title(this.getTitle())
-                .contents(this.getContents())
-                .role(this.getRole())
-                .status(this.getStatus())
-                .link(this.getLink())
-                .build();
-        return dto;
-    }
-
-    public void updateBoard(RqBoardDto dto) {
-        this.title = dto.getTitle();
-        this.contents = dto.getContents();
-        this.startDate = dto.getStartDate();
-        this.endDate = dto.getEndDate();
-        this.role = dto.getRole();
-        this.link = dto.getLink();
-    }
 
     /**
      * 연관관계 편의 메서드

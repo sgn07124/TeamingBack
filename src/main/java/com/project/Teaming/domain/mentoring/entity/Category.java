@@ -20,9 +20,12 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id")
     private Long id;
-    @Enumerated(EnumType.STRING)
     @Column(name = "category_name",unique = true)
-    private MentoringCategory name;
+    private String name;
     @OneToMany(mappedBy = "category")
     private List<TeamCategory> categories = new ArrayList<>();
+
+    public Category(String name) {
+        this.name = name;
+    }
 }

@@ -14,7 +14,6 @@ import java.util.List;
 @Getter
 @Entity
 @Table(name = "mentoring_team")
-@NoArgsConstructor
 public class MentoringTeam extends BaseEntity {
 
     @Id
@@ -23,6 +22,8 @@ public class MentoringTeam extends BaseEntity {
     private Long id;  // 멘토링 팀 ID
     @Column(name = "mentoring_name", length = 100)
     private String name;  // 멘토링 명
+    @Column(name = "recruit_deadline", length = 50)
+    private String deadline;  // 모집 마감일
     @Column(name = "start_date", length = 50)
     private String startDate;  // 멘토링 시작일
     @Column(name = "end_date", length = 50)
@@ -37,17 +38,27 @@ public class MentoringTeam extends BaseEntity {
     private String link;
     @Column(name = "flag")
     private Status flag;
+    @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
+    private List<MentoringParticipation> mentoringParticipationList;
     @OneToMany(mappedBy = "mentoringTeam")
-    private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
+    private List<MentoringBoard> mentoringBoardList;
     @OneToMany(mappedBy = "mentoringTeam")
-    private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
+    private List<Event> eventList;
     @OneToMany(mappedBy = "mentoringTeam")
-    private List<Event> eventList = new ArrayList<>();
+    private List<TeamCategory> categories;
+
+    public MentoringTeam() {
+        this.mentoringParticipationList = new ArrayList<>();
+        this.mentoringBoardList = new ArrayList<>();
+        this.eventList = new ArrayList<>();
+        this.categories = new ArrayList<>();
+    }
 
     @Builder
-    public MentoringTeam(Long id, String name, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList) {
+    public MentoringTeam(Long id, String name, String deadline, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
         this.id = id;
         this.name = name;
+        this.deadline = deadline;
         this.startDate = startDate;
         this.endDate = endDate;
         this.mentoringCnt = mentoringCnt;
@@ -55,10 +66,13 @@ public class MentoringTeam extends BaseEntity {
         this.status = status;
         this.link = link;
         this.flag = flag;
-        this.mentoringParticipationList = mentoringParticipationList;
-        this.mentoringBoardList = mentoringBoardList;
-        this.eventList = eventList;
+        this.mentoringParticipationList = mentoringParticipationList != null ? mentoringParticipationList : new ArrayList<>();
+        this.mentoringBoardList = mentoringBoardList != null ? mentoringBoardList : new ArrayList<>();
+        this.eventList = eventList != null ? eventList : new ArrayList<>();
+        this.categories = categories != null ? categories : new ArrayList<>();
+
     }
+
     public void setFlag(Status flag) {
         this.flag = flag;
     }
@@ -67,6 +81,7 @@ public class MentoringTeam extends BaseEntity {
         RsTeamDto dto = RsTeamDto.builder()
                 .id(this.getId())
                 .name(this.getName())
+                .deadline(this.getDeadline())
                 .startDate(this.getStartDate())
                 .mentoringCnt(this.getMentoringCnt())
                 .endDate(this.getEndDate())
@@ -79,6 +94,7 @@ public class MentoringTeam extends BaseEntity {
 
     public void mentoringTeamUpdate(RqTeamDto dto) {
         this.name = dto.getName();
+        this.deadline = dto.getDeadline();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();
         this.mentoringCnt = dto.getMentoringCnt();
