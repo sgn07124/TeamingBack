@@ -41,4 +41,18 @@ public class ProjectParticipateController {
         projectParticipationService.quitTeam(team_id);
         return new ResultResponse<>(ResultCode.QUIT_PROJECT_TEAM, null);
     }
+
+    @PutMapping("/project/team/{team_id}/{user_id}/accept")
+    @Operation(summary = "팀장의 팀원 신청 수락", description = "프로젝트 팀의 팀장은 대기열의 팀원 신청에 대하여 수락을 한다.")
+    public ResultResponse<Void> acceptedTeamMember(@PathVariable Long team_id, @PathVariable Long user_id) {
+        projectParticipationService.acceptedMember(team_id, user_id);
+        return new ResultResponse<>(ResultCode.ACCEPT_JOIN_MEMBER, null);
+    }
+
+    @PutMapping("/project/team/{team_id}/{user_id}/reject")
+    @Operation(summary = "팀장의 팀원 신청 거절", description = "프로젝트 팀의 팀장은 대기열의 팀원 신청에 대하여 거절을 한다.")
+    public ResultResponse<Void> rejectedTeamMember(@PathVariable Long team_id, @PathVariable Long user_id) {
+        projectParticipationService.rejectedMember(team_id, user_id);
+        return new ResultResponse<>(ResultCode.REJECT_JOIN_MEMBER, null);
+    }
 }

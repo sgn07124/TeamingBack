@@ -95,4 +95,26 @@ public class ProjectParticipationService {
             throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
         }
     }
+
+    public void acceptedMember(Long teamId, Long userId) {
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canAccept()) {
+            participation.acceptTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
+
+    public void rejectedMember(Long teamId, Long userId) {
+        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+
+        if (participation.canReject()) {
+            participation.rejectTeam();
+        } else {
+            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+        }
+    }
 }
