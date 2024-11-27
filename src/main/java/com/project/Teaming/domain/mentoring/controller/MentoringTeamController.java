@@ -36,7 +36,7 @@ public class MentoringTeamController {
     private final UserService userService;
 
     @PostMapping("/team")
-    @Operation(summary = "멘토링 팀 저장", description = "멘토링 팀을 생성하고 저장할 수 있으며, 멘토링 팀을 생성한 유저는 팀의 리더가 된다." +
+    @Operation(summary = "멘토링 팀 저장", description = "멘토링 팀을 생성하고 저장할 수 있으며, 멘토링 팀을 생성한 유저는 팀의 리더가 된다. " +
             "status는 RECRUITING(모집중), WORKING(진행중), COMPLETE(완료) / role은 MENTOR(멘토), MENTEE(멘티)로 요청 주시면 됩니다" )
     public ResultResponse<Long> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
         Long id = getUserId();
@@ -69,9 +69,9 @@ public class MentoringTeamController {
     }
 
     @GetMapping("/team/{teamId}")
-    @Operation(summary = "멘토링 팀 조회", description = "특정 멘토링 팀을 조회할 수 있다." +
+    @Operation(summary = "멘토링 팀 조회", description = "특정 멘토링 팀을 조회할 수 있다. " +
             "멘토링 팀페이지 조회용, authority가 LEADER면 팀장용페이지,CREW이면 팀원용페이지, NoAuth면 일반사용자용 페이지 띄워주세요 ")
-    public ResultResponse<?> findMentoringTeam(@PathVariable Long teamId) {
+    public ResultResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long teamId) {
         Long userId = getUserId();
         User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(teamId);
