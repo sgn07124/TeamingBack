@@ -23,7 +23,7 @@ public class ProjectParticipationInfoDto {
         this.participationStatus = participation.getParticipationStatus().toString();
         this.isDeleted = participation.getIsDeleted();
         this.requestDate = participation.getRequestDate().toString();
-        this.decisionDate = participation.getDecisionDate().toString();
+        this.decisionDate = participation.getDecisionDate() != null ? participation.getDecisionDate().toString() : "-";
         this.role = participation.getRole().toString();
         this.reportingCnt = participation.getReportingCnt();
     }
