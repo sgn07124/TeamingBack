@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,5 +50,10 @@ public class ProjectBoardController {
         return new ResultResponse<>(ResultCode.UPDATE_PROJECT_POST_INFO, null);
     }
 
-
+    @DeleteMapping("/post/{team_id}/{post_id}")
+    @Operation(summary = "프로젝트 팀 게시물 삭제", description = "프로젝트 팀에서 작성한 모집 게시글 삭제.")
+    public ResultResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
+        projectBoardService.deletePost(team_id, post_id);
+        return new ResultResponse<>(ResultCode.DELETE_PROJECT_POST_INFO, null);
+    }
 }

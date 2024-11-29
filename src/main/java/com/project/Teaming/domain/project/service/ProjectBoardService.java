@@ -91,4 +91,19 @@ public class ProjectBoardService {
         }
         projectBoard.updateProjectBoard(dto, projectTeam);
     }
+
+    public void deletePost(Long teamId, Long postId) {
+        ProjectBoard projectBoard = projectBoardRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
+
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED);
+        if (!isMember) {
+            throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
+        }
+        projectBoardRepository.delete(projectBoard);
+    }
 }
