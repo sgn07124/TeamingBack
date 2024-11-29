@@ -73,4 +73,22 @@ public class ProjectBoardService {
 
         return ProjectPostInfoDto.from(projectTeam, projectBoard, stackNames, recruitCategoryNames);
     }
+
+    public void updatePost(Long teamId, Long postId, CreatePostDto dto) {
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+
+        ProjectBoard projectBoard = projectBoardRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
+
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED);
+        if (!isMember) {
+            throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
+        }
+        projectBoard.updateProjectBoard(dto, projectTeam);
+    }
 }

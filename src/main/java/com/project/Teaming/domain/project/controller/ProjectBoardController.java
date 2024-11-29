@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,4 +41,13 @@ public class ProjectBoardController {
         ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(team_id, post_id);
         return new ResultResponse<>(ResultCode.GET_PROJECT_POST_INFO, List.of(postInfoDto));
     }
+
+    @PutMapping("/post/{team_id}/{post_id}/edit")
+    @Operation(summary = "프로젝트 팀 게시물 수정", description = "게시물 수정")
+    public ResultResponse<Void> updatePost(@PathVariable Long team_id, @PathVariable Long post_id, @Valid @RequestBody CreatePostDto createPostDto) {
+        projectBoardService.updatePost(team_id, post_id, createPostDto);
+        return new ResultResponse<>(ResultCode.UPDATE_PROJECT_POST_INFO, null);
+    }
+
+
 }

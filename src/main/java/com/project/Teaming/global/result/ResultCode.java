@@ -37,6 +37,7 @@ public enum ResultCode {
     GET_PARTICIPATION_LIST(200, "P010", "신청자 목록 조회 완료"),
     REGISTER_PROJECT_POST(200, "P011", "프로젝트 모집 글 작성 완료"),
     GET_PROJECT_POST_INFO(200, "P012", "프로젝트 모집 글 상세 조회 완료"),
+    UPDATE_PROJECT_POST_INFO(200, "P013", "프로젝트 모집 글 수정 완료"),
 
     //Mentoring
     REGISTER_MENTORING_TEAM(200,"M001","멘토링 팀 등록 완료"),

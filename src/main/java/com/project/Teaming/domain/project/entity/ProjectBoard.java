@@ -54,4 +54,14 @@ public class ProjectBoard {
         post.projectTeam = projectTeam;
         return post;
     }
+
+    public void updateProjectBoard(CreatePostDto dto, ProjectTeam projectTeam) {
+        this.title = dto.getTitle();
+        this.deadline = dto.getDeadline();
+        this.membersCnt = dto.getMemberCnt();
+        this.link = dto.getLink();
+        this.contents = dto.getContents();
+        this.status = PostStatus.RECRUITING;
+        this.projectTeam = projectTeam;
+    }
 }
