@@ -3,10 +3,7 @@ package com.project.Teaming.domain.mentoring.controller;
 import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
-import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
-import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
-import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.entity.User;
@@ -21,6 +18,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -77,10 +77,17 @@ public class MentoringBoardController {
 
 
     @GetMapping("/posts")
-    @Operation(summary = "멘토링 글 모두 조희" , description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시판 보여 줄 때의 API")
-    public ResultResponse<RsBoardDto> findAllPosts() {
-        List<RsBoardDto> boards = mentoringBoardService.findAllMentoringPost().stream()
-                .map(o -> RsBoardDto.builder()  //id, 제목, 모집하는 역할, 멘토링 팀 상태 반환.
+    @Operation(summary = "멘토링 글 모두 조희" , description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시글페이지 보여 줄 때의 API, 한페이지당 4개의 글")
+    public ResultResponse<RsBoardDto> findAllPosts(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "4") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MentoringBoard> allMentoringPost = mentoringBoardService.findAllMentoringPost(pageable);
+
+        List<RsBoardDto> result = allMentoringPost.stream()
+                .filter(o -> o.getMentoringTeam().getFlag().equals(Status.FALSE))
+                .map(o -> RsBoardDto.builder()
                         .id(o.getId())
                         .title(o.getTitle())
                         .startDate(o.getMentoringTeam().getStartDate())
@@ -90,8 +97,8 @@ public class MentoringBoardController {
                                 .map(x -> x.getCategory().getName())
                                 .collect(Collectors.toList()))
                         .build())
-                .collect(Collectors.toList());
-        return new ResultResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, boards);
+                .toList();
+        return new ResultResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, result);
     }
 
     @GetMapping("/{team_Id}/posts")
@@ -140,7 +147,7 @@ public class MentoringBoardController {
         return new ResultResponse<>(ResultCode.GET_MENTORING_POST, List.of(dto));
     }
 
-    @PostMapping("/{team_id}/post/{post_id}/del")
+    @DeleteMapping("/{team_id}/post/{post_id}/del")
     @Operation(summary = "멘토링 글 삭제", description = "나의 멘토링 글을 삭제 할 수 있다. 멘토링 게시판으로 이동")
     public ResultResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();

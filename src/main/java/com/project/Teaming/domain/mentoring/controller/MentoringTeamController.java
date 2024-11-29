@@ -41,12 +41,13 @@ public class MentoringTeamController {
     public ResultResponse<Long> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
         Long id = getUserId();
         log.info("SecurityContext Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
-        mentoringTeamService.saveMentoringTeam(id, dto);
-        return new ResultResponse<>(ResultCode.REGISTER_MENTORING_TEAM, null);
+        Long savedTeamId = mentoringTeamService.saveMentoringTeam(id, dto);
+        return new ResultResponse<>(ResultCode.REGISTER_MENTORING_TEAM, List.of(savedTeamId));
     }
 
     @PostMapping("/team/{teamId}")
-    @Operation(summary = "멘토링 팀 수정", description = "멘토링 팀을 수정할 수 있다.")
+    @Operation(summary = "멘토링 팀 수정", description = "멘토링 팀을 수정할 수 있다. " +
+            "status는 RECRUITING(모집중), WORKING(진행중), COMPLETE(완료) / role은 MENTOR(멘토), MENTEE(멘티)로 요청 주시면 됩니다")
     public ResultResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long teamId,
                                                                @RequestBody @Valid RqTeamDto dto) {
         Long userId = getUserId();

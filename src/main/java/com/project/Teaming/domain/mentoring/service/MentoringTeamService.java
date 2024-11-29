@@ -41,7 +41,7 @@ public class MentoringTeamService {
      */
 
     @Transactional
-    public void saveMentoringTeam(Long userId, RqTeamDto dto) {
+    public Long saveMentoringTeam(Long userId, RqTeamDto dto) {
         User findUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         //participation 생성 로직
         MentoringParticipation mentoringParticipation = MentoringParticipation.builder()
@@ -68,7 +68,7 @@ public class MentoringTeamService {
         //연관관계 매핑
         mentoringParticipation.setUser(findUser);
         mentoringParticipation.addMentoringMember(mentoringTeam);
-        mentoringTeamRepository.save(mentoringTeam);
+        MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
 
         //카테고리 생성
         List<Long> categoryIds = dto.getCategories();
@@ -81,6 +81,7 @@ public class MentoringTeamService {
             teamCategory.setMentoringTeam(mentoringTeam);
             teamCategoryRepository.save(teamCategory);
         }
+        return saved.getId();
     }
 
     /**
@@ -201,10 +202,10 @@ public class MentoringTeamService {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
 
         RsTeamDto dto = team.toDto();
-        List<Long> categoryIds = team.getCategories().stream()
-                .map(o -> o.getCategory().getId())
+        List<String> categories = team.getCategories().stream()
+                .map(o -> o.getCategory().getName())
                 .collect(Collectors.toList());
-        dto.setCategories(categoryIds);
+        dto.setCategories(categories);
 
         //리스폰스 dto생성
         TeamResponseDto teamResponseDto = new TeamResponseDto();

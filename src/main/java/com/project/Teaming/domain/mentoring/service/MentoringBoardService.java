@@ -11,10 +11,13 @@ import com.project.Teaming.global.error.exception.MentoringPostNotFoundException
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -40,9 +43,8 @@ public class MentoringBoardService {
                 .role(boardDto.getRole())
                 .mentoringCnt(boardDto.getMentoringCnt())
                 .build();
-        if (!boardDto.getLink().isBlank()) {  //작성한 글에 카카오톡 링크가 있으면 사용, 없으면 멘토링 팀에 등록된 카카오톡 링크 사용
-            mentoringBoard.setLink(boardDto.getLink());
-        } else mentoringBoard.setLink(mentoringTeam.getLink());
+        mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
+                .orElse(mentoringTeam.getLink()));
         mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
 
         MentoringBoard savedPost = mentoringBoardRepository.save(mentoringBoard);
@@ -72,15 +74,18 @@ public class MentoringBoardService {
      */
     public List<MentoringBoard> findAllMyMentoringPost(Long teamId) {
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new); //명시적 조회, 최신 데이터 반영
-        return mentoringTeam.getMentoringBoardList();
+        if (mentoringTeam.getFlag() == Status.FALSE) {
+            return mentoringTeam.getMentoringBoardList();
+        }
+        else throw new MentoringTeamNotFoundException("이미 삭제된 팀 입니다.");
     }
 
     /**
      * 삭제되지 않은 모든 게시물들을 가져오는 로직
      * @return
      */
-    public List<MentoringBoard> findAllMentoringPost() {
-        return mentoringBoardRepository.findAll();
+    public Page<MentoringBoard> findAllMentoringPost(Pageable pageable) {
+        return mentoringBoardRepository.findAll(pageable);
     }
 
     /**

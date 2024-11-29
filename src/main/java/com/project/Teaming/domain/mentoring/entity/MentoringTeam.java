@@ -40,7 +40,7 @@ public class MentoringTeam extends BaseEntity {
     private Status flag;
     @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
     private List<MentoringParticipation> mentoringParticipationList;
-    @OneToMany(mappedBy = "mentoringTeam")
+    @OneToMany(mappedBy = "mentoringTeam",orphanRemoval = true)
     private List<MentoringBoard> mentoringBoardList;
     @OneToMany(mappedBy = "mentoringTeam")
     private List<Event> eventList;
@@ -88,6 +88,7 @@ public class MentoringTeam extends BaseEntity {
                 .content(this.getContent())
                 .status(this.getStatus())
                 .link(this.getLink())
+                .status(this.getStatus())
                 .build();
         return dto;
     }
