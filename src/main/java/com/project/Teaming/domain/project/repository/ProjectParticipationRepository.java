@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.repository;
 
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import java.util.List;
 import java.util.Optional;
@@ -10,4 +11,6 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
     Optional<ProjectParticipation> findByProjectTeamIdAndUserId(Long projectId, Long userId);
 
     List<ProjectParticipation> findByProjectTeamId(Long teamId);
+
+    boolean existsByProjectTeamIdAndUserIdAndParticipationStatus(Long projectTeamId, Long userID, ParticipationStatus status);
 }

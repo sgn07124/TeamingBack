@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -19,21 +20,38 @@ public class ProjectBoard {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pj_post_id")
     private Long id;  // 프로젝트 모집글 ID
+
     @Column(name = "pj_post_title", nullable = false, length = 100)
-    private String title;  // 프로젝트 명
-    @Column(name = "start_date", length = 50)
-    private String startDate;  // 프로젝트 시작일
-    @Column(name = "end_date", length = 50)
-    private String endDate;  // 프로젝트 종료일
+    private String title;  // 제목
+
+    @Column(name = "recruit_deadline", length = 50)
+    private String deadline;  // 모집 마감일
+
     @Column(name = "members_cnt")
     private int membersCnt;  // 모집 인원
+
     @Column(name = "link", length = 1000)
     private String link;  // 연락 방법
+
     @Column(name = "contents", columnDefinition = "TEXT")
     private String contents;  // 프로젝트 설명
+
     @Enumerated(EnumType.STRING)
-    private ProjectStatus status;  // 프로젝트 모집 상태
+    private PostStatus status;  // 프로젝트 게시글 모집 상태
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectTeam projectTeam;  // 주인
+
+    public static ProjectBoard projectBoard(CreatePostDto dto, ProjectTeam projectTeam) {
+        ProjectBoard post = new ProjectBoard();
+        post.title = dto.getTitle();
+        post.deadline = dto.getDeadline();
+        post.membersCnt = dto.getMemberCnt();
+        post.link = dto.getLink();
+        post.contents = dto.getContents();
+        post.status = PostStatus.RECRUITING;
+        post.projectTeam = projectTeam;
+        return post;
+    }
 }
