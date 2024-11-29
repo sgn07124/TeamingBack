@@ -29,7 +29,7 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "end_date", length = 50)
     private String endDate;  // 멘토링 종료일
     @Column(name = "mentoring_cnt")
-    private int mentoringCnt;
+    private Integer mentoringCnt;
     @Column(name = "content")
     private String content;
     @Column(name = "status")
