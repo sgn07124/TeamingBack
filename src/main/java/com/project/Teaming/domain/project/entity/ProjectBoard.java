@@ -2,6 +2,7 @@ package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,7 +16,7 @@ import java.util.List;
 @Table(name = "project_board")
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectBoard {
+public class ProjectBoard extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pj_post_id")
