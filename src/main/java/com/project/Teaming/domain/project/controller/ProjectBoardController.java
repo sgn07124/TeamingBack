@@ -1,14 +1,17 @@
 package com.project.Teaming.domain.project.controller;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,5 +32,12 @@ public class ProjectBoardController {
     public ResultResponse<Void> createPost(@PathVariable Long team_id, @Valid @RequestBody CreatePostDto createPostDto) {
         projectBoardService.createPost(team_id, createPostDto);
         return new ResultResponse<>(ResultCode.REGISTER_PROJECT_POST, null);
+    }
+
+    @GetMapping("/post/{team_id}/{post_id}")
+    @Operation(summary = "프로젝트 팀 게시물 상세 조회", description = "프로젝트 팀에서 작성한 게시물들 중 하나에 대한 상세 조회")
+    public ResultResponse<ProjectPostInfoDto> getPostInfo(@PathVariable Long team_id, @PathVariable Long post_id) {
+        ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(team_id, post_id);
+        return new ResultResponse<>(ResultCode.GET_PROJECT_POST_INFO, List.of(postInfoDto));
     }
 }

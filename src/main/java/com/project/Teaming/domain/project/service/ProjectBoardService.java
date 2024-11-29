@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectBoard;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
@@ -12,6 +13,8 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -51,5 +54,23 @@ public class ProjectBoardService {
         ProjectBoard post = ProjectBoard.projectBoard(createPostDto, projectTeam);
 
         projectBoardRepository.save(post);
+    }
+
+    public ProjectPostInfoDto getPostInfo(Long teamId, Long postId) {
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+
+        ProjectBoard projectBoard = projectBoardRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
+
+        List<String> stackNames = projectTeam.getStacks().stream()
+                .map(teamStack -> teamStack.getStack().getStackName())
+                .collect(Collectors.toList());
+
+        List<String> recruitCategoryNames = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getName())
+                .collect(Collectors.toList());
+
+        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackNames, recruitCategoryNames);
     }
 }
