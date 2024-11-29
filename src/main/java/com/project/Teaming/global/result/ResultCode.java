@@ -25,18 +25,21 @@ public enum ResultCode {
     UPDATE_USER_PORTFOLIO(200, "P003", "사용자 포트폴리오 수정 완료"),
 
     // ProjectTeam
-    REGISTER_PROJECT_TEAM(200, "PT001", "프로젝트 팀 생성 완료"),
-    GET_PROJECT_TEAM(200, "PT002", "프로젝트 팀 정보 조회 완료"),
-    UPDATE_PROJECT_TEAM(200, "PT003", "프로젝트 팀 정보 수정 완료"),
-    DELETE_PROJECT_TEAM(200, "PT004", "프로젝트 팀 삭제 완료"),
+    REGISTER_PROJECT_TEAM(200, "P001", "프로젝트 팀 생성 완료"),
+    GET_PROJECT_TEAM(200, "P002", "프로젝트 팀 정보 조회 완료"),
+    UPDATE_PROJECT_TEAM(200, "P003", "프로젝트 팀 정보 수정 완료"),
+    DELETE_PROJECT_TEAM(200, "P004", "프로젝트 팀 삭제 완료"),
+    JOIN_MEMBER_PROJECT_TEAM(200, "P005", "프로젝트에 멤버로 신청 완료"),
+    CANCEL_PROJECT_TEAM(200, "P006", "프로젝트 신청 취소 완료"),
+    QUIT_PROJECT_TEAM(200, "P007", "프로젝트 탈퇴 완료"),
+    ACCEPT_JOIN_MEMBER(200, "P008", "팀원으로 수락 완료"),
+    REJECT_JOIN_MEMBER(200, "P009", "팀원 거절 완료"),
+    GET_PARTICIPATION_LIST(200, "P010", "신청자 목록 조회 완료"),
+    REGISTER_PROJECT_POST(200, "P011", "프로젝트 모집 글 작성 완료"),
+    GET_PROJECT_POST_INFO(200, "P012", "프로젝트 모집 글 상세 조회 완료"),
+    UPDATE_PROJECT_POST_INFO(200, "P013", "프로젝트 모집 글 수정 완료"),
+    DELETE_PROJECT_POST_INFO(200, "P014", "프로젝트 모집 글 삭제 완료"),
 
-    // ProjectParticipate
-    JOIN_MEMBER_PROJECT_TEAM(200, "PP001", "프로젝트에 멤버로 신청 완료"),
-    CANCEL_PROJECT_TEAM(200, "PP002", "프로젝트 신청 취소 완료"),
-    QUIT_PROJECT_TEAM(200, "PP003", "프로젝트 탈퇴 완료"),
-    ACCEPT_JOIN_MEMBER(200, "PP004", "팀원으로 수락 완료"),
-    REJECT_JOIN_MEMBER(200, "PP005", "팀원 거절 완료"),
-    GET_PARTICIPATION_LIST(200, "PP006", "신청자 목록 조회 완료"),
     //Mentoring
     REGISTER_MENTORING_TEAM(200,"M001","멘토링 팀 등록 완료"),
     UPDATE_MENTORING_TEAM(200,"M002","멘토링 팀 수정 완료"),
