@@ -20,15 +20,15 @@ public class UserInfoDto {
     private int warningCnt;
 
     private String introduce;
-    private List<String> stacks;  // 기술 스택(이름으로)
+    private List<Long> stacks;  // 기술 스택(이름으로)
 
-    public void setUserInfoDto(User user, Portfolio portfolio, List<String> stackNames) {
+    public void setUserInfoDto(User user, Portfolio portfolio, List<Long> stackIds) {
         this.email = user.getEmail();
         this.name = user.getName();
         this.provider = user.getProvider();
         this.warningCnt = user.getWarningCnt();
 
         this.introduce = portfolio.getIntroduce();
-        this.stacks = stackNames;
+        this.stacks = stackIds;
     }
 }
