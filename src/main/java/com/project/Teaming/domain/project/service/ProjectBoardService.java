@@ -15,6 +15,7 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -114,19 +115,30 @@ public class ProjectBoardService {
         projectBoardRepository.delete(projectBoard);
     }
 
-    public Page<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
+    public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.ASC, "createdDate"));
 
         Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
 
-        return projectBoards.map(projectBoard -> {
-            ProjectTeam projectTeam = projectBoard.getProjectTeam();
+        List<ProjectPostListDto> content = projectBoards.getContent().stream()
+                .map(projectBoard -> {
+                    ProjectTeam projectTeam = projectBoard.getProjectTeam();
+                    List<Long> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> stack.getId())
+                            .toList();
+                    return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
+                }).toList();
 
-            List<Long> stackIds = projectTeam.getStacks().stream()
-                    .map(stack -> stack.getId())
-                    .toList();
-
-            return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
-        });
+        // PaginatedResponse로 변환
+        return new PaginatedResponse<>(
+                content,
+                projectBoards.getTotalPages(),
+                projectBoards.getTotalElements(),
+                projectBoards.getSize(),
+                projectBoards.getNumber(),
+                projectBoards.isFirst(),
+                projectBoards.isLast(),
+                projectBoards.getNumberOfElements()
+        );
     }
 }

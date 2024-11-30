@@ -6,7 +6,9 @@ import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
 import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
 import com.project.Teaming.global.result.ResultCode;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import com.project.Teaming.global.result.ResultResponse;
+import com.project.Teaming.global.result.pagenateResponse.ResultPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -64,11 +66,11 @@ public class ProjectBoardController {
     @GetMapping("/posts")
     @Operation(summary = "프로젝트 게시글 리스트로 조회", description = "메인페이지의 프로젝트 게시글 목록을 조회. "
             + "기본값으로 첫 페이지는 1이고, 페이지 당 글 개수는 4개이고 status는 선택(미기입 시, 전체 글 조회이고, status=RECRUITING는 모집 중인 글이고, status=COMPLETED는 모집 마감된 글)이다.")
-    public ResultResponse<Page<ProjectPostListDto>> getPosts(
+    public ResultPageResponse<PaginatedResponse<ProjectPostListDto>> getPosts(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "4") int size,
             @RequestParam(required = false) PostStatus status) {
-        Page<ProjectPostListDto> posts = projectBoardService.getProjectPosts(status, page, size);
-        return new ResultResponse<>(ResultCode.GET_PROJECT_POST_LIST, List.of(posts));
+        PaginatedResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(status, page, size);
+        return new ResultPageResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
     }
 }
