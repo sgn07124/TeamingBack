@@ -63,15 +63,15 @@ public class ProjectBoardService {
         ProjectBoard projectBoard = projectBoardRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
 
-        List<String> stackNames = projectTeam.getStacks().stream()
-                .map(teamStack -> teamStack.getStack().getStackName())
+        List<Long> stackIds = projectTeam.getStacks().stream()
+                .map(teamStack -> teamStack.getStack().getId())
                 .collect(Collectors.toList());
 
-        List<String> recruitCategoryNames = projectTeam.getRecruitCategories().stream()
-                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getName())
+        List<Long> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getId())
                 .collect(Collectors.toList());
 
-        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackNames, recruitCategoryNames);
+        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds);
     }
 
     public void updatePost(Long teamId, Long postId, CreatePostDto dto) {
