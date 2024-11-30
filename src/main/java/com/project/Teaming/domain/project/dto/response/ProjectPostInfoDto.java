@@ -21,10 +21,10 @@ public class ProjectPostInfoDto {
 
     private Long projectTeamId;
 
-    private List<String> stacks;  // 기술 스택(이름으로)
-    private List<String> recruitCategories;  // 모집 구분(이름으로)
+    private List<Long> stacks;  // 기술 스택(id 조회)
+    private List<Long> recruitCategories;  // 모집 구분(id 조회)
 
-    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackNames, List<String> recruitCategoryNames) {
+    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<Long> stackIds, List<Long> recruitCategoryIds) {
         ProjectPostInfoDto dto = new ProjectPostInfoDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());
@@ -35,8 +35,8 @@ public class ProjectPostInfoDto {
         dto.setLink(projectBoard.getLink());
         dto.setContents(projectBoard.getContents());
         dto.setProjectTeamId(projectTeam.getId());
-        dto.setStacks(stackNames);
-        dto.setRecruitCategories(recruitCategoryNames);
+        dto.setStacks(stackIds);
+        dto.setRecruitCategories(recruitCategoryIds);
         return dto;
     }
 }
