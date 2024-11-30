@@ -2,7 +2,9 @@ package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
+import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.entity.ProjectBoard;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.repository.ProjectBoardRepository;
@@ -13,10 +15,16 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -105,5 +113,32 @@ public class ProjectBoardService {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
         projectBoardRepository.delete(projectBoard);
+    }
+
+    public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.ASC, "createdDate"));
+
+        Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
+
+        List<ProjectPostListDto> content = projectBoards.getContent().stream()
+                .map(projectBoard -> {
+                    ProjectTeam projectTeam = projectBoard.getProjectTeam();
+                    List<Long> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> stack.getId())
+                            .toList();
+                    return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
+                }).toList();
+
+        // PaginatedResponse로 변환
+        return new PaginatedResponse<>(
+                content,
+                projectBoards.getTotalPages(),
+                projectBoards.getTotalElements(),
+                projectBoards.getSize(),
+                projectBoards.getNumber(),
+                projectBoards.isFirst(),
+                projectBoards.isLast(),
+                projectBoards.getNumberOfElements()
+        );
     }
 }
