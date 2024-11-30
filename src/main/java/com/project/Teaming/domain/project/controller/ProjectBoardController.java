@@ -2,6 +2,8 @@ package com.project.Teaming.domain.project.controller;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
+import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
@@ -11,6 +13,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
@@ -55,5 +59,16 @@ public class ProjectBoardController {
     public ResultResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
         projectBoardService.deletePost(team_id, post_id);
         return new ResultResponse<>(ResultCode.DELETE_PROJECT_POST_INFO, null);
+    }
+
+    @GetMapping("/posts")
+    @Operation(summary = "프로젝트 게시글 리스트로 조회", description = "메인페이지의 프로젝트 게시글 목록을 조회. "
+            + "기본값으로 첫 페이지는 1이고, 페이지 당 글 개수는 4개이고 status는 선택(미기입 시, 전체 글 조회이고, status=RECRUITING는 모집 중인 글이고, status=COMPLETED는 모집 마감된 글)이다.")
+    public ResultResponse<Page<ProjectPostListDto>> getPosts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "4") int size,
+            @RequestParam(required = false) PostStatus status) {
+        Page<ProjectPostListDto> posts = projectBoardService.getProjectPosts(status, page, size);
+        return new ResultResponse<>(ResultCode.GET_PROJECT_POST_LIST, List.of(posts));
     }
 }
