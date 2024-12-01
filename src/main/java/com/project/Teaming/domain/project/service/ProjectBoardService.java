@@ -116,7 +116,7 @@ public class ProjectBoardService {
     }
 
     public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.ASC, "createdDate"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.DESC, "createdDate"));
 
         Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
 
@@ -140,5 +140,19 @@ public class ProjectBoardService {
                 projectBoards.isLast(),
                 projectBoards.getNumberOfElements()
         );
+    }
+
+    public List<ProjectPostListDto> getTeamProjectPosts(Long teamId) {
+
+        List<ProjectBoard> projectBoards = projectBoardRepository.findAllByProjectTeamId(teamId);
+
+        return projectBoards.stream()
+                .map(projectBoard -> {
+                    ProjectTeam projectTeam = projectBoard.getProjectTeam();
+                    List<Long> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> stack.getId())
+                            .toList();
+                    return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
+                }).toList();
     }
 }
