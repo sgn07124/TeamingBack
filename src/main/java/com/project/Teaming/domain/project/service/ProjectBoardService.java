@@ -116,7 +116,7 @@ public class ProjectBoardService {
     }
 
     public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.ASC, "createdDate"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.DESC, "createdDate"));
 
         Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
 

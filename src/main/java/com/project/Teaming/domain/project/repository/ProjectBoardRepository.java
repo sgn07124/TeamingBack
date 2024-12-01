@@ -14,7 +14,7 @@ public interface ProjectBoardRepository extends JpaRepository<ProjectBoard, Long
     @Query("SELECT pb FROM ProjectBoard  pb "
             + "JOIN FETCH pb.projectTeam pt "
             + "WHERE (:status IS NULL OR pb.status = :status) "
-            + "ORDER BY pb.createdDate ASC ")
+            + "ORDER BY pb.createdDate DESC ")
     Page<ProjectBoard> findAllByStatusOptional(@Param("status")PostStatus status, Pageable pageable);
 
     @Query("SELECT pb FROM ProjectBoard pb WHERE pb.projectTeam.id = :teamId ORDER BY pb.createdDate DESC ")
