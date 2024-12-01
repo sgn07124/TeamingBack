@@ -59,6 +59,7 @@ public class UserService {
 
         user.updateUserInfo(dto.getName());  // 유저에 닉네임 저장
         Portfolio portfolio = new Portfolio();
+        user.registerPortfolio(portfolio);
         if (dto.getIntroduce() != null && !dto.getIntroduce().trim().isEmpty()) {
             user.linkPortfolio(portfolio, dto);  // 포트폴리오에 자기소개 저장
         }

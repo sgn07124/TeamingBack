@@ -67,8 +67,10 @@ public class User extends BaseTimeEntity {
     /**
      * 포트폴리오 설정 비즈니스 로직
      */
-    public void linkPortfolio(Portfolio portfolio, RegisterDto dto) {
+    public void registerPortfolio(Portfolio portfolio) {
         this.portfolio = portfolio;
+    }
+    public void linkPortfolio(Portfolio portfolio, RegisterDto dto) {
         portfolio.assignUser(this);
         portfolio.updatePortfolioInfo(dto.getIntroduce());
     }
