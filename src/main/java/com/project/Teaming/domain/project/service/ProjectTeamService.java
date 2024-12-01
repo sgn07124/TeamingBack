@@ -77,19 +77,20 @@ public class ProjectTeamService {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
-        // 기술 스택 이름 리스트 생성
-        List<String> stackNames = projectTeam.getStacks().stream()
-                .map(teamStack -> teamStack.getStack().getStackName())
+        // 기술 스택 id 리스트 생성
+        List<Long> stackIds = projectTeam.getStacks().stream()
+                .map(teamStack -> teamStack.getStack().getId())
                 .collect(Collectors.toList());
 
-        List<String> recruitCategoryNames = projectTeam.getRecruitCategories().stream()
-                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getName())
+        // 모집 구분 id 리스트 생성
+        List<Long> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getId())
                 .collect(Collectors.toList());
 
-        return getProjectTeamInfoDto(projectTeam, stackNames, recruitCategoryNames);
+        return getProjectTeamInfoDto(projectTeam, stackIds, recruitCategoryIds);
     }
 
-    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<String> stackNames, List<String> recruitCategoryNames) {
+    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<Long> stackIds, List<Long> recruitCategoryIds) {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
         dto.setProjectId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());
@@ -101,8 +102,8 @@ public class ProjectTeamService {
         dto.setContents(projectTeam.getContents());
         dto.setCreatedDate(projectTeam.getCreatedDate());
         dto.setLastModifiedDate(projectTeam.getLastModifiedDate());
-        dto.setStacks(stackNames);
-        dto.setRecruitCategories(recruitCategoryNames);
+        dto.setStacks(stackIds);
+        dto.setRecruitCategories(recruitCategoryIds);
         return dto;
     }
 

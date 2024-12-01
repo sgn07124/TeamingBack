@@ -35,7 +35,7 @@ public class ProjectParticipationService {
     public void createParticipation(ProjectTeam projectTeam) {
         ProjectParticipation projectParticipation = new ProjectParticipation();
         User user = userRepository.findById(getCurrentId())
-                        .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         projectParticipation.createProjectParticipation(user, projectTeam);
         projectParticipationRepository.save(projectParticipation);

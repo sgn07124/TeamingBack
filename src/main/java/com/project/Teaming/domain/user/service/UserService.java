@@ -114,12 +114,12 @@ public class UserService {
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
 
-        // 기술 스택 이름 리스트 생성
-        List<String> stackNames = portfolio.getUserStacks().stream()
-                .map(userStack -> userStack.getStack().getStackName())
+        // 기술 스택 id 리스트 생성
+        List<Long> stackIds = portfolio.getUserStacks().stream()
+                .map(userStack -> userStack.getStack().getId())
                 .collect(Collectors.toList());
 
-        dto.setUserInfoDto(user, portfolio, stackNames);
+        dto.setUserInfoDto(user, portfolio, stackIds);
         return dto;
     }
 
