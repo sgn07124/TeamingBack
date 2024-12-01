@@ -141,4 +141,18 @@ public class ProjectBoardService {
                 projectBoards.getNumberOfElements()
         );
     }
+
+    public List<ProjectPostListDto> getTeamProjectPosts(Long teamId) {
+
+        List<ProjectBoard> projectBoards = projectBoardRepository.findAllByProjectTeamId(teamId);
+
+        return projectBoards.stream()
+                .map(projectBoard -> {
+                    ProjectTeam projectTeam = projectBoard.getProjectTeam();
+                    List<Long> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> stack.getId())
+                            .toList();
+                    return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
+                }).toList();
+    }
 }

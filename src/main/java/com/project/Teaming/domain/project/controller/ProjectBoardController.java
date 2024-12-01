@@ -72,4 +72,11 @@ public class ProjectBoardController {
         PaginatedResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(status, page, size);
         return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
     }
+
+    @GetMapping("/posts/{team_id}")
+    @Operation(summary = "프로젝트 팀의 게시글 조회", description = "특정 프로젝트 팀에서 작성한 게시글 목록을 조회")
+    public ResultListResponse<ProjectPostListDto> getTeamPosts(@PathVariable Long team_id) {
+        List<ProjectPostListDto> posts = projectBoardService.getTeamProjectPosts(team_id);
+        return new ResultListResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
+    }
 }
