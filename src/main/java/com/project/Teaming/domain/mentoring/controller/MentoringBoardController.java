@@ -12,6 +12,8 @@ import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultResponse;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
+import com.project.Teaming.global.result.pagenateResponse.ResultPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -75,30 +78,14 @@ public class MentoringBoardController {
     }
 
 
-
     @GetMapping("/posts")
-    @Operation(summary = "멘토링 글 모두 조희" , description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시글페이지 보여 줄 때의 API, 한페이지당 4개의 글")
-    public ResultResponse<RsBoardDto> findAllPosts(@RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "4") int size) {
+    @Operation(summary = "멘토링 글 모두 조희", description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시글페이지 보여 줄 때의 API, 한페이지당 4개의 글")
+    public ResultPageResponse<PaginatedResponse<RsBoardDto>> findAllPosts(@RequestParam(defaultValue = "1") int page,
+                                                                                   @RequestParam(defaultValue = "4") int size,
+                                                                                   @RequestParam(required = false) MentoringStatus status) {
+        PaginatedResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(status, page, size);
 
-        Pageable pageable = PageRequest.of(page, size);
-
-        Page<MentoringBoard> allMentoringPost = mentoringBoardService.findAllMentoringPost(pageable);
-
-        List<RsBoardDto> result = allMentoringPost.stream()
-                .filter(o -> o.getMentoringTeam().getFlag().equals(Status.FALSE))
-                .map(o -> RsBoardDto.builder()
-                        .id(o.getId())
-                        .title(o.getTitle())
-                        .startDate(o.getMentoringTeam().getStartDate())
-                        .endDate(o.getMentoringTeam().getEndDate())
-                        .contents(o.getContents())
-                        .category(o.getMentoringTeam().getCategories().stream()
-                                .map(x -> x.getCategory().getName())
-                                .collect(Collectors.toList()))
-                        .build())
-                .toList();
-        return new ResultResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, result);
+        return new ResultPageResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
     }
 
     @GetMapping("/{team_Id}/posts")

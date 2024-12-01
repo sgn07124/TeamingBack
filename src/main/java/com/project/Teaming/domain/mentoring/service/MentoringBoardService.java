@@ -1,23 +1,28 @@
 package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
-import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
-import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
-import com.project.Teaming.domain.mentoring.entity.Status;
+import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
+import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
+import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
+import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.global.error.exception.MentoringPostNotFoundException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
+import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.HTMLDocument;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -82,10 +87,63 @@ public class MentoringBoardService {
 
     /**
      * 삭제되지 않은 모든 게시물들을 가져오는 로직
+     *
      * @return
      */
-    public Page<MentoringBoard> findAllMentoringPost(Pageable pageable) {
-        return mentoringBoardRepository.findAll(pageable);
+    public PaginatedResponse<RsBoardDto> findAllPosts(MentoringStatus status, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        List<Long> boardIds = mentoringBoardRepository.findMentoringBoardIds(status, Status.FALSE, pageable);
+
+        List<Tuple> results = mentoringBoardRepository.findAllByIds(boardIds);
+        //메모리에서 정렬
+        Map<Long, List<Tuple>> groupedResults = results.stream()
+                .collect(Collectors.groupingBy(tuple -> tuple.get(QMentoringBoard.mentoringBoard.id)));
+
+        List<RsBoardDto> dtoResults = boardIds.stream()
+                .map(boardId -> {
+                    List<Tuple> groupedTuples = groupedResults.get(boardId);
+                    if (groupedTuples == null || groupedTuples.isEmpty()) {
+                        return null;
+                    }
+                    Tuple firstTuple = groupedTuples.get(0);
+
+                    // 각 보드에 대해 카테고리 리스트 생성
+                    List<String> categories = groupedTuples.stream()
+                            .map(tuple -> tuple.get(QCategory.category.name))
+                            .filter(Objects::nonNull)
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    // RsBoardDto 객체 생성
+                    return new RsBoardDto(
+                            firstTuple.get(QMentoringBoard.mentoringBoard.id),
+                            firstTuple.get(QMentoringBoard.mentoringBoard.title),
+                            firstTuple.get(QMentoringTeam.mentoringTeam.name),
+                            firstTuple.get(QMentoringTeam.mentoringTeam.startDate),
+                            firstTuple.get(QMentoringTeam.mentoringTeam.endDate),
+                            categories,
+                            firstTuple.get(QMentoringBoard.mentoringBoard.contents)
+                    );
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+
+        long total = mentoringBoardRepository.countAllByStatus(status, Status.FALSE);
+
+        Page<RsBoardDto> pageDto = new PageImpl<>(dtoResults, pageable, total);
+        return new PaginatedResponse<>(
+                pageDto.getContent(),
+                pageDto.getTotalPages(),
+                pageDto.getTotalElements(),
+                pageDto.getSize(),
+                pageDto.getNumber(),
+                pageDto.isFirst(),
+                pageDto.isLast(),
+                pageDto.getNumberOfElements()
+        );
+
     }
 
     /**
