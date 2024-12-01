@@ -1,26 +1,23 @@
 package com.project.Teaming.global.result;
 
+import com.project.Teaming.global.result.ResultCode;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ResultResponse<T> {
+public class ResultDetailResponse<T> {
 
     private int status;
     private String code;
     private String message;
-    private List<T> data;
+    private T data;
 
-    public ResultResponse(ResultCode resultCode, List<T> data) {
+    public ResultDetailResponse(ResultCode resultCode, T data) {
         this.status = resultCode.getStatus();
         this.code = resultCode.getCode();
         this.message = resultCode.getMessage();
         this.data = data;
     }
-
-
 }
