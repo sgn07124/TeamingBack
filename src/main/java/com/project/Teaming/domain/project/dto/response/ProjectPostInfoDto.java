@@ -20,6 +20,7 @@ public class ProjectPostInfoDto {
     private String contents;
 
     private Long projectTeamId;
+    private Long postId;
 
     private List<Long> stacks;  // 기술 스택(id 조회)
     private List<Long> recruitCategories;  // 모집 구분(id 조회)
@@ -35,6 +36,7 @@ public class ProjectPostInfoDto {
         dto.setLink(projectBoard.getLink());
         dto.setContents(projectBoard.getContents());
         dto.setProjectTeamId(projectTeam.getId());
+        dto.setPostId(projectBoard.getId());
         dto.setStacks(stackIds);
         dto.setRecruitCategories(recruitCategoryIds);
         return dto;
