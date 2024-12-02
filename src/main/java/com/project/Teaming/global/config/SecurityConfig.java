@@ -5,6 +5,7 @@ import com.project.Teaming.global.jwt.filter.JwtExceptionFilter;
 import com.project.Teaming.global.oauth2.CustomOAuth2UserService;
 import com.project.Teaming.global.oauth2.MyAuthenticationFailureHandler;
 import com.project.Teaming.global.oauth2.MyAuthenticationSuccessHandler;
+import com.project.Teaming.global.properties.CustomAuthenticationEntryPoint;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 
     @Bean
@@ -47,6 +49,9 @@ public class SecurityConfig {
         http
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // 세션관리 정책을 STATELESS로 설정
+
+        http
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(customAuthenticationEntryPoint));
 
         http
                 .authorizeHttpRequests(authz -> authz
