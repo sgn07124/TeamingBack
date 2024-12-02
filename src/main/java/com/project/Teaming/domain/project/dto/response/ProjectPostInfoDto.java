@@ -18,6 +18,7 @@ public class ProjectPostInfoDto {
     private int memberCnt;
     private String link;
     private String contents;
+    private String postStatus;
 
     private Long projectTeamId;
     private Long postId;
@@ -35,6 +36,7 @@ public class ProjectPostInfoDto {
         dto.setMemberCnt(projectBoard.getMembersCnt());
         dto.setLink(projectBoard.getLink());
         dto.setContents(projectBoard.getContents());
+        dto.setPostStatus(projectBoard.getStatus().name());
         dto.setProjectTeamId(projectTeam.getId());
         dto.setPostId(projectBoard.getId());
         dto.setStacks(stackIds);
