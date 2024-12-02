@@ -60,12 +60,10 @@ public class SecurityConfig {
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{team_id}/{post_id}",
                                 "/project/posts").permitAll() // 특정 경로 허용
-                        .requestMatchers(HttpMethod.GET, "/user").permitAll()
                         .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
                                 "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
                                 "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit",
-                                "/project/post/{team_id}/{post_id}/complete").hasRole("USER")
-                        .requestMatchers(HttpMethod.POST, "/user").hasRole("USER")
+                                "/project/post/{team_id}/{post_id}/complete", "/user").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 
