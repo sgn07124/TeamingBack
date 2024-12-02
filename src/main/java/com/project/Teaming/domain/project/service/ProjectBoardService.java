@@ -176,7 +176,7 @@ public class ProjectBoardService {
 
     @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
     public void updateCheckCompleteStatus() {
-        List<ProjectBoard> posts = projectBoardRepository.findAllByStatusComplete();
+        List<ProjectBoard> posts = projectBoardRepository.findAllByStatus(PostStatus.RECRUITING);
         for (ProjectBoard post : posts) {
             post.checkDeadline();
             projectBoardRepository.save(post);

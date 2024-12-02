@@ -20,5 +20,5 @@ public interface ProjectBoardRepository extends JpaRepository<ProjectBoard, Long
     @Query("SELECT pb FROM ProjectBoard pb WHERE pb.projectTeam.id = :teamId ORDER BY pb.createdDate DESC ")
     List<ProjectBoard> findAllByProjectTeamId(@Param("teamId") Long teamId);
 
-    List<ProjectBoard> findAllByStatusComplete();
+    List<ProjectBoard> findAllByStatus(PostStatus status);
 }
