@@ -39,4 +39,13 @@ public class RsBoardDto {
         this.category = Arrays.asList(category.split(","));
         this.contents = contents;
     }
+
+    public RsBoardDto(Long id, String title, String mentoringTeamName, String startDate, String endDate, String contents) {
+        this.id = id;
+        this.title = title;
+        this.mentoringTeamName = mentoringTeamName;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.contents = contents;
+    }
 }

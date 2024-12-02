@@ -49,14 +49,14 @@ public class MentoringBoard extends BaseTimeEntity {
     }
 
 
-    public RsSpecBoardDto toDto() {
+    public RsSpecBoardDto toDto(MentoringTeam mentoringTeam) {
         RsSpecBoardDto dto = RsSpecBoardDto.builder()
                 .id(this.getId())
                 .title(this.getTitle())
-                .mentoringTeamName(this.getMentoringTeam().getName())
-                .deadLine(this.getMentoringTeam().getDeadline())
-                .startDate(this.getMentoringTeam().getStartDate())
-                .endDate(this.getMentoringTeam().getEndDate())
+                .mentoringTeamName(mentoringTeam.getName())
+                .deadLine(mentoringTeam.getDeadline())
+                .startDate(mentoringTeam.getStartDate())
+                .endDate(mentoringTeam.getEndDate())
                 .role(this.getRole())
                 .mentoringCnt(this.getMentoringCnt())
                 .contents(this.getContents())

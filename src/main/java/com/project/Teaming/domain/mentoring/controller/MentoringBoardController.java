@@ -19,17 +19,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -49,8 +45,8 @@ public class MentoringBoardController {
                                          @RequestBody @Valid RqBoardDto dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
-        List<MentoringParticipation> team = getTeam(mentoringTeam, user);
-        if (!ObjectUtils.isEmpty(team)) {
+        Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
+        if (participation.isPresent()) {
             Long savedMentoringPost = mentoringBoardService.saveMentoringPost(team_id, dto);
             return new ResultResponse<>(ResultCode.REGISTER_MENTORING_POST, List.of(savedMentoringPost));
         } else throw new NoAuthorityException("글을 등록 할 수 있는 권한이 없습니다.");
@@ -64,12 +60,12 @@ public class MentoringBoardController {
                                                      @RequestBody @Valid RqBoardDto dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
-        List<MentoringParticipation> team = getTeam(mentoringTeam, user);
-        if (!ObjectUtils.isEmpty(team)) {
+        Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
+        if (participation.isPresent()) {
             mentoringBoardService.updateMentoringPost(post_id,dto);
             MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-            RsSpecBoardDto updatePostDto = mentoringPost.toDto();
-            updatePostDto.setAuthority(team.get(0).getAuthority());
+            RsSpecBoardDto updatePostDto = mentoringPost.toDto(mentoringTeam);
+            updatePostDto.setAuthority(participation.get().getAuthority());
             updatePostDto.setCategory(mentoringTeam.getCategories().stream()
                     .map(o -> o.getCategory().getName())
                     .collect(Collectors.toList()));
@@ -84,27 +80,14 @@ public class MentoringBoardController {
                                                                                    @RequestParam(defaultValue = "4") int size,
                                                                                    @RequestParam(required = false) MentoringStatus status) {
         PaginatedResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(status, page, size);
-
         return new ResultPageResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
     }
 
     @GetMapping("/{team_Id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회" , description = "특정 멘토링 팀에서 쓴 모든 글을 조회 할 수 있다. 팀 페이지에서 시용")
     public ResultResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
-        List<RsBoardDto> myBoards = mentoringBoardService.findAllMyMentoringPost(team_Id)
-                .stream().map(
-                        o -> RsBoardDto.builder()
-                                .id(o.getId())
-                                .title(o.getTitle())
-                                .startDate(o.getMentoringTeam().getStartDate())
-                                .endDate(o.getMentoringTeam().getEndDate())
-                                .contents(o.getContents())
-                                .category(o.getMentoringTeam().getCategories().stream()
-                                        .map(x -> x.getCategory().getName())
-                                        .collect(Collectors.toList()))
-                                .build())
-                .collect(Collectors.toList());
-        return new ResultResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, myBoards);
+        List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_Id);
+        return new ResultResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
     }
 
     /**
@@ -114,23 +97,23 @@ public class MentoringBoardController {
      * @param post_id
      * @return
      */
-    @GetMapping("/post/{post_id}")
+    @GetMapping("/post/{team_id}/{post_id}")
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")
-    public ResultResponse<RsSpecBoardDto> findPost(@PathVariable Long post_id) {
+    public ResultResponse<RsSpecBoardDto> findPost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-        MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
-        List<MentoringParticipation> team = getTeam(mentoringTeam, user);
-        RsSpecBoardDto dto = mentoringPost.toDto();
+        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
+
+        Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
+        RsSpecBoardDto dto = mentoringPost.toDto(mentoringTeam);
         dto.setCategory(mentoringTeam.getCategories().stream()
                 .map(o -> o.getCategory().getName())
                 .collect(Collectors.toList()));
-        if (!ObjectUtils.isEmpty(team)) {
-            dto.setAuthority(team.get(0).getAuthority());
-        } else {
-            dto.setAuthority(MentoringAuthority.NoAuth);
-        }
+        participation.ifPresentOrElse(
+                p -> dto.setAuthority(p.getAuthority()),
+                () -> dto.setAuthority(MentoringAuthority.NoAuth)
+        );
         return new ResultResponse<>(ResultCode.GET_MENTORING_POST, List.of(dto));
     }
 
@@ -139,8 +122,8 @@ public class MentoringBoardController {
     public ResultResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
-        List<MentoringParticipation> team = getTeam(mentoringTeam, user);
-        if (!ObjectUtils.isEmpty(team)) {
+        Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
+        if (participation.isPresent()) {
             mentoringBoardService.deleteMentoringPost(post_id);
         } else throw new NoAuthorityException("글을 삭제할 수 있는 권한이 없습니다.");
         return new ResultResponse<>(ResultCode.DELETE_MENTORING_POST, null);
@@ -153,10 +136,10 @@ public class MentoringBoardController {
      * @param user
      * @return
      */
-    private List<MentoringParticipation> getTeam(MentoringTeam mentoringTeam, User user) {
+    private Optional<MentoringParticipation> getTeam(MentoringTeam mentoringTeam, User user) {
         return user.getMentoringParticipations().stream()
                 .filter(o -> o.getMentoringTeam().equals(mentoringTeam))
-                .toList();
+                .findFirst();
     }
 
     private User getUser() {

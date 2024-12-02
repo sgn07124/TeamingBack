@@ -5,8 +5,6 @@ import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
-import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
-import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.global.error.exception.MentoringPostNotFoundException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
@@ -17,11 +15,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.HTMLDocument;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -77,12 +73,23 @@ public class MentoringBoardService {
      * @param teamId
      * @return
      */
-    public List<MentoringBoard> findAllMyMentoringPost(Long teamId) {
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new); //명시적 조회, 최신 데이터 반영
+    public List<RsBoardDto> findAllMyMentoringPost(Long teamId) {
+        List<RsBoardDto> boards = mentoringBoardRepository.findAllByMentoringTeamId(teamId);
+        List<Object[]> categoryResults = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         if (mentoringTeam.getFlag() == Status.FALSE) {
-            return mentoringTeam.getMentoringBoardList();
-        }
-        else throw new MentoringTeamNotFoundException("이미 삭제된 팀 입니다.");
+            Map<Long, List<String>> categoryMap = new ConcurrentHashMap<>();
+            for (Object[] row : categoryResults) {
+                Long boardId = (Long) row[0];
+                String categoryName = (String) row[1];
+                categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryName);
+            }
+            boards.forEach(post -> {
+                List<String> categories = categoryMap.getOrDefault(post.getId(), Collections.emptyList());
+                post.setCategory(categories);
+            });
+            return boards;
+        }else throw new MentoringTeamNotFoundException("이미 삭제 된 멘토링 팀 입니다.");
     }
 
     /**
