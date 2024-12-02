@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -171,5 +172,14 @@ public class ProjectBoardService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
         projectBoard.updateStatus();
         return ProjectPostStatusDto.from(projectBoard);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
+    public void updateCheckCompleteStatus() {
+        List<ProjectBoard> posts = projectBoardRepository.findAllByStatusComplete();
+        for (ProjectBoard post : posts) {
+            post.checkDeadline();
+            projectBoardRepository.save(post);
+        }
     }
 }
