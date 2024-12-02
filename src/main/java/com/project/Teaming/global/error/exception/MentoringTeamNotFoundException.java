@@ -8,4 +8,7 @@ public class MentoringTeamNotFoundException extends BusinessException{
     public MentoringTeamNotFoundException() {
         super(ErrorCode.MENTORING_TEAM_NOT_EXIST);
     }
+    public MentoringTeamNotFoundException(String message) {
+        super(message,ErrorCode.MENTORING_TEAM_NOT_EXIST);
+    }
 }

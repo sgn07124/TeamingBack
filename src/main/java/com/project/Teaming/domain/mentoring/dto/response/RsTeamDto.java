@@ -18,10 +18,10 @@ public class RsTeamDto {
     private String content;
     private MentoringStatus status;
     private String link;
-    private List<Long> categories;
+    private List<String> categories;
 
     @Builder
-    public RsTeamDto(Long id, String name, String deadline, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, List<Long> categories) {
+    public RsTeamDto(Long id, String name, String deadline, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, List<String> categories) {
         this.id = id;
         this.name = name;
         this.deadline = deadline;

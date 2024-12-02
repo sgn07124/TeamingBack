@@ -55,4 +55,5 @@ public class UserController {
         userService.updateUser(updateUserInfoDto);
         return new ResultDetailResponse<>(ResultCode.UPDATE_USER_INFO, null);
     }
+
 }

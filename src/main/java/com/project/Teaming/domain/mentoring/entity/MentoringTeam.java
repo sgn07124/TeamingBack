@@ -29,7 +29,7 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "end_date", length = 50)
     private String endDate;  // 멘토링 종료일
     @Column(name = "mentoring_cnt")
-    private int mentoringCnt;
+    private Integer mentoringCnt;
     @Column(name = "content")
     private String content;
     @Column(name = "status")
@@ -40,7 +40,7 @@ public class MentoringTeam extends BaseEntity {
     private Status flag;
     @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
     private List<MentoringParticipation> mentoringParticipationList;
-    @OneToMany(mappedBy = "mentoringTeam")
+    @OneToMany(mappedBy = "mentoringTeam",orphanRemoval = true)
     private List<MentoringBoard> mentoringBoardList;
     @OneToMany(mappedBy = "mentoringTeam")
     private List<Event> eventList;
@@ -88,6 +88,7 @@ public class MentoringTeam extends BaseEntity {
                 .content(this.getContent())
                 .status(this.getStatus())
                 .link(this.getLink())
+                .status(this.getStatus())
                 .build();
         return dto;
     }
