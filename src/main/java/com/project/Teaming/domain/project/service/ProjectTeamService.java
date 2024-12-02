@@ -78,19 +78,19 @@ public class ProjectTeamService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         // 기술 스택 id 리스트 생성
-        List<Long> stackIds = projectTeam.getStacks().stream()
-                .map(teamStack -> teamStack.getStack().getId())
+        List<String> stackIds = projectTeam.getStacks().stream()
+                .map(teamStack -> String.valueOf(teamStack.getStack().getId()))
                 .collect(Collectors.toList());
 
         // 모집 구분 id 리스트 생성
-        List<Long> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
-                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getId())
+        List<String> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
 
         return getProjectTeamInfoDto(projectTeam, stackIds, recruitCategoryIds);
     }
 
-    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<Long> stackIds, List<Long> recruitCategoryIds) {
+    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds) {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
         dto.setProjectId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());

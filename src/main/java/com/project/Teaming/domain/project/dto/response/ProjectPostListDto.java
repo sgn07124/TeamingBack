@@ -23,9 +23,9 @@ public class ProjectPostListDto {
     private Long postId;
     private String createdDate;
 
-    private List<Long> stacks;  // 기술 스택(id 조회)
+    private List<String> stacks;  // 기술 스택(id 조회)
 
-    public static ProjectPostListDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<Long> stackIds) {
+    public static ProjectPostListDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackIds) {
         ProjectPostListDto dto = new ProjectPostListDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());

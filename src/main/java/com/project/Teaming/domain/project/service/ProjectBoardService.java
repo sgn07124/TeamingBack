@@ -71,12 +71,12 @@ public class ProjectBoardService {
         ProjectBoard projectBoard = projectBoardRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
 
-        List<Long> stackIds = projectTeam.getStacks().stream()
-                .map(teamStack -> teamStack.getStack().getId())
+        List<String> stackIds = projectTeam.getStacks().stream()
+                .map(teamStack -> String.valueOf(teamStack.getStack().getId()))
                 .collect(Collectors.toList());
 
-        List<Long> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
-                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getId())
+        List<String> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
 
         return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds);
@@ -123,8 +123,8 @@ public class ProjectBoardService {
         List<ProjectPostListDto> content = projectBoards.getContent().stream()
                 .map(projectBoard -> {
                     ProjectTeam projectTeam = projectBoard.getProjectTeam();
-                    List<Long> stackIds = projectTeam.getStacks().stream()
-                            .map(stack -> stack.getId())
+                    List<String> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> String.valueOf(stack.getId()))
                             .toList();
                     return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
                 }).toList();
@@ -149,8 +149,8 @@ public class ProjectBoardService {
         return projectBoards.stream()
                 .map(projectBoard -> {
                     ProjectTeam projectTeam = projectBoard.getProjectTeam();
-                    List<Long> stackIds = projectTeam.getStacks().stream()
-                            .map(stack -> stack.getId())
+                    List<String> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> String.valueOf(stack.getId()))
                             .toList();
                     return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
                 }).toList();
