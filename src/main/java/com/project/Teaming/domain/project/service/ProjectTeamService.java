@@ -15,6 +15,8 @@ import com.project.Teaming.domain.project.repository.TeamRecruitCategoryReposito
 import com.project.Teaming.domain.project.repository.TeamStackRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -87,24 +89,7 @@ public class ProjectTeamService {
                 .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
 
-        return getProjectTeamInfoDto(projectTeam, stackIds, recruitCategoryIds);
-    }
-
-    private static ProjectTeamInfoDto getProjectTeamInfoDto(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds) {
-        ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
-        dto.setProjectId(projectTeam.getId());
-        dto.setProjectName(projectTeam.getName());
-        dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
-        dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
-        dto.setDeadline(String.valueOf(projectTeam.getDeadline()));
-        dto.setMemberCnt(projectTeam.getMembersCnt());
-        dto.setLink(projectTeam.getLink());
-        dto.setContents(projectTeam.getContents());
-        dto.setCreatedDate(projectTeam.getCreatedDate());
-        dto.setLastModifiedDate(projectTeam.getLastModifiedDate());
-        dto.setStacks(stackIds);
-        dto.setRecruitCategories(recruitCategoryIds);
-        return dto;
+        return ProjectTeamInfoDto.from(projectTeam, stackIds, recruitCategoryIds);
     }
 
     public void editTeam(Long teamId, UpdateTeamDto dto) {

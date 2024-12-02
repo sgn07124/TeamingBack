@@ -1,6 +1,8 @@
 package com.project.Teaming.domain.project.dto.response;
 
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Data;
 
 @Data
@@ -22,9 +24,14 @@ public class ProjectParticipationInfoDto {
         this.projectId = participation.getProjectTeam().getId();
         this.participationStatus = participation.getParticipationStatus().toString();
         this.isDeleted = participation.getIsDeleted();
-        this.requestDate = participation.getRequestDate().toString();
-        this.decisionDate = participation.getDecisionDate() != null ? participation.getDecisionDate().toString() : "-";
+        this.requestDate = getFormattedDate(participation.getRequestDate());
+        this.decisionDate = participation.getDecisionDate() != null ? getFormattedDate(participation.getDecisionDate()) : "-";
         this.role = participation.getRole().toString();
         this.reportingCnt = participation.getReportingCnt();
+    }
+
+    public String getFormattedDate(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return dateTime.format(formatter);
     }
 }
