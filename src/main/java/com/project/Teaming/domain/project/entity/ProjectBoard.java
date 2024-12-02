@@ -65,4 +65,8 @@ public class ProjectBoard extends BaseTimeEntity {
         this.status = PostStatus.RECRUITING;
         this.projectTeam = projectTeam;
     }
+
+    public void updateStatus() {
+        this.status = PostStatus.COMPLETE;
+    }
 }
