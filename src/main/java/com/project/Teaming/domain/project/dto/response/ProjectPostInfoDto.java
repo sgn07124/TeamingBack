@@ -30,8 +30,8 @@ public class ProjectPostInfoDto {
         ProjectPostInfoDto dto = new ProjectPostInfoDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());
-        dto.setStartDate(projectTeam.getStartDate());
-        dto.setEndDate(projectTeam.getEndDate());
+        dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
+        dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
         dto.setDeadline(String.valueOf(projectBoard.getDeadline()));
         dto.setMemberCnt(projectBoard.getMembersCnt());
         dto.setLink(projectBoard.getLink());

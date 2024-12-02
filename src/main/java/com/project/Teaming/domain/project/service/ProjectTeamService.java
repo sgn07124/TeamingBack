@@ -94,9 +94,9 @@ public class ProjectTeamService {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
         dto.setProjectId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());
-        dto.setStartDate(projectTeam.getStartDate());
-        dto.setEndDate(projectTeam.getEndDate());
-        dto.setDeadline(projectTeam.getDeadline());
+        dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
+        dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
+        dto.setDeadline(String.valueOf(projectTeam.getDeadline()));
         dto.setMemberCnt(projectTeam.getMembersCnt());
         dto.setLink(projectTeam.getLink());
         dto.setContents(projectTeam.getContents());
