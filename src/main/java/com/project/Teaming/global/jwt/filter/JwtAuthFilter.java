@@ -2,6 +2,8 @@ package com.project.Teaming.global.jwt.filter;
 
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.JwtUtil;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import jakarta.servlet.FilterChain;
@@ -47,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // AccessToken이 유효한 경우, 사용자 정보를 조회하고 인증 객체를 설정한다.
         String email = jwtUtil.getUid(accessToken);
         User findUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalStateException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         // SecurityContext에 등록할 User 객체를 만들어준다.
         SecurityUserDto userDto = SecurityUserDto.builder()
