@@ -71,12 +71,12 @@ public class ProjectBoardService {
         ProjectBoard projectBoard = projectBoardRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
 
-        List<Long> stackIds = projectTeam.getStacks().stream()
-                .map(teamStack -> teamStack.getStack().getId())
+        List<String> stackIds = projectTeam.getStacks().stream()
+                .map(teamStack -> String.valueOf(teamStack.getStack().getId()))
                 .collect(Collectors.toList());
 
-        List<Long> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
-                .map(teamRecruitCategory -> teamRecruitCategory.getRecruitCategory().getId())
+        List<String> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
+                .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
 
         return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds);
@@ -116,15 +116,15 @@ public class ProjectBoardService {
     }
 
     public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.ASC, "createdDate"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.DESC, "createdDate"));
 
         Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
 
         List<ProjectPostListDto> content = projectBoards.getContent().stream()
                 .map(projectBoard -> {
                     ProjectTeam projectTeam = projectBoard.getProjectTeam();
-                    List<Long> stackIds = projectTeam.getStacks().stream()
-                            .map(stack -> stack.getId())
+                    List<String> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> String.valueOf(stack.getId()))
                             .toList();
                     return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
                 }).toList();
@@ -140,5 +140,19 @@ public class ProjectBoardService {
                 projectBoards.isLast(),
                 projectBoards.getNumberOfElements()
         );
+    }
+
+    public List<ProjectPostListDto> getTeamProjectPosts(Long teamId) {
+
+        List<ProjectBoard> projectBoards = projectBoardRepository.findAllByProjectTeamId(teamId);
+
+        return projectBoards.stream()
+                .map(projectBoard -> {
+                    ProjectTeam projectTeam = projectBoard.getProjectTeam();
+                    List<String> stackIds = projectTeam.getStacks().stream()
+                            .map(stack -> String.valueOf(stack.getId()))
+                            .toList();
+                    return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
+                }).toList();
     }
 }

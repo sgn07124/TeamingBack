@@ -11,9 +11,9 @@ import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
-import com.project.Teaming.global.result.ResultResponse;
+import com.project.Teaming.global.result.ResultDetailResponse;
+import com.project.Teaming.global.result.ResultListResponse;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
-import com.project.Teaming.global.result.pagenateResponse.ResultPageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -41,14 +41,14 @@ public class MentoringBoardController {
 
     @PostMapping("/{team_id}/post")
     @Operation(summary = "멘토링 글 등록" , description = "멘토링 팀에서(팀의 팀장, 팀원 모두 가능) 글을 등록 할 수 있다. 멘토링 게시판 페이지로 이동")
-    public ResultResponse<Long> savePost(@PathVariable Long team_id,
-                                         @RequestBody @Valid RqBoardDto dto) {
+    public ResultDetailResponse<Long> savePost(@PathVariable Long team_id,
+                                               @RequestBody @Valid RqBoardDto dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
         Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
         if (participation.isPresent()) {
             Long savedMentoringPost = mentoringBoardService.saveMentoringPost(team_id, dto);
-            return new ResultResponse<>(ResultCode.REGISTER_MENTORING_POST, List.of(savedMentoringPost));
+            return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, savedMentoringPost);
         } else throw new NoAuthorityException("글을 등록 할 수 있는 권한이 없습니다.");
 
     }
@@ -56,7 +56,7 @@ public class MentoringBoardController {
 
     @PostMapping("/{team_id}/post/{post_id}")
     @Operation(summary = "멘토링 글 수정", description = "나의 팀에서 등록된 멘토링 게시물을 팀 구성원(팀장과 팀원) 모두가 수정 할 수 있다. 수정버튼이 있는 멘토링 글 상세페이지로 이동.")
-    public ResultResponse<RsSpecBoardDto> updatePost(@PathVariable Long team_id, @PathVariable Long post_id,
+    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long team_id, @PathVariable Long post_id,
                                                      @RequestBody @Valid RqBoardDto dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
@@ -69,25 +69,25 @@ public class MentoringBoardController {
             updatePostDto.setCategory(mentoringTeam.getCategories().stream()
                     .map(o -> o.getCategory().getName())
                     .collect(Collectors.toList()));
-            return new ResultResponse<>(ResultCode.UPDATE_MENTORING_POST, List.of(updatePostDto));
+            return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_POST, updatePostDto);
         } else throw new NoAuthorityException("글을 수정 할 수 있는 권한이 없습니다.");
     }
 
 
     @GetMapping("/posts")
     @Operation(summary = "멘토링 글 모두 조희", description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시글페이지 보여 줄 때의 API, 한페이지당 4개의 글")
-    public ResultPageResponse<PaginatedResponse<RsBoardDto>> findAllPosts(@RequestParam(defaultValue = "1") int page,
-                                                                                   @RequestParam(defaultValue = "4") int size,
-                                                                                   @RequestParam(required = false) MentoringStatus status) {
+    public ResultDetailResponse<PaginatedResponse<RsBoardDto>> findAllPosts(@RequestParam(defaultValue = "1") int page,
+                                                                          @RequestParam(defaultValue = "4") int size,
+                                                                          @RequestParam(required = false) MentoringStatus status) {
         PaginatedResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(status, page, size);
-        return new ResultPageResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
+        return new ResultDetailResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
     }
 
     @GetMapping("/{team_Id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회" , description = "특정 멘토링 팀에서 쓴 모든 글을 조회 할 수 있다. 팀 페이지에서 시용")
-    public ResultResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
+    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
         List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_Id);
-        return new ResultResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
+        return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
     }
 
     /**
@@ -100,7 +100,7 @@ public class MentoringBoardController {
     @GetMapping("/post/{team_id}/{post_id}")
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")
-    public ResultResponse<RsSpecBoardDto> findPost(@PathVariable Long team_id, @PathVariable Long post_id) {
+    public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
@@ -114,19 +114,19 @@ public class MentoringBoardController {
                 p -> dto.setAuthority(p.getAuthority()),
                 () -> dto.setAuthority(MentoringAuthority.NoAuth)
         );
-        return new ResultResponse<>(ResultCode.GET_MENTORING_POST, List.of(dto));
+        return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST, dto);
     }
 
     @DeleteMapping("/{team_id}/post/{post_id}/del")
     @Operation(summary = "멘토링 글 삭제", description = "나의 멘토링 글을 삭제 할 수 있다. 멘토링 게시판으로 이동")
-    public ResultResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
+    public ResultDetailResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
         Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
         if (participation.isPresent()) {
             mentoringBoardService.deleteMentoringPost(post_id);
         } else throw new NoAuthorityException("글을 삭제할 수 있는 권한이 없습니다.");
-        return new ResultResponse<>(ResultCode.DELETE_MENTORING_POST, null);
+        return new ResultDetailResponse<>(ResultCode.DELETE_MENTORING_POST, null);
     }
 
 

@@ -59,6 +59,7 @@ public class UserService {
 
         user.updateUserInfo(dto.getName());  // 유저에 닉네임 저장
         Portfolio portfolio = new Portfolio();
+        user.registerPortfolio(portfolio);
         if (dto.getIntroduce() != null && !dto.getIntroduce().trim().isEmpty()) {
             user.linkPortfolio(portfolio, dto);  // 포트폴리오에 자기소개 저장
         }
@@ -115,8 +116,8 @@ public class UserService {
                         .orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
 
         // 기술 스택 id 리스트 생성
-        List<Long> stackIds = portfolio.getUserStacks().stream()
-                .map(userStack -> userStack.getStack().getId())
+        List<String> stackIds = portfolio.getUserStacks().stream()
+                .map(userStack -> String.valueOf(userStack.getStack().getId()))
                 .collect(Collectors.toList());
 
         dto.setUserInfoDto(user, portfolio, stackIds);

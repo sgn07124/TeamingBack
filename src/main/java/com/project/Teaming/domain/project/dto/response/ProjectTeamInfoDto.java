@@ -24,6 +24,6 @@ public class ProjectTeamInfoDto {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
     private Long projectId;
-    private List<Long> stacks;  // 기술 스택(이름으로)
-    private List<Long> recruitCategories;  // 모집 구분(이름으로)
+    private List<String> stacks;  // 기술 스택(id로)
+    private List<String> recruitCategories;  // 모집 구분(id로)
 }

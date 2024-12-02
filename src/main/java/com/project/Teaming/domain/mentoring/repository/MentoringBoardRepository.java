@@ -19,7 +19,8 @@ public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,L
     @Query("SELECT new com.project.Teaming.domain.mentoring.dto.response.RsBoardDto(pb.id, pb.title,mt.name, mt.startDate, mt.endDate, pb.contents) " +
             "FROM MentoringBoard pb " +
             "JOIN pb.mentoringTeam mt " +
-            "WHERE mt.id = :teamId")
+            "WHERE mt.id = :teamId " +
+            "ORDER BY pb.createdDate desc")
     List<RsBoardDto> findAllByMentoringTeamId(@Param("teamId") Long teamId);
 
     @Query("SELECT pb.id, c.name FROM MentoringBoard pb " +
