@@ -4,6 +4,8 @@ import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,7 +28,7 @@ public class ProjectBoard extends BaseTimeEntity {
     private String title;  // 제목
 
     @Column(name = "recruit_deadline", length = 50)
-    private String deadline;  // 모집 마감일
+    private LocalDate deadline;  // 모집 마감일
 
     @Column(name = "members_cnt")
     private int membersCnt;  // 모집 인원
@@ -47,7 +49,7 @@ public class ProjectBoard extends BaseTimeEntity {
     public static ProjectBoard projectBoard(CreatePostDto dto, ProjectTeam projectTeam) {
         ProjectBoard post = new ProjectBoard();
         post.title = dto.getTitle();
-        post.deadline = dto.getDeadline();
+        post.deadline = LocalDate.parse(dto.getDeadline());
         post.membersCnt = dto.getMemberCnt();
         post.link = dto.getLink();
         post.contents = dto.getContents();
@@ -58,11 +60,27 @@ public class ProjectBoard extends BaseTimeEntity {
 
     public void updateProjectBoard(CreatePostDto dto, ProjectTeam projectTeam) {
         this.title = dto.getTitle();
-        this.deadline = dto.getDeadline();
+        this.deadline = LocalDate.parse(dto.getDeadline());
         this.membersCnt = dto.getMemberCnt();
         this.link = dto.getLink();
         this.contents = dto.getContents();
         this.status = PostStatus.RECRUITING;
         this.projectTeam = projectTeam;
+    }
+
+    public void updateStatus() {
+        this.status = PostStatus.COMPLETE;
+    }
+
+    /**
+     * 현재 날짜가 deadline 을 넘어간 경우
+     */
+    public void checkDeadline() {
+        LocalDate now = LocalDate.now();
+        if (now.isAfter(this.deadline)) {
+            this.status = PostStatus.COMPLETE;
+        } else {
+            this.status = PostStatus.RECRUITING;
+        }
     }
 }

@@ -1,7 +1,9 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.project.Teaming.domain.project.entity.ProjectTeam;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,9 +23,31 @@ public class ProjectTeamInfoDto {
     private int memberCnt;
     private String link;
     private String contents;
-    private LocalDateTime createdDate;
-    private LocalDateTime lastModifiedDate;
+    private String createdDate;
+    private String lastModifiedDate;
     private Long projectId;
     private List<String> stacks;  // 기술 스택(id로)
     private List<String> recruitCategories;  // 모집 구분(id로)
+
+    public static ProjectTeamInfoDto from(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds) {
+        ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
+        dto.setProjectId(projectTeam.getId());
+        dto.setProjectName(projectTeam.getName());
+        dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
+        dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
+        dto.setDeadline(String.valueOf(projectTeam.getDeadline()));
+        dto.setMemberCnt(projectTeam.getMembersCnt());
+        dto.setLink(projectTeam.getLink());
+        dto.setContents(projectTeam.getContents());
+        dto.setCreatedDate(dto.getFormattedDate(projectTeam.getCreatedDate()));
+        dto.setLastModifiedDate(dto.getFormattedDate(projectTeam.getLastModifiedDate()));
+        dto.setStacks(stackIds);
+        dto.setRecruitCategories(recruitCategoryIds);
+        return dto;
+    }
+
+    public String getFormattedDate(LocalDateTime dateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return dateTime.format(formatter);
+    }
 }

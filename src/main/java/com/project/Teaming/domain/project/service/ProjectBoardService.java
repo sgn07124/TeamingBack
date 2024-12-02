@@ -3,6 +3,7 @@ package com.project.Teaming.domain.project.service;
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.entity.ProjectBoard;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -154,5 +156,30 @@ public class ProjectBoardService {
                             .toList();
                     return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
                 }).toList();
+    }
+
+    public ProjectPostStatusDto completePostStatus(Long teamId, Long postId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED);
+        if (!isMember) {
+            throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
+        }
+
+        ProjectBoard projectBoard = projectBoardRepository.findById(postId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
+        projectBoard.updateStatus();
+        return ProjectPostStatusDto.from(projectBoard);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
+    public void updateCheckCompleteStatus() {
+        List<ProjectBoard> posts = projectBoardRepository.findAllByStatus(PostStatus.RECRUITING);
+        for (ProjectBoard post : posts) {
+            post.checkDeadline();
+            projectBoardRepository.save(post);
+        }
     }
 }

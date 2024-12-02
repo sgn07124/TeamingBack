@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/project/posts").permitAll() // 특정 경로 허용
                         .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
                                 "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
-                                "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit").hasRole("USER")
+                                "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit",
+                                "/project/post/{team_id}/{post_id}/complete").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 

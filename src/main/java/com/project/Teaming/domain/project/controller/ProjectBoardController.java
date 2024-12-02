@@ -3,6 +3,7 @@ package com.project.Teaming.domain.project.controller;
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
+import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
 import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
 import com.project.Teaming.global.result.ResultCode;
@@ -53,6 +54,13 @@ public class ProjectBoardController {
     public ResultDetailResponse<Void> updatePost(@PathVariable Long team_id, @PathVariable Long post_id, @Valid @RequestBody CreatePostDto createPostDto) {
         projectBoardService.updatePost(team_id, post_id, createPostDto);
         return new ResultDetailResponse<>(ResultCode.UPDATE_PROJECT_POST_INFO, null);
+    }
+
+    @PutMapping("/post/{team_id}/{post_id}/complete")
+    @Operation(summary = "게시물 모집 완료", description = "게시물을 팀원 또는 팀장이 모집 완료 처리를 직접 할 수 있다.")
+    public ResultDetailResponse<ProjectPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
+        ProjectPostStatusDto dto = projectBoardService.completePostStatus(team_id, post_id);
+        return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_STATUS, dto);
     }
 
     @DeleteMapping("/post/{team_id}/{post_id}")
