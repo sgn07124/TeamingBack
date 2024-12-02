@@ -92,6 +92,7 @@ public class JwtUtil {
                     .getExpiration()
                     .after(new Date());  // 만료 시간이 현재 시간 이후인지 확인하여 유효성 검사 결과를 반환
         } catch (Exception e) {
+            log.error("Invalid JWT signature: {}", token);
             return false;
         }
     }
