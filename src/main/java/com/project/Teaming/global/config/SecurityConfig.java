@@ -10,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,7 +24,7 @@ import org.springframework.web.filter.CorsFilter;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -56,13 +57,13 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/token/**").permitAll() // 토큰 발급 경로 허용
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/user", "/swagger-ui/**", "/v3/api-docs/**",
+                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{team_id}/{post_id}",
                                 "/project/posts").permitAll() // 특정 경로 허용
                         .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
                                 "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
                                 "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit",
-                                "/project/post/{team_id}/{post_id}/complete").hasRole("USER")
+                                "/project/post/{team_id}/{post_id}/complete", "/user").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 

@@ -53,9 +53,8 @@ public class UserService {
 
 
     public void saveUserInfo(RegisterDto dto) {
-        SecurityUserDto securityUser = getSecurityUserDto();
-        log.info("email : " + securityUser.getEmail());
-        User user = findByEmail(securityUser.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        log.info("email : " + getSecurityUserDto().getEmail());
+        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         user.updateUserInfo(dto.getName());  // 유저에 닉네임 저장
         Portfolio portfolio = new Portfolio();
@@ -91,7 +90,7 @@ public class UserService {
 
     @Transactional
     public void updateUser(UpdateUserInfoDto dto) {
-        User user = userRepository.findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId()).orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
 
         user.updateUserInfo(dto.getName());
@@ -109,8 +108,7 @@ public class UserService {
     }
 
     public UserInfoDto getUserInfo(UserInfoDto dto) {
-        SecurityUserDto securityUser = getSecurityUserDto();
-        User user = findByEmail(securityUser.getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
