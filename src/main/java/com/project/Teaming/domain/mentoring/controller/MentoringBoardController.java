@@ -139,6 +139,7 @@ public class MentoringBoardController {
     private Optional<MentoringParticipation> getTeam(MentoringTeam mentoringTeam, User user) {
         return user.getMentoringParticipations().stream()
                 .filter(o -> o.getMentoringTeam().equals(mentoringTeam))
+                .filter(o -> o.getParticipationStatus().equals(MentoringParticipationStatus.ACCEPTED))
                 .findFirst();
     }
 
