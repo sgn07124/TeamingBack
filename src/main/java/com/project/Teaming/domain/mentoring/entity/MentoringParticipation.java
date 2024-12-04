@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "mentoring_participation")
 @NoArgsConstructor
-public class MentoringParticipation {
+public class MentoringParticipation extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mp_id")
@@ -62,8 +63,24 @@ public class MentoringParticipation {
         user.getMentoringParticipations().add(this);
     }
 
-    public void addMentoringMember(MentoringTeam mentoringTeam) {
+    public void setParticipationStatus(MentoringParticipationStatus participationStatus) {
+        this.participationStatus = participationStatus;
+    }
+
+    public void addMentoringTeam(MentoringTeam mentoringTeam) {
         this.mentoringTeam = mentoringTeam;
         mentoringTeam.getMentoringParticipationList().add(this);
+    }
+    public void removeUser(User user) {
+        if (this.user != null) {
+            this.user.getMentoringParticipations().remove(this);
+            this.user = null;
+        }
+    }
+    public void removeMentoringTeam(MentoringTeam mentoringTeam) {
+        if (this.mentoringTeam != null) {
+            this.mentoringTeam.getMentoringParticipationList().remove(this);
+            this.mentoringTeam = null;
+        }
     }
 }

@@ -97,17 +97,16 @@ public class MentoringBoardController {
      * @param post_id
      * @return
      */
-    @GetMapping("/post/{team_id}/{post_id}")
+    @GetMapping("/post/{post_id}")
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")
     public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long team_id, @PathVariable Long post_id) {
         User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
 
-        Optional<MentoringParticipation> participation = getTeam(mentoringTeam, user);
-        RsSpecBoardDto dto = mentoringPost.toDto(mentoringTeam);
-        dto.setCategory(mentoringTeam.getCategories().stream()
+        Optional<MentoringParticipation> participation = getTeam(mentoringPost.getMentoringTeam(), user);
+        RsSpecBoardDto dto = mentoringPost.toDto(mentoringPost.getMentoringTeam());
+        dto.setCategory(mentoringPost.getMentoringTeam().getCategories().stream()
                 .map(o -> o.getCategory().getName())
                 .collect(Collectors.toList()));
         participation.ifPresentOrElse(

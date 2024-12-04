@@ -67,7 +67,7 @@ public class MentoringTeamService {
 
         //연관관계 매핑
         mentoringParticipation.setUser(findUser);
-        mentoringParticipation.addMentoringMember(mentoringTeam);
+        mentoringParticipation.addMentoringTeam(mentoringTeam);
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
 
         //카테고리 생성
