@@ -1,12 +1,14 @@
 package com.project.Teaming.domain.project.dto.request;
 
 import com.project.Teaming.domain.project.entity.ProjectStatus;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
@@ -14,16 +16,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateTeamDto {
 
-    @NotNull(message = "프로젝트 명을 입력해주세요.")
+    @NotBlank(message = "프로젝트 명을 입력해주세요.")
     private String projectName;
 
     @NotNull(message = "프로젝트 시작일을 입력해주세요.")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private String startDate;
 
     @NotNull(message = "프로젝트 종료일을 입력해주세요.")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private String endDate;
 
     @NotNull(message = "팀 모집 마감일을 입력해주세요.")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private String deadline;
 
     @NotNull(message = "모집 인원을 입력해주세요.")
@@ -31,7 +36,7 @@ public class UpdateTeamDto {
 
     private String link;
 
-    @NotNull(message = "모집 소개를 입력해주세요.")
+    @NotBlank(message = "모집 소개를 입력해주세요.")
     private String contents;
 
     @NotNull(message = "기술 스택을 선택해주세요.")
