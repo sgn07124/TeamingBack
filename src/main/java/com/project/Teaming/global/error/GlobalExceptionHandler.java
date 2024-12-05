@@ -1,6 +1,7 @@
 package com.project.Teaming.global.error;
 
 import com.project.Teaming.global.error.exception.BusinessException;
+import java.time.format.DateTimeParseException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,5 +54,15 @@ public class GlobalExceptionHandler {
         log.error("Exception : " + e);
         final ErrorResponse response = ErrorResponse.of(INTERNAL_SERVER_ERROR);
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(DateTimeParseException.class)
+    protected ResponseEntity<ErrorResponse> handleDateTimeParseException(DateTimeParseException e) {
+        String field = "date"; // 추정된 날짜 필드 이름
+        String rejectedValue = e.getParsedString();
+        String reason = "잘못된 날짜 형식이 입력되었습니다. 올바른 날짜 형식은 yyyy-MM-dd입니다.";
+
+        ErrorResponse response = ErrorResponse.forDateTimeParseException(field, rejectedValue, reason);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 }
