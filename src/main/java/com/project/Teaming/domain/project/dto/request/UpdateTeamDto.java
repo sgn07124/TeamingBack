@@ -1,6 +1,9 @@
 package com.project.Teaming.domain.project.dto.request;
 
 import com.project.Teaming.domain.project.entity.ProjectStatus;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.List;
@@ -32,6 +35,9 @@ public class UpdateTeamDto {
     private String deadline;
 
     @NotNull(message = "모집 인원을 입력해주세요.")
+    @Min(value = 1, message = "모집 인원은 최소 1명이어야 합니다.")
+    @Max(value = 20, message = "모집 인원은 최대 20명까지 가능합니다.")
+    @Digits(integer = 2, fraction = 0, message = "모집 인원은 정수만 입력 가능합니다.")
     private int memberCnt;
 
     private String link;
