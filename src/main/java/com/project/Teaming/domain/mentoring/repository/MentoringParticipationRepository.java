@@ -22,6 +22,7 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
 
     boolean existsByMentoringTeamAndUserAndAuthority(MentoringTeam mentoringTeam, User user, MentoringAuthority authority);
 
-    Optional<MentoringParticipation> existsByMentoringTeamAndUser(MentoringTeam mentoringTeam, User user);
+    Optional<MentoringParticipation> findByMentoringTeamAndUser(MentoringTeam mentoringTeam, User user);
 
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status);
 }

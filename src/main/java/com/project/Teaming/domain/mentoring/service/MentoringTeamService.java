@@ -6,6 +6,7 @@ import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.CategoryRepository;
+import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.mentoring.repository.TeamCategoryRepository;
 import com.project.Teaming.domain.user.entity.User;
@@ -33,6 +34,7 @@ public class MentoringTeamService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TeamCategoryRepository teamCategoryRepository;
+    private final MentoringParticipationRepository mentoringParticipationRepository;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -91,12 +93,14 @@ public class MentoringTeamService {
      * @param dto
      */
     @Transactional
-    public void updateMentoringTeam(Long userId,Long mentoringTeamId, RqTeamDto dto) {
+    public void updateMentoringTeam(Long userId, Long mentoringTeamId, RqTeamDto dto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
+        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (mentoringTeam.getFlag() == Status.TRUE) {
             throw new NoAuthorityException("이미 삭제된 팀 입니다.");
         }
-        if (isTrue(userId, mentoringTeamId)) {
+        if (flag) {
             mentoringTeam.mentoringTeamUpdate(dto); //업데이트 메서드
             List<TeamCategory> categoriesToRemove = new ArrayList<>(mentoringTeam.getCategories()); // 리스트 복사,객체 참조
             // 연관관계 해제
@@ -167,30 +171,15 @@ public class MentoringTeamService {
      */
     @Transactional
     public void deleteMentoringTeam(Long userId,Long mentoringTeamId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        if (isTrue(userId, mentoringTeamId)) {
+        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (flag) {
             mentoringTeam.setFlag(Status.TRUE);
         }
         else throw new NoAuthorityException("삭제 할 권한이 없습니다");
     }
 
-
-    /**
-     * 내가 속해있는 멘토링 팀이고 팀장인지 확인하는 검증 로직
-     * 수정, 삭제시 사용
-     * @param userId
-     * @param mentoringTeamId
-     * @return
-     */
-    private boolean isTrue(Long userId, Long mentoringTeamId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("유저가 존재하지 않습니다"));
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        List<MentoringParticipation> mentoringParticipants = user.getMentoringParticipations();
-        for (MentoringParticipation x : mentoringParticipants) {
-            if (x.getMentoringTeam() == mentoringTeam && x.getAuthority() == MentoringAuthority.LEADER) return true;
-        }
-        return false;
-    }
 
     /**
      * 멘토링팀 responseDto 반환로직

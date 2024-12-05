@@ -1,12 +1,9 @@
 package com.project.Teaming.domain.mentoring.controller;
 
 import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
-import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
@@ -68,6 +65,7 @@ public class MentoringParticipationController {
         mentoringParticipationService.rejectMentoringParticipation(user.getId(), team_id, participant_id);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
+
 
 
     private User getUser() {

@@ -39,11 +39,11 @@ public class MentoringParticipationService {
     public void saveMentoringParticipation(Long userId, Long mentoringTeamId, MentoringRole role) {
         User findUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> participation = mentoringParticipationRepository.existsByMentoringTeamAndUser(mentoringTeam, findUser);
+        Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, findUser);
         if (participation.isPresent()) {
             if (participation.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_MEMBER_OF_TEAM);
-            } else if (participation.get().getParticipationStatus() == MentoringParticipationStatus.PENDING) {
+            } else {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_PARTICIPATED);
             }
         } else {
@@ -68,7 +68,7 @@ public class MentoringParticipationService {
     public void cancelMentoringParticipation(Long userId, Long mentoringTeamId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> participation = mentoringParticipationRepository.existsByMentoringTeamAndUser(mentoringTeam, user);
+        Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (participation.isPresent()) {
             if (participation.get().getParticipationStatus() == MentoringParticipationStatus.PENDING) {
                 participation.get().removeMentoringTeam(mentoringTeam);  //연관관계 해제
@@ -111,9 +111,9 @@ public class MentoringParticipationService {
      * @param participant_id
      */
     @Transactional
-    public void rejectMentoringParticipation(Long userId, Long team_Id, Long participant_id) {
+    public void rejectMentoringParticipation(Long userId, Long teamId, Long participant_id) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(team_Id).orElseThrow(MentoringTeamNotFoundException::new);
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (!flag) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
@@ -125,4 +125,9 @@ public class MentoringParticipationService {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
         }
     }
+
+    public Optional<MentoringParticipation> findBy(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status) {
+        return mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam,user,MentoringParticipationStatus.ACCEPTED);
+    }
+
 }

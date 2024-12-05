@@ -4,14 +4,20 @@ import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
+import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
+import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.user.repository.UserRepository;
+import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.MentoringPostNotFoundException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
+import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +34,8 @@ public class MentoringBoardService {
 
     private final MentoringBoardRepository mentoringBoardRepository;
     private final MentoringTeamRepository mentoringTeamRepository;
+    private final UserRepository userRepository;
+    private final MentoringParticipationRepository mentoringParticipationRepository;
 
     /**
      * 게시물을 저장하는 로직
@@ -36,20 +44,24 @@ public class MentoringBoardService {
      * @param boardDto
      */
     @Transactional
-    public Long saveMentoringPost(Long teamId, RqBoardDto boardDto) {
+    public Long saveMentoringPost(Long userId,Long teamId, RqBoardDto boardDto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);  //명시적 조회, 최신 데이터 반영
-        MentoringBoard mentoringBoard = MentoringBoard.builder()
-                .title(boardDto.getTitle())
-                .contents(boardDto.getContents())
-                .role(boardDto.getRole())
-                .mentoringCnt(boardDto.getMentoringCnt())
-                .build();
-        mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
-                .orElse(mentoringTeam.getLink()));
-        mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
+        Optional<MentoringParticipation> TeamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
+        if (TeamUser.isPresent()) {
+            MentoringBoard mentoringBoard = MentoringBoard.builder()
+                    .title(boardDto.getTitle())
+                    .contents(boardDto.getContents())
+                    .role(boardDto.getRole())
+                    .mentoringCnt(boardDto.getMentoringCnt())
+                    .build();
+            mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
+                    .orElse(mentoringTeam.getLink()));
+            mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
 
-        MentoringBoard savedPost = mentoringBoardRepository.save(mentoringBoard);
-        return savedPost.getId();
+            MentoringBoard savedPost = mentoringBoardRepository.save(mentoringBoard);
+            return savedPost.getId();
+        } else throw new NoAuthorityException(ErrorCode.NO_AUTHORITY);
     }
 
     /**
@@ -160,15 +172,20 @@ public class MentoringBoardService {
      * @return
      */
     @Transactional
-    public void updateMentoringPost(Long postId, RqBoardDto dto) {
+    public MentoringAuthority updateMentoringPost(Long userId, Long postId, RqBoardDto dto) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
-        if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) {  //team의 최신 데이터 업데이트
-            mentoringBoard.updateBoard(dto);
-        } else {
-            throw new MentoringTeamNotFoundException("이미 삭제된 팀의 글 입니다.");
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringBoard.getMentoringTeam(), user, MentoringParticipationStatus.ACCEPTED);
+        if (teamUser.isPresent()) {
+            if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) {  //team의 최신 데이터 업데이트
+                mentoringBoard.updateBoard(dto);
+                return teamUser.get().getAuthority();
+            } else {
+                throw new MentoringTeamNotFoundException("이미 삭제된 팀의 글 입니다.");
+            }
         }
-
+        else throw new NoAuthorityException(ErrorCode.NO_AUTHORITY);
     }
 
     /**
@@ -176,14 +193,19 @@ public class MentoringBoardService {
      * @param postId
      */
     @Transactional
-    public void deleteMentoringPost(Long postId) {
+    public void deleteMentoringPost(Long userId,Long postId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("회원이 존재하지 않습니다."));
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
-        if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) { //team의 최신 데이터 업데이트
-            mentoringBoardRepository.delete(mentoringBoard);
-        } else {
-            throw new MentoringTeamNotFoundException("이미 삭제된 팀의 글 입니다.");
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringBoard.getMentoringTeam(), user, MentoringParticipationStatus.ACCEPTED);
+        if (teamUser.isPresent()) {
+            if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) { //team의 최신 데이터 업데이트
+                mentoringBoardRepository.delete(mentoringBoard);
+            } else {
+                throw new MentoringTeamNotFoundException("이미 삭제된 팀의 글 입니다.");
+            }
         }
+        else throw new NoAuthorityException(ErrorCode.NO_AUTHORITY);
     }
 
 }
