@@ -1,19 +1,15 @@
 package com.project.Teaming.domain.project.entity;
 
-import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import jakarta.persistence.*;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
@@ -45,6 +41,9 @@ public class ProjectParticipation {
     @Column(name = "reporting_cnt", nullable = false, columnDefinition = "INT DEFAULT 0")
     private int reportingCnt;  // 신고 누적
 
+    @Column(nullable = false)
+    private String recruitCategory;  // 프로젝트 팀에 지원 시 신청자가 선택하는 모집 구분
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;  // 사용자 ID (주인)
@@ -59,15 +58,17 @@ public class ProjectParticipation {
         this.requestDate = LocalDateTime.now();
         this.decisionDate = LocalDateTime.now();
         this.role = ProjectRole.OWNER;
+        this.recruitCategory = "OWNER";
         this.user = user;
         this.projectTeam = team;
     }
 
-    public void joinTeamMember(User user, ProjectTeam projectTeam) {
+    public void joinTeamMember(User user, ProjectTeam projectTeam, String recruitCategory) {
         this.participationStatus = ParticipationStatus.PENDING;
         this.isDeleted = false;
         this.requestDate = LocalDateTime.now();
         this.role = ProjectRole.MEMBER;
+        this.recruitCategory = recruitCategory;
         this.user = user;
         this.projectTeam = projectTeam;
     }
