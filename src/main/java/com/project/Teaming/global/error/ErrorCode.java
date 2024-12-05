@@ -24,6 +24,8 @@ public enum ErrorCode {
 
     // Auth
     REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),
+    REFRESH_TOKEN_NOT_IN_REDIS(400, "A002", "RefreshToken이 Redis에 존재하지 않습니다."),
+
 
     // Portfolio
     PORTFOLIO_NOT_EXIST(404, "P001", "포트폴리오를 찾을 수 없습니다."),
