@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.service;
 
+import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
@@ -47,15 +48,15 @@ public class ProjectParticipationService {
         return securityUser.getUserId();
     }
 
-    public void joinTeam(Long teamId) {
-        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
+    public void joinTeam(JoinTeamDto dto) {
+        ProjectTeam projectTeam = projectTeamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
         // 이미 팀에 참여했는지 여부 확인
-        Optional<ProjectParticipation> existingParticipation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId());
+        Optional<ProjectParticipation> existingParticipation = projectParticipationRepository.findByProjectTeamIdAndUserId(dto.getTeamId(), user.getId());
         if (existingParticipation.isPresent()) {
             ProjectParticipation participation = existingParticipation.get();
             if (participation.getRole() == ProjectRole.OWNER) {
@@ -67,7 +68,7 @@ public class ProjectParticipationService {
 
         // 새로운 팀에 참여
         ProjectParticipation newParticipation = new ProjectParticipation();
-        newParticipation.joinTeamMember(user, projectTeam);
+        newParticipation.joinTeamMember(user, projectTeam, dto.getRecruitCategory());
         projectParticipationRepository.save(newParticipation);
     }
 

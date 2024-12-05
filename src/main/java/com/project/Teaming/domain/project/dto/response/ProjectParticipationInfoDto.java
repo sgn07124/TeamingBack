@@ -16,6 +16,7 @@ public class ProjectParticipationInfoDto {
     private String requestDate;
     private String decisionDate;
     private String role;
+    private String recruitCategory;
     private int reportingCnt;
 
     public ProjectParticipationInfoDto(ProjectParticipation participation) {
@@ -27,6 +28,7 @@ public class ProjectParticipationInfoDto {
         this.requestDate = getFormattedDate(participation.getRequestDate());
         this.decisionDate = participation.getDecisionDate() != null ? getFormattedDate(participation.getDecisionDate()) : "-";
         this.role = participation.getRole().toString();
+        this.recruitCategory = participation.getRecruitCategory();
         this.reportingCnt = participation.getReportingCnt();
     }
 
