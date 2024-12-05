@@ -1,9 +1,12 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
-import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.dto.response.LeaderResponseDto;
+import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
+import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
+import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
+import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
@@ -19,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -30,6 +34,7 @@ public class MentoringParticipationController {
 
     private final MentoringParticipationService mentoringParticipationService;
     private final MentoringBoardService mentoringBoardService;
+    private final MentoringTeamService mentoringTeamService;
     private final UserService userService;
 
     @PostMapping("/{post_id}/join")
@@ -66,6 +71,30 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
 
+    @GetMapping("/{team_id}/status")
+    @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
+            "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환, 일반사용자는 지원자 현황만 반환 " +
+            "Authority를 같이 반환하니 이거에 따라 다른 페이지 보여주세요.")
+    public ResultListResponse<?> getParticipationAppliers(@PathVariable Long team_id) {
+        User user = getUser();
+        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
+        Optional<MentoringParticipation> teamUser = mentoringParticipationService.findByTeamAndUser(mentoringTeam, user);
+        if (teamUser.get().getAuthority() == MentoringAuthority.LEADER) {
+            List<RsTeamUserDto> allTeamUsers = mentoringParticipationService.findAllTeamUsers(mentoringTeam);
+            List<RsTeamParticipationDto> participations = mentoringParticipationService.findForLeader(mentoringTeam.getId());
+            LeaderResponseDto dto = new LeaderResponseDto();
+            dto.setMembers(allTeamUsers);
+            dto.setParticipations(participations);
+            return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_LEADER, List.of(MentoringAuthority.LEADER,dto));
+
+        } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW) {
+            List<RsTeamUserDto> members = mentoringParticipationService.findAllTeamUsers(mentoringTeam);
+            return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_CREW, List.of(MentoringAuthority.CREW,members));
+        } else {
+            List<RsTeamParticipationDto> forUser = mentoringParticipationService.findForUser(mentoringTeam.getId());
+            return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_NoAuth, List.of(MentoringAuthority.NoAuth,forUser));
+        }
+    }
 
 
     private User getUser() {

@@ -97,7 +97,7 @@ public class MentoringBoardController {
     public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long post_id) {
         User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-        Optional<MentoringParticipation> teamUser = mentoringParticipationService.findBy(mentoringPost.getMentoringTeam(), user, MentoringParticipationStatus.ACCEPTED);
+        Optional<MentoringParticipation> teamUser = mentoringParticipationService.findBy(mentoringPost.getMentoringTeam(), user);
         RsSpecBoardDto dto = mentoringPost.toDto(mentoringPost.getMentoringTeam());
         dto.setCategory(mentoringPost.getMentoringTeam().getCategories().stream()
                 .map(o -> o.getCategory().getName())

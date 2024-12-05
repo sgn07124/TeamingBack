@@ -1,5 +1,7 @@
 package com.project.Teaming.domain.mentoring.service;
 
+import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
+import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
@@ -107,7 +109,7 @@ public class MentoringParticipationService {
     /**
      * 지원 거절 로직
      * @param userId
-     * @param team_Id
+     * @param teamId
      * @param participant_id
      */
     @Transactional
@@ -125,9 +127,50 @@ public class MentoringParticipationService {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
         }
     }
+    /**
+     * 특정 지원자 조회 로직
+     * @param mentoringParticipationId
+     * @return
+     */
+    public MentoringParticipation findMentoringParticipation(Long mentoringParticipationId) {
+        return mentoringParticipationRepository.findById(mentoringParticipationId).orElseThrow(MentoringParticipationNotFoundException::new);
+    }
 
-    public Optional<MentoringParticipation> findBy(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status) {
+
+    /**
+     * 리더 페이지용
+     * 지원자 현황 조회용 로직
+     * @param teamId
+     * @return
+     */
+    public List<RsTeamParticipationDto> findForLeader(Long teamId) {
+        return mentoringParticipationRepository.findAllForLeader(teamId,MentoringAuthority.LEADER);
+    }
+
+    /**
+     * 일반 사용자 페이지용
+     * 지원자 현황 조회용 로직
+     * @param teamId
+     * @return
+     */
+    public List<RsTeamParticipationDto> findForUser(Long teamId) {
+        return mentoringParticipationRepository.findAllForUser(teamId,MentoringAuthority.LEADER);
+    }
+
+    /**
+     * 팀원 조회용 로직
+     * @param team
+     * @return
+     */
+    public List<RsTeamUserDto> findAllTeamUsers(MentoringTeam team) {
+        return mentoringParticipationRepository.findAllByMemberStatus(team, MentoringParticipationStatus.ACCEPTED);
+    }
+
+    public Optional<MentoringParticipation> findBy(MentoringTeam mentoringTeam, User user) {
         return mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam,user,MentoringParticipationStatus.ACCEPTED);
+    }
+    public Optional<MentoringParticipation> findByTeamAndUser(MentoringTeam mentoringTeam, User user) {
+        return mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam,user);
     }
 
 }
