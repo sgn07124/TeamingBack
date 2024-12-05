@@ -1,6 +1,7 @@
 package com.project.Teaming.global.error;
 
 import jakarta.validation.ConstraintViolation;
+import java.util.Collections;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,6 +59,12 @@ public class ErrorResponse {
     public static ErrorResponse of(MethodArgumentTypeMismatchException e) {
         final String value = e.getValue() == null ? "" : e.getValue().toString();
         final List<FieldError> errors = FieldError.of(e.getName(), value, e.getErrorCode());
+        return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
+    }
+
+    public static ErrorResponse forDateTimeParseException(String field, String value, String reason) {
+        FieldError fieldError = new FieldError(field, value, reason);
+        List<FieldError> errors = Collections.singletonList(fieldError);
         return new ErrorResponse(ErrorCode.INVALID_TYPE_VALUE, errors);
     }
 

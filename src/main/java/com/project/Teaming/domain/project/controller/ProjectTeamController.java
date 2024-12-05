@@ -8,13 +8,11 @@ import com.project.Teaming.domain.project.service.ProjectParticipationService;
 import com.project.Teaming.domain.project.service.ProjectTeamService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
-import com.project.Teaming.global.result.ResultListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +32,7 @@ public class ProjectTeamController {
 
     @PostMapping("/project/team")
     @Operation(summary = "프로젝트 팀 생성", description = "프로젝트를 생성하고 싶은 사용자는 프로젝트 팀 생성을 통해 프로젝트를 생성할 수 있고 해당 프로젝트의 팀장이 된다. \n기술 스택과 모집 구분은 [1, 2]와 같이 리스트 형태로 작성한다.(project_stack과 project_recruit_category의 id 값")
-    public ResultDetailResponse<Void> createTeam(@RequestBody CreateTeamDto createTeamDto, BindingResult bindingResult) {
+    public ResultDetailResponse<Void> createTeam(@RequestBody @Valid CreateTeamDto createTeamDto) {
         ProjectTeam projectTeam = projectTeamService.createTeam(createTeamDto);
         projectParticipationService.createParticipation(projectTeam);
         return new ResultDetailResponse<>(ResultCode.REGISTER_PROJECT_TEAM, null);
