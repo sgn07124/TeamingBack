@@ -24,13 +24,15 @@ public class AuthController {
     private final RefreshTokenRepository repository;
 
     @PostMapping("token/logout")
-    public ResponseEntity<StatusResponseDto> logout(HttpServletResponse response, @CookieValue(value = "accessToken" , required = false) String accessToken) {
-        if (accessToken != null) {
+    public ResponseEntity<StatusResponseDto> logout(HttpServletResponse response,
+                                                    @CookieValue(value = "accessToken" , required = false) String accessToken,
+                                                    @CookieValue(value = "refreshToken", required = false) String refreshToken) {
+        if (refreshToken != null) {
             // Redis에서 RefreshToken 정보 삭제
-            tokenService.removeRefreshToken(accessToken);
+            tokenService.removeRefreshToken(refreshToken);
 
-            // AccessToken 쿠키 삭제 설정
-            ResponseCookie deleteCookie = ResponseCookie.from("accessToken", null)
+            // RefreshToken 쿠키 삭제
+            ResponseCookie deleteRefreshTokenCookie = ResponseCookie.from("refreshToken", null)
                     .httpOnly(true)
                     .secure(true)
                     .sameSite("None")   // 교차 출처 요청 허용
@@ -38,7 +40,19 @@ public class AuthController {
                     .path("/")
                     .maxAge(0)  // 즉시 만료
                     .build();
-            response.addHeader("Set-Cookie", deleteCookie.toString());
+            response.addHeader("Set-Cookie", deleteRefreshTokenCookie.toString());
+        }
+        if (accessToken != null) {
+            // AccessToken 쿠키 삭제
+            ResponseCookie deleteAccessTokenCookie = ResponseCookie.from("accessToken", null)
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("None")   // 교차 출처 요청 허용
+                    .domain("myspringserver.shop")
+                    .path("/")
+                    .maxAge(0)  // 즉시 만료
+                    .build();
+            response.addHeader("Set-Cookie", deleteAccessTokenCookie.toString());
         }
         return ResponseEntity.ok(StatusResponseDto.addStatus(200));
     }
