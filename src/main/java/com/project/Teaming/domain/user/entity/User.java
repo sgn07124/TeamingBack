@@ -31,7 +31,7 @@ public class User extends BaseTimeEntity {
     private String name;  // 사용자 이름
 
     @Column(name = "warning_cnt", nullable = false)
-    private int warningCnt;  // 사용자가 받은 경고 횟수
+    private Integer warningCnt;  // 사용자가 받은 경고 횟수
 
     @Column(name = "user_role")
     private String userRole;

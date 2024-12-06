@@ -50,7 +50,14 @@ public enum ErrorCode {
     //Mentoring
     MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),
     MENTORING_PARTICIPATION_NOT_EXIST(404, "M002", "mentoring participation not exist"),
-    MENTORING_POST_NOT_EXIST(404, "M003", "mentoring post not exist");
+    MENTORING_POST_NOT_EXIST(404, "M003", "mentoring post not exist"),
+    ALREADY_MEMBER_OF_TEAM(404, "M004", "이미 해당 팀의 구성원입니다."),
+    ALREADY_PARTICIPATED(404,"M005","이미 신청한 팀 입니다."),
+    REJECTED_FROM_MENTORING_TEAM(404,"M006","이미 거절된 팀 입니다."),
+    NOT_A_LEADER(404, "M007", "수락할 수 있는 권한이 없습니다."),
+    STATUS_IS_NOT_PENDING(404, "M008", "이미 수락 또는 거절된 지원자 입니다"),
+    EXPORTED_BY_TEAM(404, "M009", "이미 강퇴된 팀 입니다."),
+    NOT_A_MEMBER(404, "M010", "팀 구성원이 아닙니다.");
 
     private int status;
     private final String code;

@@ -53,7 +53,16 @@ public enum ResultCode {
     GET_ALL_MY_MENTORING_POSTS(200,"M008", "특정 멘토링 팀의 모든 게시물들 조희"),
     GET_MENTORING_POST(200, "M009", "멘토링 게시판의 특정 게시물 조회"),
     DELETE_MENTORING_POST(200, "M010", "멘토링 글 삭제 왼료"),
-    UPDATE_MENTORING_POST(200, "M011", "멘토링 글 수정 왼료");
+    UPDATE_MENTORING_POST(200, "M011", "멘토링 글 수정 왼료"),
+    REGISTER_MENTORING_PARTICIPATION(200, "M012", "멘토링 지원 등록 완료"),
+    CANCEL_MENTORING_PARTICIPATION(200, "M013", "멘토링 지원 취소 완료"),
+    ACCEPT_MENTORING_PARTICIPATION(200, "M014", "멘토링 지원 수락 완료"),
+    REJECT_MENTORING_PARTICIPATION(200, "M015", "멘토링 지원 거절 완료"),
+    GET_MEMBER_INFO_FOR_LEADER(200, "M016", "리더용 멤버 및 지원자 현황 조회 완료"),
+    GET_MEMBER_INFO_FOR_CREW(200, "M017", "팀원용 멤버 및 지원자 현황 조회 완료"),
+    GET_MEMBER_INFO_FOR_PENDING(200, "M018", "지원한 사용자용 지원자 현황 조회 완료"),
+    GET_MEMBER_INFO_FOR_NoAuth(200, "M018", "일반사용자용 멤버 및 지원자 현황 조회 완료"),
+    DELETE_PARTICIPATION(200, "M019", "팀 탈퇴 완료");
 
     private int status;
     private final String code;
