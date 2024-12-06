@@ -19,6 +19,7 @@ public class RefreshToken implements Serializable {
     @Indexed
     private String accessToken;
 
+    @Indexed
     private String refreshToken;
 
     public void updateAccessToken(String accessToken) {
