@@ -41,7 +41,7 @@ public class MentoringParticipationService {
      * @param role
      */
     @Transactional
-    public void saveMentoringParticipation(Long userId, Long mentoringTeamId, MentoringRole role) {
+    public Long saveMentoringParticipation(Long userId, Long mentoringTeamId, MentoringRole role) {
         User findUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, findUser);
@@ -64,7 +64,8 @@ public class MentoringParticipationService {
                     .build();
             mentoringParticipation.setUser(findUser);
             mentoringParticipation.addMentoringTeam(mentoringTeam);
-            mentoringParticipationRepository.save(mentoringParticipation);
+            MentoringParticipation saved = mentoringParticipationRepository.save(mentoringParticipation);
+            return saved.getId();
         }
     }
 
@@ -137,6 +138,18 @@ public class MentoringParticipationService {
             mentoringParticipation.setDecisionDate(LocalDateTime.now());
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
+        }
+    }
+
+    @Transactional
+    public void deleteUser(Long userId, Long teamId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
+        if (teamUser.isPresent()) {
+            teamUser.get().setDeleted(true);
+        } else {
+            throw new NoAuthorityException(ErrorCode.NOT_A_MEMBER);
         }
     }
 

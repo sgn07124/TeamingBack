@@ -94,4 +94,8 @@ public class MentoringParticipation {
             this.mentoringTeam = null;
         }
     }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
 }

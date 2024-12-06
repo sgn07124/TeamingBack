@@ -40,13 +40,13 @@ public class MentoringParticipationController {
     private final UserService userService;
 
     @PostMapping("/{post_id}/join")
-    @Operation(summary = "멘토링 지원자 등록", description = "멘토링 팀에 지원하는 API")
-    public ResultDetailResponse<Void> saveMentoringParticipation(@PathVariable Long post_id) {
+    @Operation(summary = "멘토링 지원자 등록", description = "멘토링 팀에 지원하는 API , 지원자 ID 반환")
+    public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long post_id) {
         User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
-        mentoringParticipationService.saveMentoringParticipation(user.getId(), mentoringTeam.getId(), mentoringPost.getRole());
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, null);
+        Long id = mentoringParticipationService.saveMentoringParticipation(user.getId(), mentoringTeam.getId(), mentoringPost.getRole());
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(id));
     }
 
     @PostMapping("/{team_id}/cancel")
@@ -73,6 +73,14 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
 
+    @PostMapping("/team/{team_id}/quit")
+    @Operation(summary = "팀 구성원의 탈퇴", description = "팀 구성원들이 탈퇴하는 API")
+    public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id) {
+        User user = getUser();
+        mentoringParticipationService.deleteUser(user.getId(), team_id);
+        return new ResultDetailResponse<>(ResultCode.DELETE_PARTICIPATION, null);
+    }
+
     @GetMapping("/{team_id}/status")
     @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
             "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환, 지원한사용자, 일반사용자는 지원자 현황만 반환 " +
@@ -89,7 +97,7 @@ public class MentoringParticipationController {
                 dto.setMembers(allTeamUsers);
                 dto.setParticipations(participations);
                 return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_LEADER, List.of(MentoringAuthority.LEADER, dto));
-            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW) {  //팀의 멤버인 유저
+            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted()) {  //팀의 멤버인 유저
                 List<RsTeamUserDto> members = mentoringParticipationService.findAllTeamUsers(mentoringTeam);
                 return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_CREW, List.of(MentoringAuthority.CREW, members));
             } else {  //지원만 한 유저 , 수정필요
@@ -100,14 +108,13 @@ public class MentoringParticipationController {
                 responseList.add(forUser);
                 return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_PENDING, responseList);
             }
-        }
-        else { //팀과 무관한 사용자
+        } else { //팀과 무관한 사용자
             List<RsUserParticipationDto> forUser = mentoringParticipationService.findForUser(mentoringTeam.getId());
             List<Object> responseList = new ArrayList<>();
             responseList.add(MentoringAuthority.NoAuth);
             responseList.add(forUser);
             return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_NoAuth, responseList);
-        }
+}
     }
 
 

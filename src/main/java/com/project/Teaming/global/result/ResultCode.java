@@ -61,7 +61,8 @@ public enum ResultCode {
     GET_MEMBER_INFO_FOR_LEADER(200, "M016", "리더용 멤버 및 지원자 현황 조회 완료"),
     GET_MEMBER_INFO_FOR_CREW(200, "M017", "팀원용 멤버 및 지원자 현황 조회 완료"),
     GET_MEMBER_INFO_FOR_PENDING(200, "M018", "지원한 사용자용 지원자 현황 조회 완료"),
-    GET_MEMBER_INFO_FOR_NoAuth(200, "M018", "일반사용자용 멤버 및 지원자 현황 조회 완료");
+    GET_MEMBER_INFO_FOR_NoAuth(200, "M018", "일반사용자용 멤버 및 지원자 현황 조회 완료"),
+    DELETE_PARTICIPATION(200, "M019", "팀 탈퇴 완료");
 
     private int status;
     private final String code;
