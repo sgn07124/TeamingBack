@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class RefreshTokenService {
@@ -33,9 +31,9 @@ public class RefreshTokenService {
     }
 
     @Transactional
-    public void removeRefreshToken(String accessToken) {
-        RefreshToken token = repository.findByAccessToken(accessToken)
-                .orElseThrow(IllegalArgumentException::new);
+    public void removeRefreshToken(String refreshToken) {
+        RefreshToken token = repository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new BusinessException(ErrorCode.REFRESH_TOKEN_NOT_IN_REDIS));
 
         repository.delete(token);
     }
