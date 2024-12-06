@@ -53,7 +53,8 @@ public enum ErrorCode {
     ALREADY_PARTICIPATED(404,"M005","이미 신청한 팀 입니다."),
     REJECTED_FROM_MENTORING_TEAM(404,"M006","이미 거절된 팀 입니다."),
     NOT_A_LEADER(404, "M007", "수락할 수 있는 권한이 없습니다."),
-    STATUS_IS_NOT_PENDING(404, "M008", "이미 수락 또는 거절된 지원자 입니다");
+    STATUS_IS_NOT_PENDING(404, "M008", "이미 수락 또는 거절된 지원자 입니다"),
+    EXPORTED_BY_TEAM(404, "M009", "이미 강퇴된 팀 입니다.");
 
     private int status;
     private final String code;

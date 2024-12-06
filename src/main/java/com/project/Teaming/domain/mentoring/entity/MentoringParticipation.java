@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "mentoring_participation")
 @NoArgsConstructor
-public class MentoringParticipation extends BaseTimeEntity {
+public class MentoringParticipation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mp_id")
@@ -28,10 +28,17 @@ public class MentoringParticipation extends BaseTimeEntity {
     private LocalDateTime decisionDate;  // 신청 수락/거절 날짜
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 역할
+
+    public void setAuthority(MentoringAuthority authority) {
+        this.authority = authority;
+    }
+
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
     @Column(name = "reporting_cnt")
     private int reportingCnt;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -41,7 +48,7 @@ public class MentoringParticipation extends BaseTimeEntity {
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 
     @Builder
-    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, User user, MentoringTeam mentoringTeam) {
+    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, boolean isDeleted, User user, MentoringTeam mentoringTeam) {
         this.id = id;
         this.participationStatus = participationStatus;
         this.requestDate = requestDate;
@@ -49,10 +56,10 @@ public class MentoringParticipation extends BaseTimeEntity {
         this.role = role;
         this.authority = authority;
         this.reportingCnt = reportingCnt;
+        this.isDeleted = isDeleted;
         this.user = user;
         this.mentoringTeam = mentoringTeam;
     }
-
 
     /**
      *연관관계 편의 메서드
@@ -65,6 +72,10 @@ public class MentoringParticipation extends BaseTimeEntity {
 
     public void setParticipationStatus(MentoringParticipationStatus participationStatus) {
         this.participationStatus = participationStatus;
+    }
+
+    public void setDecisionDate(LocalDateTime decisionDate) {
+        this.decisionDate = decisionDate;
     }
 
     public void addMentoringTeam(MentoringTeam mentoringTeam) {

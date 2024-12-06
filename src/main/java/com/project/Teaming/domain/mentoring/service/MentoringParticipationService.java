@@ -2,6 +2,7 @@ package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
+import com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
@@ -18,6 +19,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,15 +48,19 @@ public class MentoringParticipationService {
         if (participation.isPresent()) {
             if (participation.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_MEMBER_OF_TEAM);
+            } else if (participation.get().getParticipationStatus() == MentoringParticipationStatus.EXPORT) {
+                throw new NoAuthorityException(ErrorCode.EXPORTED_BY_TEAM);
             } else {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_PARTICIPATED);
             }
         } else {
             MentoringParticipation mentoringParticipation = MentoringParticipation.builder()
                     .participationStatus(MentoringParticipationStatus.PENDING)
-                    .authority(MentoringAuthority.CREW)
+                    .authority(MentoringAuthority.NoAuth)
                     .role(role)
+                    .requestDate(LocalDateTime.now())
                     .reportingCnt(0)
+                    .isDeleted(false)
                     .build();
             mentoringParticipation.setUser(findUser);
             mentoringParticipation.addMentoringTeam(mentoringTeam);
@@ -78,6 +85,8 @@ public class MentoringParticipationService {
                 mentoringParticipationRepository.delete(participation.get());
             } else if (participation.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
                 throw new NoAuthorityException(ErrorCode.ALREADY_MEMBER_OF_TEAM);
+            } else if (participation.get().getParticipationStatus() == MentoringParticipationStatus.EXPORT) {
+                throw new NoAuthorityException(ErrorCode.EXPORTED_BY_TEAM);
             } else throw new NoAuthorityException(ErrorCode.REJECTED_FROM_MENTORING_TEAM);
         } else {
             throw new MentoringParticipationNotFoundException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST);
@@ -99,8 +108,10 @@ public class MentoringParticipationService {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
-        if (mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
+        if ( mentoringParticipation.getAuthority() == MentoringAuthority.NoAuth && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
             mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.ACCEPTED);
+            mentoringParticipation.setAuthority(MentoringAuthority.CREW);
+            mentoringParticipation.setDecisionDate(LocalDateTime.now());
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
         }
@@ -121,19 +132,12 @@ public class MentoringParticipationService {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
-        if (mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
+        if (mentoringParticipation.getAuthority() == MentoringAuthority.NoAuth && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
             mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.REJECTED);
+            mentoringParticipation.setDecisionDate(LocalDateTime.now());
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
         }
-    }
-    /**
-     * 특정 지원자 조회 로직
-     * @param mentoringParticipationId
-     * @return
-     */
-    public MentoringParticipation findMentoringParticipation(Long mentoringParticipationId) {
-        return mentoringParticipationRepository.findById(mentoringParticipationId).orElseThrow(MentoringParticipationNotFoundException::new);
     }
 
 
@@ -144,17 +148,19 @@ public class MentoringParticipationService {
      * @return
      */
     public List<RsTeamParticipationDto> findForLeader(Long teamId) {
-        return mentoringParticipationRepository.findAllForLeader(teamId,MentoringAuthority.LEADER);
+        return mentoringParticipationRepository.findAllForLeader(teamId,MentoringAuthority.LEADER,MentoringParticipationStatus.EXPORT);
     }
 
     /**
      * 일반 사용자 페이지용
      * 지원자 현황 조회용 로직
+     * 팀원이 되었다가 내보내진 유저는 보여지지 않도록
      * @param teamId
      * @return
      */
-    public List<RsTeamParticipationDto> findForUser(Long teamId) {
-        return mentoringParticipationRepository.findAllForUser(teamId,MentoringAuthority.LEADER);
+    public List<RsUserParticipationDto> findForUser(Long teamId) {
+        List<RsUserParticipationDto> result = mentoringParticipationRepository.findAllForUser(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
+        return (result.isEmpty()) ? Collections.emptyList() : result;
     }
 
     /**
@@ -163,7 +169,7 @@ public class MentoringParticipationService {
      * @return
      */
     public List<RsTeamUserDto> findAllTeamUsers(MentoringTeam team) {
-        return mentoringParticipationRepository.findAllByMemberStatus(team, MentoringParticipationStatus.ACCEPTED);
+        return mentoringParticipationRepository.findAllByMemberStatus(team, MentoringParticipationStatus.ACCEPTED,MentoringParticipationStatus.EXPORT);
     }
 
     public Optional<MentoringParticipation> findBy(MentoringTeam mentoringTeam, User user) {

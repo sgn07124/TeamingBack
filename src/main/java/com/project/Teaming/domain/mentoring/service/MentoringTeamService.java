@@ -51,6 +51,7 @@ public class MentoringTeamService {
                 .authority(MentoringAuthority.LEADER)
                 .role(dto.getRole())
                 .reportingCnt(0)
+                .isDeleted(false)
                 .build();
 
 
