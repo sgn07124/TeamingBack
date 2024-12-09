@@ -109,4 +109,8 @@ public class ProjectTeam extends BaseTimeEntity {
             this.recruitCategories.add(teamRecruitCategory);
         }
     }
+
+    public void updateTeamStatus(ProjectStatus status) {
+        this.status = status;
+    }
 }

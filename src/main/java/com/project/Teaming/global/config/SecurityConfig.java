@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
                                 "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
                                 "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit",
-                                "/project/post/{team_id}/{post_id}/complete", "/user", "/project/team/{team_id}/member/**").hasRole("USER")
+                                "/project/post/{team_id}/{post_id}/complete", "/user", "/project/team/{team_id}/member/**", "/project/team/status").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 

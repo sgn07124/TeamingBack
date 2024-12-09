@@ -2,25 +2,35 @@ package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
 import com.project.Teaming.domain.project.dto.request.UpdateTeamDto;
+import com.project.Teaming.domain.project.dto.request.UpdateTeamStatusDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamInfoDto;
+import com.project.Teaming.domain.project.entity.ProjectParticipation;
+import com.project.Teaming.domain.project.entity.ProjectRole;
+import com.project.Teaming.domain.project.entity.ProjectStatus;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.entity.RecruitCategory;
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.project.entity.TeamRecruitCategory;
 import com.project.Teaming.domain.project.entity.TeamStack;
+import com.project.Teaming.domain.project.repository.ProjectParticipationRepository;
 import com.project.Teaming.domain.project.repository.ProjectTeamRepository;
 import com.project.Teaming.domain.project.repository.RecruitCategoryRepository;
 import com.project.Teaming.domain.project.repository.StackRepository;
 import com.project.Teaming.domain.project.repository.TeamRecruitCategoryRepository;
 import com.project.Teaming.domain.project.repository.TeamStackRepository;
+import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +45,8 @@ public class ProjectTeamService {
     private final TeamStackRepository teamStackRepository;
     private final RecruitCategoryRepository recruitCategoryRepository;
     private final TeamRecruitCategoryRepository teamRecruitCategoryRepository;
+    private final ProjectParticipationRepository projectParticipationRepository;
+    private final UserRepository userRepository;
 
     public ProjectTeam createTeam(CreateTeamDto dto) {
         ProjectTeam projectTeam = ProjectTeam.projectTeam(dto);
@@ -122,5 +134,26 @@ public class ProjectTeamService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         projectTeamRepository.delete(projectTeam);
+    }
+
+    public void updateTeamStatus(UpdateTeamStatusDto dto) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(dto.getTeamId(), ProjectRole.OWNER)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
+        ProjectTeam projectTeam = projectTeamRepository.findById(dto.getTeamId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+
+        if (user.getId().equals(teamOwner.getUser().getId())) {
+            projectTeam.updateTeamStatus(dto.getStatus());
+        } else {
+            throw new BusinessException(ErrorCode.FAIL_TO_UPDATE_TEAM_STATUS);
+        }
+    }
+
+    private Long getCurrentId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+        return securityUser.getUserId();
     }
 }
