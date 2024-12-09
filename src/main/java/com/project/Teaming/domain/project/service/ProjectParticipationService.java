@@ -127,4 +127,20 @@ public class ProjectParticipationService {
                 .map(ProjectParticipationInfoDto::new)
                 .collect(Collectors.toList());
     }
+
+    public void exportMember(Long teamId, Long userId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        ProjectParticipation exportMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+        ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(teamId, ProjectRole.OWNER)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
+
+        if (user.getId() == teamOwner.getUser().getId()) {
+            exportMember.exportTeam();
+        } else {
+            throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
+        }
+    }
 }

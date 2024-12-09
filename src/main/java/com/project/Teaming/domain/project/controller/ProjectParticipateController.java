@@ -68,4 +68,11 @@ public class ProjectParticipateController {
         List<ProjectParticipationInfoDto> list = projectParticipationService.getAllParticipationDtos(team_id);
         return  new ResultListResponse<>(ResultCode.GET_PARTICIPATION_LIST, list);
     }
+
+    @PutMapping("/project/team/{team_id}/member/{user_id}/export")
+    @Operation(summary = "팀장의 팀원 내보내기", description = "팀장은 해당 팀의 팀원을 팀에서 내보낼 수 있다.")
+    public ResultDetailResponse<Void> exportTeamMember(@PathVariable Long team_id, @PathVariable Long user_id) {
+        projectParticipationService.exportMember(team_id, user_id);
+        return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_MEMBER, null);
+    }
 }

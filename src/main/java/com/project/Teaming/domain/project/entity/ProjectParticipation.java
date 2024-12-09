@@ -114,4 +114,8 @@ public class ProjectParticipation {
         this.participationStatus = ParticipationStatus.REJECTED;
         this.decisionDate = LocalDateTime.now();
     }
+
+    public void exportTeam() {
+        this.isExport = true;
+    }
 }

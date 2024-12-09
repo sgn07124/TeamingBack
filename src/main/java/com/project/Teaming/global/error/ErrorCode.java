@@ -46,6 +46,8 @@ public enum ErrorCode {
     CANNOT_REJECT_MEMBER(404, "PP009", "신청자를 거절할 수 없습니다."),
     USER_NOT_PART_OF_TEAM(404, "PP010", "사용자가 팀의 구성원이 아니거나 참여 상태가 승인되지 않았습니다."),
     NOT_FOUND_PROJECT_POST(404, "PP011", "게시물을 찾을 수 없습니다."),
+    NOT_FOUND_PROJECT_OWNER(404, "P012", "프로젝트 팀장을 찾을 수 없습니다."),
+    FAIL_TO_EXPORT_TEAM(404, "P013", "해당 팀원을 내보낼 수 없습니다."),
 
     //Mentoring
     MENTORING_TEAM_NOT_EXIST(404,"M001","mentoring team not exist"),
