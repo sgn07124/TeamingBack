@@ -137,7 +137,7 @@ public class ProjectParticipationService {
         ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(teamId, ProjectRole.OWNER)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
 
-        if (user.getId() == teamOwner.getUser().getId()) {
+        if (user.getId().equals(teamOwner.getUser().getId())) {
             exportMember.exportTeam();
         } else {
             throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
