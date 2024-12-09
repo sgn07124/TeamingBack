@@ -13,6 +13,7 @@ public class ProjectParticipationInfoDto {
     private Long projectId;
     private String participationStatus;
     private Boolean isDeleted;
+    private Boolean isExport;
     private String requestDate;
     private String decisionDate;
     private String role;
@@ -25,6 +26,7 @@ public class ProjectParticipationInfoDto {
         this.projectId = participation.getProjectTeam().getId();
         this.participationStatus = participation.getParticipationStatus().toString();
         this.isDeleted = participation.getIsDeleted();
+        this.isExport = participation.getIsExport();
         this.requestDate = getFormattedDate(participation.getRequestDate());
         this.decisionDate = participation.getDecisionDate() != null ? getFormattedDate(participation.getDecisionDate()) : "-";
         this.role = participation.getRole().toString();

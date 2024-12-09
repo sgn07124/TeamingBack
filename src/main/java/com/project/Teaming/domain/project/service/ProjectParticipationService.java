@@ -96,29 +96,37 @@ public class ProjectParticipationService {
         if (participation.canQuit()) {
             participation.quitTeam();
         } else {
-            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+            throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
         }
     }
 
     public void acceptedMember(Long teamId, Long userId) {
-        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        ProjectParticipation joinMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+        ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(teamId, ProjectRole.OWNER)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
 
-        if (participation.canAccept()) {
-            participation.acceptTeam();
+        if (joinMember.canAccept() && isTeamOwner(user, teamOwner)) {
+            joinMember.acceptTeam();
         } else {
-            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+            throw new BusinessException(ErrorCode.CANNOT_ACCEPT_MEMBER);
         }
     }
 
     public void rejectedMember(Long teamId, Long userId) {
-        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        ProjectParticipation joinMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+        ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(teamId, ProjectRole.OWNER)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
 
-        if (participation.canReject()) {
-            participation.rejectTeam();
+        if (joinMember.canReject() && isTeamOwner(user, teamOwner)) {
+            joinMember.rejectTeam();
         } else {
-            throw new BusinessException(ErrorCode.INVALID_PARTICIPATION_ERROR);
+            throw new BusinessException(ErrorCode.CANNOT_REJECT_MEMBER);
         }
     }
 
@@ -126,5 +134,24 @@ public class ProjectParticipationService {
         return projectParticipationRepository.findByProjectTeamId(teamId).stream()
                 .map(ProjectParticipationInfoDto::new)
                 .collect(Collectors.toList());
+    }
+
+    public void exportMember(Long teamId, Long userId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        ProjectParticipation exportMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
+        ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(teamId, ProjectRole.OWNER)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
+
+        if (isTeamOwner(user, teamOwner)) {
+            exportMember.exportTeam();
+        } else {
+            throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
+        }
+    }
+
+    private static boolean isTeamOwner(User user, ProjectParticipation teamOwner) {
+        return user.getId().equals(teamOwner.getUser().getId());
     }
 }
