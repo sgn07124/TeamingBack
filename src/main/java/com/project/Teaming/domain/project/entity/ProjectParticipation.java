@@ -29,6 +29,9 @@ public class ProjectParticipation {
     @Column(name = "is_deleted")
     private Boolean isDeleted;  // 탈퇴 여부 (초기값 : false)
 
+    @Column(name = "is_export")
+    private Boolean isExport;  // 팀장의 내보기내 여부 (초기값: false)
+
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime requestDate;  // 신청일
@@ -55,6 +58,7 @@ public class ProjectParticipation {
     public void createProjectParticipation(User user, ProjectTeam team) {
         this.participationStatus = ParticipationStatus.ACCEPTED;
         this.isDeleted = false;
+        this.isExport = false;
         this.requestDate = LocalDateTime.now();
         this.decisionDate = LocalDateTime.now();
         this.role = ProjectRole.OWNER;
@@ -66,6 +70,7 @@ public class ProjectParticipation {
     public void joinTeamMember(User user, ProjectTeam projectTeam, String recruitCategory) {
         this.participationStatus = ParticipationStatus.PENDING;
         this.isDeleted = false;
+        this.isExport = false;
         this.requestDate = LocalDateTime.now();
         this.role = ProjectRole.MEMBER;
         this.recruitCategory = recruitCategory;
