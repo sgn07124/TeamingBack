@@ -24,7 +24,6 @@ public class Report extends BaseTimeEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private ReportStatus status;  // 신고 상태
-    // 외래키 : 신청 ID, 신고한 사용자 ID, 신고 당한 사용자 ID, 프로젝트 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_participation_id", referencedColumnName = "par_id",nullable = true)
     private ProjectParticipation projectParticipation;  // 프로젝트 유저 ID (FK)
@@ -34,9 +33,6 @@ public class Report extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_user_id", referencedColumnName = "user_id", nullable = false)
     private User reportedUser;  // 신고 당한 사용자 ID (FK)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reporting_user_id", referencedColumnName = "user_id")
-    private User reportingUser;  // 신고한 사용자 ID (FK)
 
     @PrePersist
     @PreUpdate
