@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.user.entity.Report;
+import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
@@ -60,6 +61,7 @@ public class ProjectParticipation {
 
     @OneToMany(mappedBy = "projectParticipation")
     private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
+
 
     public void createProjectParticipation(User user, ProjectTeam team) {
         this.participationStatus = ParticipationStatus.ACCEPTED;

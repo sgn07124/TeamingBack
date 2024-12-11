@@ -45,6 +45,9 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "reportedUser")
     private List<Report> reports = new ArrayList<>();
 
+    @OneToMany(mappedBy = "reviewee", fetch = FetchType.LAZY)
+    private List<Review> reviews = new ArrayList<>();
+
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;

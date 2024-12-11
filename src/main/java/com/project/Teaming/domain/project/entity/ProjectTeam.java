@@ -56,9 +56,6 @@ public class ProjectTeam extends BaseTimeEntity {
     @OneToMany(mappedBy = "projectTeam")
     private List<ProjectBoard> projectBoards = new ArrayList<>();
 
-    @OneToMany(mappedBy = "projectTeam")
-    private List<Review> reviews = new ArrayList<>();
-
     @OneToMany(mappedBy = "projectTeam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamStack> stacks = new ArrayList<>();  // 기술 스택
 
