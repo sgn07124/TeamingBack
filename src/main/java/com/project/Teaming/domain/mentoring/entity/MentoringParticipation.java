@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.entity;
 
+import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -9,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -29,10 +32,6 @@ public class MentoringParticipation {
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 역할
 
-    public void setAuthority(MentoringAuthority authority) {
-        this.authority = authority;
-    }
-
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
     @Column(name = "reporting_cnt")
@@ -46,6 +45,8 @@ public class MentoringParticipation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
+    @OneToMany(mappedBy = "mentoringParticipation")
+    private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 
     @Builder
     public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, boolean isDeleted, User user, MentoringTeam mentoringTeam) {
@@ -61,14 +62,8 @@ public class MentoringParticipation {
         this.mentoringTeam = mentoringTeam;
     }
 
-    /**
-     *연관관계 편의 메서드
-     */
 
-    public void setUser(User user) {
-        this.user = user;
-        user.getMentoringParticipations().add(this);
-    }
+
 
     public void setParticipationStatus(MentoringParticipationStatus participationStatus) {
         this.participationStatus = participationStatus;
@@ -76,6 +71,22 @@ public class MentoringParticipation {
 
     public void setDecisionDate(LocalDateTime decisionDate) {
         this.decisionDate = decisionDate;
+    }
+
+    public void setAuthority(MentoringAuthority authority) {
+        this.authority = authority;
+    }
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    /**
+     *연관관계 편의 메서드
+     */
+
+    public void setUser(User user) {
+        this.user = user;
+        user.getMentoringParticipations().add(this);
     }
 
     public void addMentoringTeam(MentoringTeam mentoringTeam) {
@@ -93,9 +104,5 @@ public class MentoringParticipation {
             this.mentoringTeam.getMentoringParticipationList().remove(this);
             this.mentoringTeam = null;
         }
-    }
-
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
     }
 }

@@ -13,6 +13,7 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(405, "C003", "method not allowed"),
     INVALID_TYPE_VALUE(400, "C004", "invalid type value"),
     BAD_CREDENTIALS(400, "C005", "bad credentials"),
+    CHOOSE_ONE_DOMAIN(400,"C006","멘토링유저와 프로젝트 유저중 하나를 선택해야합니다."),
 
     // User
     USER_NOT_EXIST(404, "U001", "member not exist"),

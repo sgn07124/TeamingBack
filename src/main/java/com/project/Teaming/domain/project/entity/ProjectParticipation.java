@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -54,6 +57,9 @@ public class ProjectParticipation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private ProjectTeam projectTeam;  // 프로젝트 팀 ID (주인)
+
+    @OneToMany(mappedBy = "projectParticipation")
+    private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 
     public void createProjectParticipation(User user, ProjectTeam team) {
         this.participationStatus = ParticipationStatus.ACCEPTED;
