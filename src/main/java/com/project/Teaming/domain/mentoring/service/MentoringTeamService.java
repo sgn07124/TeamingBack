@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -97,11 +98,11 @@ public class MentoringTeamService {
     public void updateMentoringTeam(Long userId, Long mentoringTeamId, RqTeamDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (mentoringTeam.getFlag() == Status.TRUE) {
             throw new NoAuthorityException("이미 삭제된 팀 입니다.");
         }
-        if (flag) {
+        if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
             mentoringTeam.mentoringTeamUpdate(dto); //업데이트 메서드
             List<TeamCategory> categoriesToRemove = new ArrayList<>(mentoringTeam.getCategories()); // 리스트 복사,객체 참조
             // 연관관계 해제
@@ -153,15 +154,16 @@ public class MentoringTeamService {
      * @return
      */
     public List<MentoringTeam> findMyMentoringTeams(Long userId) {
-        List<MentoringTeam> list = new ArrayList<>();
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("유저가 존재하지 않습니다"));
+        List<MentoringTeam> teams = new ArrayList<>();
+        User user = userRepository.findByIdWithMentoringTeams(userId).orElseThrow(() -> new UsernameNotFoundException("유저가 존재하지 않습니다"));
+
         List<MentoringParticipation> mentoringParticipants = user.getMentoringParticipations();
         for (MentoringParticipation x : mentoringParticipants) {
-            if (x.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
-                list.add(x.getMentoringTeam());
+            if (x.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !x.getIsDeleted()) {
+                teams.add(x.getMentoringTeam());
             }
         }
-        return list;
+        return teams;
     }
 
 
@@ -174,8 +176,8 @@ public class MentoringTeamService {
     public void deleteMentoringTeam(Long userId,Long mentoringTeamId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
-        if (flag) {
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
             mentoringTeam.setFlag(Status.TRUE);
         }
         else throw new NoAuthorityException("삭제 할 권한이 없습니다");
@@ -201,15 +203,16 @@ public class MentoringTeamService {
         TeamResponseDto teamResponseDto = new TeamResponseDto();
 
         //권한 반환하는 로직
-        List<MentoringParticipation> mentoringParticipations = user.getMentoringParticipations();
-        List<MentoringParticipation> collect = mentoringParticipations.stream()
-                .filter(o -> o.getMentoringTeam().equals(team))
-                .toList();
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(team, user);
 
-        if (collect.isEmpty()) {
+        if (teamUser.isEmpty()) {
             teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
         } else {
-            teamResponseDto.setAuthority(collect.get(0).getAuthority());
+            if (teamUser.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !teamUser.get().getIsDeleted()) {
+                teamResponseDto.setAuthority(teamUser.get().getAuthority());
+            } else {
+                teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
+            }
         }
         teamResponseDto.setDto(dto);
 
@@ -232,15 +235,12 @@ public class MentoringTeamService {
                 team.getStatus());
 
         //권한 반환하는 로직
-        List<MentoringParticipation> mentoringParticipations = user.getMentoringParticipations();
-        List<MentoringParticipation> collect = mentoringParticipations.stream()
-                .filter(o -> o.getMentoringTeam().equals(team))
-                .toList();
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(team, user);
 
-        if (collect.isEmpty()) {
+        if (teamUser.isEmpty()) {
             teamDto.setAuthority(MentoringAuthority.NoAuth);
         } else {
-            teamDto.setAuthority(collect.get(0).getAuthority());
+            teamDto.setAuthority(teamUser.get().getAuthority());
         }
 
         return teamDto;

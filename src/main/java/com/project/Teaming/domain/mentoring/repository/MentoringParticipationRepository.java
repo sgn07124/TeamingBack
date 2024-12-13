@@ -39,7 +39,12 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             "where mt.id = :teamId and mp.authority <> :authority and mp.participationStatus <> :status")
     List<RsUserParticipationDto> findAllForUser(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
 
-    boolean existsByMentoringTeamAndUserAndAuthority(MentoringTeam mentoringTeam, User user, MentoringAuthority authority);
+    @Query("select mp " +
+            "from MentoringParticipation mp " +
+            "join fetch mp.mentoringTeam mt " +
+            "join fetch mp.user u " +
+            "where mt = :mentoringTeam and u = :user and mp.authority = :authority")
+    Optional<MentoringParticipation> existsByMentoringTeamAndUserAndAuthority(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("authority") MentoringAuthority authority);
 
     @Query("select mp " +
     "from MentoringParticipation mp " +

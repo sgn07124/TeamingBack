@@ -102,7 +102,7 @@ public class MentoringBoardController {
         dto.setCategory(mentoringPost.getMentoringTeam().getCategories().stream()
                 .map(o -> o.getCategory().getName())
                 .collect(Collectors.toList()));
-        if (teamUser.isPresent()) {
+        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
             dto.setAuthority(teamUser.get().getAuthority());
         } else {
             dto.setAuthority(MentoringAuthority.NoAuth);

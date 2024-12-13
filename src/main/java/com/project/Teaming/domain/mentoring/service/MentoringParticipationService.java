@@ -104,8 +104,8 @@ public class MentoringParticipationService {
     public void acceptMentoringParticipation(Long userId, Long team_Id, Long participant_id) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(team_Id).orElseThrow(MentoringTeamNotFoundException::new);
-        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
-        if (!flag) {
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (teamLeader.isEmpty()) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
@@ -128,8 +128,8 @@ public class MentoringParticipationService {
     public void rejectMentoringParticipation(Long userId, Long teamId, Long participant_id) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
-        boolean flag = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
-        if (!flag) {
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (teamLeader.isEmpty()) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
@@ -141,12 +141,17 @@ public class MentoringParticipationService {
         }
     }
 
+    /**
+     * 탈퇴하는 로직
+     * @param userId
+     * @param teamId
+     */
     @Transactional
     public void deleteUser(Long userId, Long teamId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
-        if (teamUser.isPresent()) {
+        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
             teamUser.get().setDeleted(true);
         } else {
             throw new NoAuthorityException(ErrorCode.NOT_A_MEMBER);

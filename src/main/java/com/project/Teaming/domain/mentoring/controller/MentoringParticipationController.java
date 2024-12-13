@@ -90,7 +90,7 @@ public class MentoringParticipationController {
         MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
         Optional<MentoringParticipation> teamUser = mentoringParticipationService.findByTeamAndUser(mentoringTeam, user);
         if (teamUser.isPresent()) {  //팀과의 연관관계가 있으면
-            if (teamUser.get().getAuthority() == MentoringAuthority.LEADER) {  //팀의 리더인 유저
+            if (teamUser.get().getAuthority() == MentoringAuthority.LEADER && !teamUser.get().getIsDeleted()) {  //팀의 리더인 유저
                 List<RsTeamUserDto> allTeamUsers = mentoringParticipationService.findAllTeamUsers(mentoringTeam);
                 List<RsTeamParticipationDto> participations = mentoringParticipationService.findForLeader(mentoringTeam.getId());
                 LeaderResponseDto dto = new LeaderResponseDto();
@@ -102,7 +102,6 @@ public class MentoringParticipationController {
                 return new ResultListResponse<>(ResultCode.GET_MEMBER_INFO_FOR_CREW, List.of(MentoringAuthority.CREW, members));
             } else {  //지원만 한 유저 , 수정필요
                 List<RsUserParticipationDto> forUser = mentoringParticipationService.findForUser(mentoringTeam.getId());
-
                 List<Object> responseList = new ArrayList<>();
                 responseList.add(MentoringAuthority.NoAuth);
                 responseList.add(forUser);
