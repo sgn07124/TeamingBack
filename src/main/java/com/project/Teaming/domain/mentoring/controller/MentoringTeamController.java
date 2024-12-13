@@ -58,7 +58,7 @@ public class MentoringTeamController {
     public ResultListResponse<MyTeamDto> findMyMentoringTeams() {
         List<MentoringTeam> myMentoringTeams = mentoringTeamService.findMyMentoringTeams();
         List<MyTeamDto> teams = myMentoringTeams.stream()
-                .map(team -> mentoringTeamService.getMyTeam(team))
+                .map(mentoringTeamService::getMyTeam)
                 .collect(Collectors.toList());
         return new ResultListResponse<>(ResultCode.GET_MY_ALL_MENTORING_TEAM, teams);
     }

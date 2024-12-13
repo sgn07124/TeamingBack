@@ -1,8 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto;
+import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
@@ -13,14 +11,17 @@ import com.project.Teaming.global.error.exception.MentoringParticipationAlreadyE
 import com.project.Teaming.global.error.exception.MentoringParticipationNotFoundException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
+import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,15 +37,14 @@ public class MentoringParticipationService {
 
     /**
      * 지원자로 등록하는 로직
-     * @param userId
      * @param mentoringTeamId
      * @param role
      */
     @Transactional
-    public Long saveMentoringParticipation(Long userId, Long mentoringTeamId, MentoringRole role) {
-        User findUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+    public Long saveMentoringParticipation(Long mentoringTeamId, MentoringRole role) {
+        User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, findUser);
+        Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (participation.isPresent()) {
             if (participation.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_MEMBER_OF_TEAM);
@@ -62,7 +62,7 @@ public class MentoringParticipationService {
                     .reportingCnt(0)
                     .isDeleted(false)
                     .build();
-            mentoringParticipation.setUser(findUser);
+            mentoringParticipation.setUser(user);
             mentoringParticipation.addMentoringTeam(mentoringTeam);
             MentoringParticipation saved = mentoringParticipationRepository.save(mentoringParticipation);
             return saved.getId();
@@ -71,12 +71,11 @@ public class MentoringParticipationService {
 
     /**
      * 지원 취소하는 로직
-     * @param userId
      * @param mentoringTeamId
      */
     @Transactional
-    public void cancelMentoringParticipation(Long userId, Long mentoringTeamId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+    public void cancelMentoringParticipation(Long mentoringTeamId) {
+        User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (participation.isPresent()) {
@@ -96,13 +95,12 @@ public class MentoringParticipationService {
 
     /**
      * 지원 수락 로직
-     * @param userId
      * @param team_Id
      * @param participant_id
      */
     @Transactional
-    public void acceptMentoringParticipation(Long userId, Long team_Id, Long participant_id) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+    public void acceptMentoringParticipation(Long team_Id, Long participant_id) {
+        User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(team_Id).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isEmpty()) {
@@ -120,13 +118,12 @@ public class MentoringParticipationService {
 
     /**
      * 지원 거절 로직
-     * @param userId
      * @param teamId
      * @param participant_id
      */
     @Transactional
-    public void rejectMentoringParticipation(Long userId, Long teamId, Long participant_id) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+    public void rejectMentoringParticipation(Long teamId, Long participant_id) {
+        User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isEmpty()) {
@@ -143,12 +140,11 @@ public class MentoringParticipationService {
 
     /**
      * 탈퇴하는 로직
-     * @param userId
      * @param teamId
      */
     @Transactional
-    public void deleteUser(Long userId, Long teamId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+    public void deleteUser(Long teamId) {
+        User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
@@ -158,40 +154,49 @@ public class MentoringParticipationService {
         }
     }
 
+    public ParticipantsDto<?> getParticipantsInfo(Long teamId) {
+        User user = getUser();
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam,user);
+        if (teamUser.isPresent()) {  //팀과의 연관관계가 있으면
+            if (teamUser.get().getAuthority() == MentoringAuthority.LEADER && !teamUser.get().getIsDeleted()) {  //팀의 리더인 유저
+                List<RsTeamUserDto> allTeamUsers =  mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED,MentoringParticipationStatus.EXPORT);
+                List<RsTeamParticipationDto> participations = mentoringParticipationRepository.findAllForLeader(teamId,MentoringAuthority.LEADER,MentoringParticipationStatus.EXPORT);
+                LeaderResponseDto dto = new LeaderResponseDto();
+                dto.setMembers(allTeamUsers);
+                dto.setParticipations(participations);
+                List<Object> responseList = new ArrayList<>();
+                responseList.add(MentoringAuthority.LEADER);
+                responseList.add(dto);
+                return new ParticipantsDto<>(responseList);
+            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted()) {  //팀의 멤버인 유저
+                List<RsTeamUserDto> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED,MentoringParticipationStatus.EXPORT);
+                List<Object> responseList = new ArrayList<>();
+                responseList.add(MentoringAuthority.CREW);
+                responseList.add(members);
+                return new ParticipantsDto<>(responseList);
+            } else {  //지원만 한 유저 , 수정필요
+                List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
+                List<Object> responseList = new ArrayList<>();
+                responseList.add(MentoringAuthority.NoAuth);
+                responseList.add(forUser);
+                return new ParticipantsDto<>(responseList);
+            }
+        } else { //팀과 무관한 사용자
+            List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
+            List<Object> responseList = new ArrayList<>();
+            responseList.add(MentoringAuthority.NoAuth);
+            responseList.add(forUser);
+            return new ParticipantsDto<>(responseList);
+        }
 
-    /**
-     * 리더 페이지용
-     * 지원자 현황 조회용 로직
-     * @param teamId
-     * @return
-     */
-    public List<RsTeamParticipationDto> findForLeader(Long teamId) {
-        return mentoringParticipationRepository.findAllForLeader(teamId,MentoringAuthority.LEADER,MentoringParticipationStatus.EXPORT);
     }
 
-    /**
-     * 일반 사용자 페이지용
-     * 지원자 현황 조회용 로직
-     * 팀원이 되었다가 내보내진 유저는 보여지지 않도록
-     * @param teamId
-     * @return
-     */
-    public List<RsUserParticipationDto> findForUser(Long teamId) {
-        List<RsUserParticipationDto> result = mentoringParticipationRepository.findAllForUser(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
-        return (result.isEmpty()) ? Collections.emptyList() : result;
+    private User getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
+        Long userId = securityUser.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        return user;
     }
-
-    /**
-     * 팀원 조회용 로직
-     * @param team
-     * @return
-     */
-    public List<RsTeamUserDto> findAllTeamUsers(MentoringTeam team) {
-        return mentoringParticipationRepository.findAllByMemberStatus(team, MentoringParticipationStatus.ACCEPTED,MentoringParticipationStatus.EXPORT);
-    }
-
-    public Optional<MentoringParticipation> findByTeamAndUser(MentoringTeam mentoringTeam, User user) {
-        return mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam,user);
-    }
-
 }

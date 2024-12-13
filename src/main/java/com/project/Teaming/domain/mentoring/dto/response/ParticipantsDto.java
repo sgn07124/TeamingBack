@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class LeaderResponseDto {
+@AllArgsConstructor
+public class ParticipantsDto<T> {
+    private T details;
 
-    private List<RsTeamUserDto> members;
-    private List<RsTeamParticipationDto> participations;
 }
