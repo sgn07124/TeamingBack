@@ -87,10 +87,10 @@ public class MentoringBoardService {
     public List<String> findTeamCategories(Long teamId) {
         List<String> categories = new ArrayList<>();
         List<Object[]> teamCategories = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
-        for (Object[] x : teamCategories) {
-            categories.add(String.valueOf(x[1]));
-        }
-        return categories;
+        return teamCategories.stream()
+                .map(x -> String.valueOf(x[1]))
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public RsSpecBoardDto toDto(MentoringBoard mentoringPost) {
