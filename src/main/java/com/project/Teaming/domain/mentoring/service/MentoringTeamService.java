@@ -193,7 +193,7 @@ public class MentoringTeamService {
 
         RsTeamDto dto = team.toDto();
         List<String> categories = team.getCategories().stream()
-                .map(o -> o.getCategory().getName())
+                .map(o -> String.valueOf(o.getCategory().getId()))
                 .collect(Collectors.toList());
         dto.setCategories(categories);
 

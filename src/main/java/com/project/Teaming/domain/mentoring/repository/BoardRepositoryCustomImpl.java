@@ -50,7 +50,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
         QCategory c = QCategory.category;
 
         return queryFactory
-                .select(mb.id, mb.title, mt.name, mt.startDate, mt.endDate, c.name, mb.contents)
+                .select(mb.id, mb.title, mt.name, mt.startDate, mt.endDate, c.id, mb.contents)
                 .from(mb)
                 .join(mb.mentoringTeam, mt)
                 .leftJoin(mt.categories, tc)

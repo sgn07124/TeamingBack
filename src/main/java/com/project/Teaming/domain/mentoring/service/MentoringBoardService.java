@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -90,11 +89,11 @@ public class MentoringBoardService {
         List<Object[]> categoryResults = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         if (mentoringTeam.getFlag() == Status.FALSE) {
-            Map<Long, List<String>> categoryMap = new ConcurrentHashMap<>();
+            Map<Long, List<String>> categoryMap = new HashMap<>();
             for (Object[] row : categoryResults) {
                 Long boardId = (Long) row[0];
-                String categoryName = (String) row[1];
-                categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryName);
+                String categoryId = (String) row[1];
+                categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryId);
             }
             boards.forEach(post -> {
                 List<String> categories = categoryMap.getOrDefault(post.getId(), Collections.emptyList());
@@ -112,10 +111,10 @@ public class MentoringBoardService {
     public PaginatedResponse<RsBoardDto> findAllPosts(MentoringStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
-        List<Long> boardIds = mentoringBoardRepository.findMentoringBoardIds(status, Status.FALSE, pageable);
+        List<Long> boardIds = mentoringBoardRepository.findMentoringBoardIds(status, Status.FALSE, pageable);  //삭제되지 않은 글들의 id
 
         List<Tuple> results = mentoringBoardRepository.findAllByIds(boardIds);
-        //메모리에서 정렬
+        //메모리에서 그룹화,정렬 해줌, db에서 하면 집계되어 중복데이터
         Map<Long, List<Tuple>> groupedResults = results.stream()
                 .collect(Collectors.groupingBy(tuple -> tuple.get(QMentoringBoard.mentoringBoard.id)));
 
@@ -125,11 +124,11 @@ public class MentoringBoardService {
                     if (groupedTuples == null || groupedTuples.isEmpty()) {
                         return null;
                     }
-                    Tuple firstTuple = groupedTuples.get(0);
+                    Tuple firstTuple = groupedTuples.get(0);  //카테고리가 여러개여서 카테고리수만큼 중복 데이터가 생김. 하나만 활용
 
                     // 각 보드에 대해 카테고리 리스트 생성
                     List<String> categories = groupedTuples.stream()
-                            .map(tuple -> tuple.get(QCategory.category.name))
+                            .map(tuple -> String.valueOf(tuple.get(QCategory.category.id)))
                             .filter(Objects::nonNull)
                             .distinct()
                             .collect(Collectors.toList());
