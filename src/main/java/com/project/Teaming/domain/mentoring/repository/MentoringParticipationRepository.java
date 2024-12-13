@@ -44,7 +44,7 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             "join fetch mp.mentoringTeam mt " +
             "join fetch mp.user u " +
             "where mt = :mentoringTeam and u = :user and mp.authority = :authority")
-    Optional<MentoringParticipation> existsByMentoringTeamAndUserAndAuthority(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("authority") MentoringAuthority authority);
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndAuthority(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("authority") MentoringAuthority authority);
 
     @Query("select mp " +
     "from MentoringParticipation mp " +
@@ -53,5 +53,10 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
     "where mt = :mentoringTeam and u = :user")
     Optional<MentoringParticipation> findByMentoringTeamAndUser(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user);
 
-    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status);
+    @Query("select mp " +
+            "from MentoringParticipation mp " +
+            "join fetch mp.mentoringTeam mt " +
+            "join fetch mp.user u " +
+            "where mt = :mentoringTeam and u = :user and mp.participationStatus = :status")
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("status") MentoringParticipationStatus status);
 }

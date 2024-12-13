@@ -37,33 +37,23 @@ import java.util.stream.Collectors;
 public class MentoringBoardController {
 
     private final MentoringBoardService mentoringBoardService;
-    private final MentoringTeamService mentoringTeamService;
-    private final MentoringParticipationService mentoringParticipationService;
-    private final UserService userService;
 
     @PostMapping("/{team_id}/post")
     @Operation(summary = "멘토링 글 등록" , description = "멘토링 팀에서(팀의 팀장, 팀원 모두 가능) 글을 등록 할 수 있다. 멘토링 글 id 반환")
     public ResultDetailResponse<Long> savePost(@PathVariable Long team_id,
                                                @RequestBody @Valid RqBoardDto dto) {
-        User user = getUser();
-        Long savedMentoringPost = mentoringBoardService.saveMentoringPost(user.getId(),team_id, dto);
+        Long savedMentoringPost = mentoringBoardService.saveMentoringPost(team_id, dto);
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, savedMentoringPost);
     }
 
 
-    @PostMapping("/{team_id}/post/{post_id}")
+    @PostMapping("/post/{post_id}")
     @Operation(summary = "멘토링 글 수정", description = "나의 팀에서 등록된 멘토링 게시물을 팀 구성원(팀장과 팀원) 모두가 수정 할 수 있다. 수정버튼이 있는 멘토링 글 상세페이지로 이동.")
-    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long team_id, @PathVariable Long post_id,
+    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long post_id,
                                                      @RequestBody @Valid RqBoardDto dto) {
-        User user = getUser();
-        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
-        MentoringAuthority userAuthority = mentoringBoardService.updateMentoringPost(user.getId(), post_id, dto);
+        mentoringBoardService.updateMentoringPost(post_id, dto);
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-        RsSpecBoardDto updatePostDto = mentoringPost.toDto(mentoringTeam);
-        updatePostDto.setAuthority(userAuthority);
-        updatePostDto.setCategory(mentoringTeam.getCategories().stream()
-                .map(o -> o.getCategory().getName())
-                .collect(Collectors.toList()));
+        RsSpecBoardDto updatePostDto = mentoringBoardService.toDto(mentoringPost);
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_POST, updatePostDto);
     }
 
@@ -76,6 +66,7 @@ public class MentoringBoardController {
         PaginatedResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(status, page, size);
         return new ResultDetailResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
     }
+
 
     @GetMapping("/{team_Id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회" , description = "특정 멘토링 팀에서 쓴 모든 글을 조회 할 수 있다. 팀 페이지에서 시용")
@@ -95,35 +86,17 @@ public class MentoringBoardController {
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")
     public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long post_id) {
-        User user = getUser();
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
-        Optional<MentoringParticipation> teamUser = mentoringParticipationService.findBy(mentoringPost.getMentoringTeam(), user);
-        RsSpecBoardDto dto = mentoringPost.toDto(mentoringPost.getMentoringTeam());
-        dto.setCategory(mentoringPost.getMentoringTeam().getCategories().stream()
-                .map(o -> o.getCategory().getName())
-                .collect(Collectors.toList()));
-        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
-            dto.setAuthority(teamUser.get().getAuthority());
-        } else {
-            dto.setAuthority(MentoringAuthority.NoAuth);
-        }
+        RsSpecBoardDto dto = mentoringBoardService.toDto(mentoringPost);
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST, dto);
     }
+
 
     @DeleteMapping("/post/{post_id}/del")
     @Operation(summary = "멘토링 글 삭제", description = "나의 멘토링 글을 삭제 할 수 있다. 멘토링 게시판으로 이동")
     public ResultDetailResponse<Void> deletePost(@PathVariable Long post_id) {
-        User user = getUser();
-        mentoringBoardService.deleteMentoringPost(user.getId(),post_id);
+        mentoringBoardService.deleteMentoringPost(post_id);
         return new ResultDetailResponse<>(ResultCode.DELETE_MENTORING_POST, null);
-    }
-
-    private User getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
-        Long userId = securityUser.getUserId();
-        User user = userService.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return user;
     }
 
 }

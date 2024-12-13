@@ -104,7 +104,7 @@ public class MentoringParticipationService {
     public void acceptMentoringParticipation(Long userId, Long team_Id, Long participant_id) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(team_Id).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isEmpty()) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
@@ -128,7 +128,7 @@ public class MentoringParticipationService {
     public void rejectMentoringParticipation(Long userId, Long teamId, Long participant_id) {
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.existsByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isEmpty()) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
@@ -190,9 +190,6 @@ public class MentoringParticipationService {
         return mentoringParticipationRepository.findAllByMemberStatus(team, MentoringParticipationStatus.ACCEPTED,MentoringParticipationStatus.EXPORT);
     }
 
-    public Optional<MentoringParticipation> findBy(MentoringTeam mentoringTeam, User user) {
-        return mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam,user,MentoringParticipationStatus.ACCEPTED);
-    }
     public Optional<MentoringParticipation> findByTeamAndUser(MentoringTeam mentoringTeam, User user) {
         return mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam,user);
     }
