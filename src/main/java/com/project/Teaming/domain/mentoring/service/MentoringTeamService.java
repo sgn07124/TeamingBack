@@ -22,6 +22,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +55,7 @@ public class MentoringTeamService {
                 .authority(MentoringAuthority.LEADER)
                 .role(dto.getRole())
                 .reportingCnt(0)
+                .decisionDate(LocalDateTime.now())
                 .isDeleted(false)
                 .build();
 
