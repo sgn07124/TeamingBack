@@ -3,15 +3,18 @@ package com.project.Teaming.domain.project.controller;
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
 import com.project.Teaming.domain.project.dto.request.UpdateTeamDto;
 import com.project.Teaming.domain.project.dto.request.UpdateTeamStatusDto;
+import com.project.Teaming.domain.project.dto.response.MyProjectListDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamInfoDto;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
 import com.project.Teaming.domain.project.service.ProjectTeamService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
+import com.project.Teaming.global.result.ResultListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -65,5 +68,12 @@ public class ProjectTeamController {
     public ResultDetailResponse<Void> editTeamStatus(@RequestBody UpdateTeamStatusDto dto) {
         projectTeamService.updateTeamStatus(dto);
         return new ResultDetailResponse<>(ResultCode.UPDATE_TEAM_STATUS, null);
+    }
+
+    @GetMapping("/user/project")
+    @Operation(summary = "마이페이지의 참여 프로젝트 목록 조회", description = "로그인한 사용자는 본인의 마이페이지에서 본인이 참여했던 프로젝트 목록을 조회할 수 있다.")
+    public ResultListResponse<MyProjectListDto> getProjectTeamList() {
+        List<MyProjectListDto> teams = projectTeamService.getProjectList();
+        return new ResultListResponse<>(ResultCode.GET_MY_PROJECT, teams);
     }
 }
