@@ -3,7 +3,9 @@ package com.project.Teaming.domain.project.service;
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
 import com.project.Teaming.domain.project.dto.request.UpdateTeamDto;
 import com.project.Teaming.domain.project.dto.request.UpdateTeamStatusDto;
+import com.project.Teaming.domain.project.dto.response.MyProjectListDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamInfoDto;
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
 import com.project.Teaming.domain.project.entity.ProjectStatus;
@@ -155,5 +157,21 @@ public class ProjectTeamService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         return securityUser.getUserId();
+    }
+
+    public List<MyProjectListDto> getProjectList() {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        List<ProjectParticipation> participations = projectParticipationRepository.findByUserIdAndParticipationStatus(user.getId(),
+                ParticipationStatus.ACCEPTED);
+
+        List<MyProjectListDto> projectLists = participations.stream()
+                .map(participation -> {
+                    ProjectTeam projectTeam = projectTeamRepository.findById(participation.getProjectTeam().getId())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+                    return MyProjectListDto.from(projectTeam, participation);
+                })
+                .collect(Collectors.toList());
+        return projectLists;
     }
 }
