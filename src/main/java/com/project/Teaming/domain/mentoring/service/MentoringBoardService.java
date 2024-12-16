@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
+import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
@@ -96,6 +97,7 @@ public class MentoringBoardService {
                 .distinct()
                 .collect(Collectors.toList());
     }
+
 
     public RsSpecBoardDto toDto(MentoringBoard mentoringPost) {
         User user = getUser();
@@ -237,6 +239,26 @@ public class MentoringBoardService {
             }
         }
         else throw new NoAuthorityException(ErrorCode.NO_AUTHORITY);
+    }
+
+    /**
+     * 리더가 글에서 모집 현황을 수정할 수 있는 로직
+     * @param teamId
+     * @param postId
+     * @return
+     */
+    @Transactional
+    public MentoringPostStatusDto updatePostStatus(Long teamId, Long postId) {
+        User user = getUser();
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        MentoringBoard post = mentoringBoardRepository.findById(postId).orElseThrow(MentoringPostNotFoundException::new);
+        if (teamLeader.isPresent()) {
+            post.updateStatus();
+            return new MentoringPostStatusDto(PostStatus.COMPLETE);
+        } else {
+            throw new NoAuthorityException(ErrorCode.NOT_A_MEMBER);
+        }
     }
 
     @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행

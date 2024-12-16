@@ -1,12 +1,14 @@
 package com.project.Teaming.domain.mentoring.controller;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
+import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
+import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
@@ -73,6 +75,13 @@ public class MentoringBoardController {
     public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
         List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_Id);
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
+    }
+
+    @PostMapping("/post/{team_id}/{post_id}/complete")
+    @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀장이 모집 완료 처리를 직접 할 수 있다.")
+    public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
+        MentoringPostStatusDto statusDto = mentoringBoardService.updatePostStatus(team_id, post_id);
+        return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,statusDto);
     }
 
     /**

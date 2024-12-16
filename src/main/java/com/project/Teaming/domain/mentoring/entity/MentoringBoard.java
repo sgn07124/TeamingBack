@@ -59,6 +59,15 @@ public class MentoringBoard extends BaseTimeEntity {
         this.deadLine = deadLine;
     }
 
+    public void setStatus(PostStatus status) {
+        this.status = status;
+    }
+
+    public void updateStatus(){
+        this.status = PostStatus.COMPLETE;
+        this.deadLine = LocalDate.now().minusDays(1);
+    }
+
     public RsSpecBoardDto toDto(MentoringTeam mentoringTeam) {
         RsSpecBoardDto dto = RsSpecBoardDto.builder()
                 .id(String.valueOf(this.getId()))
