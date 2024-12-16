@@ -9,8 +9,8 @@ import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRep
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
-import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.error.exception.MentoringPostNotFoundException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
@@ -20,6 +20,7 @@ import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,10 +59,13 @@ public class MentoringBoardService {
                     .title(boardDto.getTitle())
                     .contents(boardDto.getContents())
                     .role(boardDto.getRole())
+                    .status(PostStatus.RECRUITING)
                     .mentoringCnt(boardDto.getMentoringCnt())
                     .build();
             mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
                     .orElse(mentoringTeam.getLink()));
+            mentoringBoard.setDeadLine(Optional.ofNullable(boardDto.getDeadLine())
+                    .orElse(mentoringTeam.getDeadline()));
             mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
 
             MentoringBoard savedPost = mentoringBoardRepository.save(mentoringBoard);
@@ -73,8 +78,8 @@ public class MentoringBoardService {
      * @param postId
      * @return
      */
+
     public MentoringBoard findMentoringPost(Long postId) {
-        User user = getUser();
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
         if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) { //team의 최신 데이터 업데이트
@@ -85,7 +90,6 @@ public class MentoringBoardService {
     }
 
     public List<String> findTeamCategories(Long teamId) {
-        List<String> categories = new ArrayList<>();
         List<Object[]> teamCategories = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
         return teamCategories.stream()
                 .map(x -> String.valueOf(x[1]))
@@ -107,6 +111,7 @@ public class MentoringBoardService {
         }
         return dto;
     }
+
     /**
      * 특정 멘토링 팀의 삭제되지않은 모든 게시물들을 가져오는 로직
      * @param teamId
@@ -135,7 +140,7 @@ public class MentoringBoardService {
      * 삭제되지 않은 모든 게시물들을 가져오는 로직
      *
      * @return
-     */
+*/
     public PaginatedResponse<RsBoardDto> findAllPosts(MentoringStatus status, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdDate"));
 
@@ -200,12 +205,16 @@ public class MentoringBoardService {
      */
     @Transactional
     public void updateMentoringPost(Long postId, RqBoardDto dto) {
-
+        User user = getUser();
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
-        if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) {  //team의 최신 데이터 업데이트
-            mentoringBoard.updateBoard(dto);
-            } else {
+        MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
+        Optional<MentoringParticipation> TeamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
+        if (mentoringTeam.getFlag() == Status.FALSE) {  //team의 최신 데이터 업데이트
+            if (TeamUser.isPresent() && !TeamUser.get().getIsDeleted()) {
+                mentoringBoard.updateBoard(dto);
+            } else throw new BusinessException(ErrorCode.NO_AUTHORITY);
+        } else {
                 throw new MentoringTeamNotFoundException("이미 삭제된 팀의 글 입니다.");
             }
     }
@@ -228,6 +237,12 @@ public class MentoringBoardService {
             }
         }
         else throw new NoAuthorityException(ErrorCode.NO_AUTHORITY);
+    }
+
+    @Scheduled(cron = "0 0 0 * * ?") // 매일 자정 실행
+    @Transactional
+    public void updateCheckCompleteStatus() {
+        mentoringBoardRepository.bulkUpDateStatus(PostStatus.COMPLETE, PostStatus.RECRUITING, LocalDate.now());
     }
 
     private User getUser() {
