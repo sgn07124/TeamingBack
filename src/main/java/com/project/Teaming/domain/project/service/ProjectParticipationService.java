@@ -2,6 +2,7 @@ package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
+import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
@@ -153,5 +154,28 @@ public class ProjectParticipationService {
 
     private static boolean isTeamOwner(User user, ProjectParticipation teamOwner) {
         return user.getId().equals(teamOwner.getUser().getId());
+    }
+
+    public List<ProjectTeamMemberDto> getAllMembers(Long teamId) {
+        User user = userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+
+        // 현재 팀원 목록 조회
+        List<ProjectParticipation> teamMembers = projectParticipationRepository.findByProjectTeamIdAndParticipationStatus(teamId, ParticipationStatus.ACCEPTED);
+
+        // 팀의 멤버인지 판별
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED);
+        if (!isMember) {
+            throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
+        }
+
+        return teamMembers.stream()
+                .map(member -> {
+                    ProjectTeamMemberDto dto = new ProjectTeamMemberDto(member);
+                    dto.setLoginUser(member.getUser().getId().equals(user.getId()));  // 로그인 한 유저인지
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 }
