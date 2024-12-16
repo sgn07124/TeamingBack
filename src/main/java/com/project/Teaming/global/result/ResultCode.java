@@ -44,6 +44,7 @@ public enum ResultCode {
     EXPORT_TEAM_MEMBER(200, "P017", "프로젝트 팀원 내보내기 완료"),
     UPDATE_TEAM_STATUS(200, "P018", "프로젝트 팀 상태 변경 완료"),
     GET_MY_PROJECT(200, "P019", "참여 중인 프로젝트 조회 완료"),
+    GET_MEMBER_LIST(200, "P020", "프로젝트 멤버 조회 완료"),
 
     //Mentoring
     REGISTER_MENTORING_TEAM(200,"M001","멘토링 팀 등록 완료"),

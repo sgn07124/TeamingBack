@@ -2,6 +2,7 @@ package com.project.Teaming.domain.project.controller;
 
 import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
+import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
@@ -67,6 +68,13 @@ public class ProjectParticipateController {
     public ResultListResponse<ProjectParticipationInfoDto> getParticipations(@PathVariable Long team_id){
         List<ProjectParticipationInfoDto> list = projectParticipationService.getAllParticipationDtos(team_id);
         return  new ResultListResponse<>(ResultCode.GET_PARTICIPATION_LIST, list);
+    }
+
+    @GetMapping("/project/team/{team_id}/member")
+    @Operation(summary = "프로젝트 팀의 팀원 목록 조회", description = "프로젝트 팀원을 조회한다.")
+    public ResultListResponse<ProjectTeamMemberDto> getMembers(@PathVariable Long team_id) {
+        List<ProjectTeamMemberDto> list = projectParticipationService.getAllMembers(team_id);
+        return new ResultListResponse<>(ResultCode.GET_MEMBER_LIST, list);
     }
 
     @PutMapping("/project/team/{team_id}/member/{user_id}/export")
