@@ -22,8 +22,6 @@ public class MentoringTeam extends BaseEntity {
     private Long id;  // 멘토링 팀 ID
     @Column(name = "mentoring_name", length = 100)
     private String name;  // 멘토링 명
-    @Column(name = "recruit_deadline", length = 50)
-    private LocalDate deadline;  // 모집 마감일
     @Column(name = "start_date", length = 50)
     private LocalDate startDate;  // 멘토링 시작일
     @Column(name = "end_date", length = 50)
@@ -55,10 +53,9 @@ public class MentoringTeam extends BaseEntity {
     }
 
     @Builder
-    public MentoringTeam(Long id, String name, LocalDate deadline, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
+    public MentoringTeam(Long id, String name, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
         this.id = id;
         this.name = name;
-        this.deadline = deadline;
         this.startDate = startDate;
         this.endDate = endDate;
         this.mentoringCnt = mentoringCnt;
@@ -80,7 +77,6 @@ public class MentoringTeam extends BaseEntity {
         RsTeamDto dto = RsTeamDto.builder()
                 .id(this.getId())
                 .name(this.getName())
-                .deadline(this.getDeadline())
                 .startDate(this.getStartDate())
                 .mentoringCnt(this.getMentoringCnt())
                 .endDate(this.getEndDate())
@@ -94,7 +90,6 @@ public class MentoringTeam extends BaseEntity {
 
     public void mentoringTeamUpdate(RqTeamDto dto) {
         this.name = dto.getName();
-        this.deadline = dto.getDeadline();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();
         this.mentoringCnt = dto.getMentoringCnt();

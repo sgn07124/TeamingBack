@@ -63,7 +63,6 @@ public class MentoringTeamService {
         //팀 생성 로직
         MentoringTeam mentoringTeam = MentoringTeam.builder()
                 .name(dto.getName())
-                .deadline(dto.getDeadline())
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
                 .mentoringCnt(dto.getMentoringCnt())
