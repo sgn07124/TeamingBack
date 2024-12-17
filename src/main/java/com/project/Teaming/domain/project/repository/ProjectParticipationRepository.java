@@ -20,4 +20,8 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
     List<ProjectParticipation> findByUserIdAndParticipationStatus(Long userId, ParticipationStatus status);
 
     List<ProjectParticipation> findByProjectTeamIdAndParticipationStatus(Long projectTeamId, ParticipationStatus status);
+
+    Optional<ProjectParticipation> findByProjectTeamIdAndUserIdAndParticipationStatus(Long projectId, Long userId, ParticipationStatus status);
+
+    long countByProjectTeamIdAndParticipationStatusAndIsDeleted(Long teamId, ParticipationStatus status, boolean delete);
 }
