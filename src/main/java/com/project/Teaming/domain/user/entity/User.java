@@ -82,4 +82,8 @@ public class User extends BaseTimeEntity {
         this.name = name;
         this.portfolio = portfolio;
     }
+
+    public void incrementWarningCnt() {
+        this.warningCnt += 1;
+    }
 }

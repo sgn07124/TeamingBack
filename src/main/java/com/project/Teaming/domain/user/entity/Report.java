@@ -21,18 +21,25 @@ public class Report extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "report_id")
     private Long id;  // 신고 ID
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private ReportStatus status;  // 신고 상태
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_participation_id", referencedColumnName = "par_id",nullable = true)
     private ProjectParticipation projectParticipation;  // 프로젝트 유저 ID (FK)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentoring_participation_id", referencedColumnName = "mp_id",nullable = true)
     private MentoringParticipation mentoringParticipation;  // 멘토링 유저 ID (FK)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_user_id", referencedColumnName = "user_id", nullable = false)
     private User reportedUser;  // 신고 당한 사용자 ID (FK)
+
+    @Column(name = "warning_processed", nullable = false)
+    private boolean warningProcessed; // warningCnt 증가 처리 여부
 
     @PrePersist
     @PreUpdate
@@ -48,6 +55,7 @@ public class Report extends BaseTimeEntity {
         report.projectParticipation = reporterParticipation;
         report.reportedUser = reportedUser;
         report.status = ReportStatus.REPORTED;
+        report.warningProcessed = false;
         return report;
     }
 }
