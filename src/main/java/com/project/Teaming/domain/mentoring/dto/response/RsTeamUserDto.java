@@ -14,8 +14,8 @@ public class RsTeamUserDto {
     private String username;
     private MentoringRole role;
     private MentoringParticipationStatus status;
+    private Boolean isLogined;
     private Boolean isDeleted;
-
 
 
     public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
@@ -24,6 +24,7 @@ public class RsTeamUserDto {
         this.username = username;
         this.role = role;
         this.status = status;
+        this.isLogined = false;
         this.isDeleted = isDeleted;
     }
 }

@@ -126,7 +126,7 @@ public class MentoringBoardService {
             Map<Long, List<String>> categoryMap = new HashMap<>();
             for (Object[] row : categoryResults) {
                 Long boardId = (Long) row[0];
-                String categoryId = (String) row[1];
+                String categoryId = row[1] != null ? String.valueOf(row[1]) : null;
                 categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryId);
             }
             boards.forEach(post -> {
