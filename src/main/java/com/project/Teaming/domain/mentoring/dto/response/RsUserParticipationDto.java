@@ -12,11 +12,13 @@ public class RsUserParticipationDto {
     private String userId;
     private String username;
     private MentoringParticipationStatus status;
+    private Boolean isLogined;
 
     public RsUserParticipationDto(LocalDateTime participatedTime, Long userId, String username, MentoringParticipationStatus status) {
         this.participatedTime = participatedTime;
         this.userId = String.valueOf(userId);
         this.username = username;
         this.status = status;
+        this.isLogined = false;
     }
 }
