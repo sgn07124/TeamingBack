@@ -42,4 +42,12 @@ public class Report extends BaseTimeEntity {
             throw new BusinessException(ErrorCode.CHOOSE_ONE_DOMAIN);
         }
     }
+
+    public static Report projectReport(ProjectParticipation reporterParticipation, User reportedUser) {
+        Report report = new Report();
+        report.projectParticipation = reporterParticipation;
+        report.reportedUser = reportedUser;
+        report.status = ReportStatus.REPORTED;
+        return report;
+    }
 }

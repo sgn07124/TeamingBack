@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.controller;
 
 import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
+import com.project.Teaming.domain.project.dto.request.ReportDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
@@ -82,5 +83,12 @@ public class ProjectParticipateController {
     public ResultDetailResponse<Void> exportTeamMember(@PathVariable Long team_id, @PathVariable Long user_id) {
         projectParticipationService.exportMember(team_id, user_id);
         return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_MEMBER, null);
+    }
+
+    @PostMapping("project/report")
+    @Operation(summary = "프로젝트 팀 내 팀원 신고", description = "프로젝트 내의 팀원들은 팀원에 대하여 신고를 할 수 있다.")
+    public ResultDetailResponse<Void> reportUser(@RequestBody ReportDto dto) {
+        projectParticipationService.reportUser(dto.getTeamId(), dto.getReportedUserId());
+        return new ResultDetailResponse<>(ResultCode.REPORT_MEMBER, null);
     }
 }
