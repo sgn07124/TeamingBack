@@ -61,12 +61,11 @@ public class MentoringBoardService {
                     .contents(boardDto.getContents())
                     .role(boardDto.getRole())
                     .status(PostStatus.RECRUITING)
+                    .deadLine(boardDto.getDeadLine())
                     .mentoringCnt(boardDto.getMentoringCnt())
                     .build();
             mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
                     .orElse(mentoringTeam.getLink()));
-            mentoringBoard.setDeadLine(Optional.ofNullable(boardDto.getDeadLine())
-                    .orElse(mentoringTeam.getDeadline()));
             mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
 
             MentoringBoard savedPost = mentoringBoardRepository.save(mentoringBoard);

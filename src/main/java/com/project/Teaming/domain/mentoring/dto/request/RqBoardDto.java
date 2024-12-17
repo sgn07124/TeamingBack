@@ -15,6 +15,7 @@ public class RqBoardDto {
     private MentoringRole role;  // 모집하는 역할
     private int mentoringCnt;
     private String link;  // 연락 방법
+    @NotNull(message = "모집 마감기한을 작성해주세요 ")
     private LocalDate deadLine;
     @NotBlank(message = "내용을 작성해주세요")
     private String contents;  // 모집글 내용

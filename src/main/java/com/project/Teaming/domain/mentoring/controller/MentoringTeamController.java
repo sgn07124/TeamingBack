@@ -34,12 +34,13 @@ public class MentoringTeamController {
     private final MentoringTeamService mentoringTeamService;
 
     @PostMapping("/team")
-    @Operation(summary = "멘토링 팀 저장", description = "멘토링 팀을 생성하고 저장할 수 있으며, 멘토링 팀을 생성한 유저는 팀의 리더가 된다. " +
-            "status는 RECRUITING(모집중), WORKING(진행중), COMPLETE(완료) / role은 MENTOR(멘토), MENTEE(멘티)로 요청 주시면 됩니다" )
-    public ResultDetailResponse<Long> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
+    @Operation(summary = "멘토링 팀 저장", description = "멘토링 팀을 생성하고 저장할 수 있으며, 멘토링 팀을 생성한 유저는 팀의 리더가 된다,  " +
+            "status는 RECRUITING(모집중), WORKING(진행중), COMPLETE(완료) / role은 MENTOR(멘토), MENTEE(멘티)로 요청 주시면 됩니다,  " +
+            "저장된 팀의 id 반환")
+    public ResultDetailResponse<String> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
         log.info("SecurityContext Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
-        mentoringTeamService.saveMentoringTeam(dto);
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_TEAM, null);
+        Long savedId = mentoringTeamService.saveMentoringTeam(dto);
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_TEAM, String.valueOf(savedId));
     }
 
     @PostMapping("/team/{teamId}")
