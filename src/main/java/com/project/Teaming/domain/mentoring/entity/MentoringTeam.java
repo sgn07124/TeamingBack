@@ -66,10 +66,10 @@ public class MentoringTeam extends BaseEntity {
         this.status = status;
         this.link = link;
         this.flag = flag;
-        this.mentoringParticipationList = mentoringParticipationList;
-        this.mentoringBoardList = mentoringBoardList;
-        this.eventList = eventList;
-        this.categories = categories;
+        this.mentoringParticipationList = mentoringParticipationList != null ? mentoringParticipationList : new ArrayList<>();
+        this.mentoringBoardList = mentoringBoardList != null ? mentoringBoardList : new ArrayList<>();
+        this.eventList = eventList != null ? eventList : new ArrayList<>();
+        this.categories = categories != null ? categories : new ArrayList<>();
     }
 
     public void setFlag(Status flag) {

@@ -73,7 +73,7 @@ public class MentoringBoard extends BaseTimeEntity {
                 .id(String.valueOf(this.getId()))
                 .title(this.getTitle())
                 .mentoringTeamName(mentoringTeam.getName())
-                .deadLine(mentoringTeam.getDeadline())
+                .deadLine(this.getDeadLine())
                 .startDate(mentoringTeam.getStartDate())
                 .endDate(mentoringTeam.getEndDate())
                 .status(this.getStatus())

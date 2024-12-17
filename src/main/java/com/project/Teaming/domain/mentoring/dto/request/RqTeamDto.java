@@ -20,9 +20,9 @@ public class RqTeamDto {
     private String name;  // 멘토링 명
     @NotNull(message = "모집 마감일을 작성해 주세요")
     private LocalDate deadline;  // 모집 마감일
-    @NotBlank(message = "멘토링 시작일을 작성해 주세요")
+    @NotNull(message = "멘토링 시작일을 작성해 주세요")
     private LocalDate startDate;  // 멘토링 시작일
-    @NotBlank(message = "멘토링 종료일을 작성해 주세요")
+    @NotNull(message = "멘토링 종료일을 작성해 주세요")
     private LocalDate endDate;  // 멘토링 종료일
     private int mentoringCnt;
     @NotBlank(message = "멘토링 팀 설명을 작성해 주세요")
