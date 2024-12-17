@@ -5,6 +5,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -14,13 +15,13 @@ public class RsBoardDto {
     private Long id;
     private String title;
     private String mentoringTeamName;
-    private String startDate;
-    private String endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private List<String> category;
     private String contents;
 
     @Builder
-    public RsBoardDto(Long id, String title, String mentoringTeamName, String startDate, String endDate, List<String> category, String contents) {
+    public RsBoardDto(Long id, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, List<String> category, String contents) {
         this.id = id;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
@@ -30,7 +31,7 @@ public class RsBoardDto {
         this.contents = contents;
     }
 
-    public RsBoardDto(Long id, String title, String mentoringTeamName, String startDate, String endDate, String category, String contents) {
+    public RsBoardDto(Long id, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String category, String contents) {
         this.id = id;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
@@ -40,7 +41,7 @@ public class RsBoardDto {
         this.contents = contents;
     }
 
-    public RsBoardDto(Long id, String title, String mentoringTeamName, String startDate, String endDate, String contents) {
+    public RsBoardDto(Long id, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents) {
         this.id = id;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;

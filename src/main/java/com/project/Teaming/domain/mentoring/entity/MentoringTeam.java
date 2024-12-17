@@ -6,8 +6,8 @@ import com.project.Teaming.global.auditing.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,11 +23,11 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "mentoring_name", length = 100)
     private String name;  // 멘토링 명
     @Column(name = "recruit_deadline", length = 50)
-    private String deadline;  // 모집 마감일
+    private LocalDate deadline;  // 모집 마감일
     @Column(name = "start_date", length = 50)
-    private String startDate;  // 멘토링 시작일
+    private LocalDate startDate;  // 멘토링 시작일
     @Column(name = "end_date", length = 50)
-    private String endDate;  // 멘토링 종료일
+    private LocalDate endDate;  // 멘토링 종료일
     @Column(name = "mentoring_cnt")
     private Integer mentoringCnt;
     @Column(name = "content")
@@ -55,7 +55,7 @@ public class MentoringTeam extends BaseEntity {
     }
 
     @Builder
-    public MentoringTeam(Long id, String name, String deadline, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
+    public MentoringTeam(Long id, String name, LocalDate deadline, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
         this.id = id;
         this.name = name;
         this.deadline = deadline;
@@ -70,7 +70,6 @@ public class MentoringTeam extends BaseEntity {
         this.mentoringBoardList = mentoringBoardList != null ? mentoringBoardList : new ArrayList<>();
         this.eventList = eventList != null ? eventList : new ArrayList<>();
         this.categories = categories != null ? categories : new ArrayList<>();
-
     }
 
     public void setFlag(Status flag) {

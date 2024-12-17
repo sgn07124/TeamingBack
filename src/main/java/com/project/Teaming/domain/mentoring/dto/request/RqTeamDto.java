@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,11 +19,11 @@ public class RqTeamDto {
     @NotNull(message = "멘토링 팀 이름을 작성해 주세요")
     private String name;  // 멘토링 명
     @NotNull(message = "모집 마감일을 작성해 주세요")
-    private String deadline;  // 모집 마감일
-    @NotBlank(message = "멘토링 시작일을 작성해 주세요")
-    private String startDate;  // 멘토링 시작일
-    @NotBlank(message = "멘토링 종료일을 작성해 주세요")
-    private String endDate;  // 멘토링 종료일
+    private LocalDate deadline;  // 모집 마감일
+    @NotNull(message = "멘토링 시작일을 작성해 주세요")
+    private LocalDate startDate;  // 멘토링 시작일
+    @NotNull(message = "멘토링 종료일을 작성해 주세요")
+    private LocalDate endDate;  // 멘토링 종료일
     private int mentoringCnt;
     @NotBlank(message = "멘토링 팀 설명을 작성해 주세요")
     private String content;
@@ -35,7 +36,7 @@ public class RqTeamDto {
     private List<Long> categories;
 
     @Builder
-    public RqTeamDto(String name, String deadline, String startDate, String endDate, int mentoringCnt, String content, MentoringStatus status, String link, MentoringRole role, List<Long> categories) {
+    public RqTeamDto(String name, LocalDate deadline, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, MentoringStatus status, String link, MentoringRole role, List<Long> categories) {
         this.name = name;
         this.deadline = deadline;
         this.startDate = startDate;

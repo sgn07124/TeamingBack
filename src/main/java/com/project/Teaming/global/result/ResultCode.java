@@ -62,8 +62,9 @@ public enum ResultCode {
     CANCEL_MENTORING_PARTICIPATION(200, "M013", "멘토링 지원 취소 완료"),
     ACCEPT_MENTORING_PARTICIPATION(200, "M014", "멘토링 지원 수락 완료"),
     REJECT_MENTORING_PARTICIPATION(200, "M015", "멘토링 지원 거절 완료"),
-    GET_MEMBER_INFO(200, "M016", "멤버 및 지원자 현황 조회 완료"),
-    DELETE_PARTICIPATION(200, "M017", "팀 탈퇴 완료");
+    GET_MEMBER_INFO(200, "M016", "멘토링 팀 멤버 및 지원자 현황 조회 완료"),
+    DELETE_PARTICIPATION(200, "M017", "멘토링팀 탈퇴 완료"),
+    UPDATE_POST_STATUS(200, "M18", "멘토링 글에서 모집현황 업데이트 완료");
 
     private int status;
     private final String code;
