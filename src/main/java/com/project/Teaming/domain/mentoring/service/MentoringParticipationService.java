@@ -7,10 +7,7 @@ import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
-import com.project.Teaming.global.error.exception.MentoringParticipationAlreadyExistException;
-import com.project.Teaming.global.error.exception.MentoringParticipationNotFoundException;
-import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
-import com.project.Teaming.global.error.exception.NoAuthorityException;
+import com.project.Teaming.global.error.exception.*;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -138,6 +135,23 @@ public class MentoringParticipationService {
         }
     }
 
+    @Transactional
+    public void exportTeamUser(Long teamId, Long participationId) {
+        User user = getUser();
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (teamLeader.isEmpty()) {
+            throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
+        }
+        MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participationId).orElseThrow(MentoringParticipationNotFoundException::new);
+        if (mentoringParticipation.getMentoringTeam() == mentoringTeam && mentoringParticipation.getAuthority() == MentoringAuthority.CREW && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
+            mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.EXPORT);
+        } else {
+            throw new BusinessException(ErrorCode.NOT_A_MEMBER);
+        }
+
+    }
+
     /**
      * 탈퇴하는 로직
      * @param teamId
@@ -180,7 +194,7 @@ public class MentoringParticipationService {
                 responseList.add(dto);
                 return new ParticipantsDto<>(responseList);
 
-            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted()) {  //팀의 멤버인 유저
+            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted() && teamUser.get().getParticipationStatus() != MentoringParticipationStatus.EXPORT) {  //팀의 멤버인 유저
                 List<RsTeamUserDto> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
                 setLoginStatus(members,String.valueOf(user.getId()));
                 List<Object> responseList = new ArrayList<>();

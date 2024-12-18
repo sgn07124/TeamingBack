@@ -64,6 +64,13 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
 
+    @PostMapping("/team/{team_id}/{participant_id}/export")
+    @Operation(summary = "리더의 멘토링 팀원 강퇴" , description = "멘토링 팀 리더가 팀원을 강퇴하는 API")
+    public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long team_id, @PathVariable Long participant_id) {
+        mentoringParticipationService.exportTeamUser(team_id, participant_id);
+        return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_USER, null);
+    }
+
     @PostMapping("/team/{team_id}/quit")
     @Operation(summary = "팀 구성원의 탈퇴", description = "팀 구성원들이 탈퇴하는 API")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id) {

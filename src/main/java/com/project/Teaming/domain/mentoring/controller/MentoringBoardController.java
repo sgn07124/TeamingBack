@@ -42,10 +42,10 @@ public class MentoringBoardController {
 
     @PostMapping("/{team_id}/post")
     @Operation(summary = "멘토링 글 등록" , description = "멘토링 팀에서(팀의 팀장, 팀원 모두 가능) 글을 등록 할 수 있다. 멘토링 글 id 반환")
-    public ResultDetailResponse<Long> savePost(@PathVariable Long team_id,
+    public ResultDetailResponse<String> savePost(@PathVariable Long team_id,
                                                @RequestBody @Valid RqBoardDto dto) {
         Long savedMentoringPost = mentoringBoardService.saveMentoringPost(team_id, dto);
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, savedMentoringPost);
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, String.valueOf(savedMentoringPost));
     }
 
 
