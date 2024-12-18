@@ -7,10 +7,7 @@ import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
-import com.project.Teaming.global.error.exception.MentoringParticipationAlreadyExistException;
-import com.project.Teaming.global.error.exception.MentoringParticipationNotFoundException;
-import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
-import com.project.Teaming.global.error.exception.NoAuthorityException;
+import com.project.Teaming.global.error.exception.*;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -136,6 +133,23 @@ public class MentoringParticipationService {
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
         }
+    }
+
+    @Transactional
+    public void exportTeamUser(Long teamId, Long participationId) {
+        User user = getUser();
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        if (teamLeader.isEmpty()) {
+            throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
+        }
+        MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participationId).orElseThrow(MentoringParticipationNotFoundException::new);
+        if (mentoringParticipation.getMentoringTeam() == mentoringTeam && mentoringParticipation.getAuthority() == MentoringAuthority.CREW && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
+            mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.EXPORT);
+        } else {
+            throw new BusinessException(ErrorCode.NOT_A_MEMBER);
+        }
+
     }
 
     /**
