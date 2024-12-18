@@ -240,7 +240,6 @@ public class MentoringTeamService {
         } else {
             teamDto.setAuthority(teamUser.get().getAuthority());
         }
-
         return teamDto;
     }
 

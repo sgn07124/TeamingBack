@@ -194,7 +194,7 @@ public class MentoringParticipationService {
                 responseList.add(dto);
                 return new ParticipantsDto<>(responseList);
 
-            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted()) {  //팀의 멤버인 유저
+            } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted() && teamUser.get().getParticipationStatus() != MentoringParticipationStatus.EXPORT) {  //팀의 멤버인 유저
                 List<RsTeamUserDto> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
                 setLoginStatus(members,String.valueOf(user.getId()));
                 List<Object> responseList = new ArrayList<>();
