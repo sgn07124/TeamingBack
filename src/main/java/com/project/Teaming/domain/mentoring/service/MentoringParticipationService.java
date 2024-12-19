@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
+import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
@@ -35,10 +36,11 @@ public class MentoringParticipationService {
     /**
      * 지원자로 등록하는 로직
      * @param mentoringTeamId
-     * @param role
+     * @param dto
+     * @return
      */
     @Transactional
-    public Long saveMentoringParticipation(Long mentoringTeamId, MentoringRole role) {
+    public Long saveMentoringParticipation(Long mentoringTeamId, RqParticipationDto dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
@@ -52,9 +54,9 @@ public class MentoringParticipationService {
             }
         } else {
             MentoringParticipation mentoringParticipation = MentoringParticipation.builder()
-                    .participationStatus(MentoringParticipationStatus.PENDING)
-                    .authority(MentoringAuthority.NoAuth)
-                    .role(role)
+                    .participationStatus(dto.getStatus())
+                    .authority(dto.getAuthority())
+                    .role(dto.getRole())
                     .requestDate(LocalDateTime.now())
                     .reportingCnt(0)
                     .isDeleted(false)
