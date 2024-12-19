@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class RsTeamUserDto {
 
     private LocalDateTime acceptedTime;
-    private String userId;
+    private Long userId;
     private String username;
     private MentoringRole role;
     private MentoringParticipationStatus status;
@@ -20,7 +20,7 @@ public class RsTeamUserDto {
 
     public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
         this.acceptedTime = acceptedTime;
-        this.userId = String.valueOf(userId);
+        this.userId = userId;
         this.username = username;
         this.role = role;
         this.status = status;
