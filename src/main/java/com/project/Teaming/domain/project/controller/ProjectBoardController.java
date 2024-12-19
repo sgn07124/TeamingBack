@@ -77,14 +77,13 @@ public class ProjectBoardController {
             description = "커서 기반 페이징을 사용하여 게시글 목록을 조회한다. cursor를 기준으로 이후 게시글을 가져옵니다.",
             parameters = {
                     @Parameter(
-                            name = "cursor",
-                            description = "마지막 게시글의 ID(다음 페이지 조회 시 필요)",
-                            required = false,
-                            schema = @Schema(type = "integer", example = "34")
+                            name = "nextCursor",
+                            description = "다음 게시글의 ID(다음 페이지 조회 시 필요)",
+                            required = false
                     ),
                     @Parameter(
                             name = "pageSize",
-                            description = "페이지당 게시글 수",
+                            description = "페이지당 게시글 수(기본값: 10)",
                             required = false,
                             schema = @Schema(type = "integer", example = "10", defaultValue = "10")
                     )
