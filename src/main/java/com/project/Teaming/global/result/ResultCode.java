@@ -46,6 +46,7 @@ public enum ResultCode {
     GET_MY_PROJECT(200, "P019", "참여 중인 프로젝트 조회 완료"),
     GET_MEMBER_LIST(200, "P020", "프로젝트 멤버 조회 완료"),
     REPORT_MEMBER(200, "P021", "팀원 신고 완료"),
+    REVIEW_MEMBER(200, "P022", "팀원 리뷰 완료"),
 
     //Mentoring
     REGISTER_MENTORING_TEAM(200,"M001","멘토링 팀 등록 완료"),

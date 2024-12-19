@@ -22,6 +22,8 @@ public class ProjectTeamMemberDto {
     private boolean isLoginUser;  // 로그인 한 유저 본인인지 여부
     @JsonProperty("isReported")
     private boolean isReported;  // 해당 팀원을 로그인한 사용자가 신고했는지 여부
+    @JsonProperty("isReviewed")
+    private boolean isReviewed;  // 해당 팀원을 로그인한 사용자가 리뷰했는지 여부
 
     public ProjectTeamMemberDto(ProjectParticipation participation) {
         this.participationId = participation.getId();
@@ -36,5 +38,6 @@ public class ProjectTeamMemberDto {
         this.reportingCnt = participation.getReportingCnt();
         this.isLoginUser = false;
         this.isReported = false;
+        this.isReviewed = false;
     }
 }
