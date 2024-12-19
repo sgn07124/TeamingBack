@@ -78,13 +78,12 @@ public class ProjectBoardController {
             parameters = {
                     @Parameter(
                             name = "cursor",
-                            description = "마지막 게시글의 ID(다음 페이지 조회 시 필요)",
-                            required = false,
-                            schema = @Schema(type = "integer", example = "34")
+                            description = "다음 게시글의 ID(다음 페이지 조회 시 필요. nextCursor 값)",
+                            required = false
                     ),
                     @Parameter(
                             name = "pageSize",
-                            description = "페이지당 게시글 수",
+                            description = "페이지당 게시글 수(기본값: 10)",
                             required = false,
                             schema = @Schema(type = "integer", example = "10", defaultValue = "10")
                     )
