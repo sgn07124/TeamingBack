@@ -34,6 +34,7 @@ public enum ErrorCode {
     // ProjectTeam
     NOT_VALID_STACK_ID(400, "PT001", "유효하지 않은 스택 id가 포함되어 있습니다."),
     NOT_VALID_RECRUIT_CATEGORY_ID(400, "PT002", "유효하지 않은 모집 구분 id가 포함되어 있습니다."),
+    PROJECT_NOT_COMPLETE(404, "PT003", "프로젝트의 상태가 COMPLETE가 아닙니다."),
 
     // ProjectParticipation
     NOT_FOUND_PROJECT_TEAM(404, "PP001", "해당 프로젝트 팀을 찾을 수 없습니다"),
@@ -65,8 +66,10 @@ public enum ErrorCode {
     EXPORTED_MEMBER_NOT_EXISTS(404, "M011", "강퇴할 대상이 팀에 속해있지 않습니다."),
     NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
 
-    // Report
-    INVALID_REPORT_TARGET(404, "R001", "신고자를 찾을 수 없습니다.");
+    // Report & Review
+    INVALID_REPORT_TARGET(404, "R001", "신고자를 찾을 수 없습니다."),
+    INVALID_REVIEW_TARGET(404, "R002", "리뷰 대상자를 찾을 수 없습니다."),
+    INVALID_SELF_ACTION(404, "R003", "자기 자신에 대해서는 불가합니다.");
 
     private int status;
     private final String code;

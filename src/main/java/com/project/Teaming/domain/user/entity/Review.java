@@ -40,6 +40,15 @@ public class   Review extends BaseEntity {
     @JoinColumn(name = "reviewee_id", referencedColumnName = "user_id",nullable = false)
     private User reviewee;  // 리뷰 대상자 ID
 
+    public static Review projectReview(ProjectParticipation reviewerParticipation, User reviewee, int rating, String content) {
+        Review review = new Review();
+        review.projectParticipation = reviewerParticipation;
+        review.reviewee = reviewee;
+        review.rating = rating;
+        review.content = content;
+        return review;
+    }
+
     @PrePersist
     @PreUpdate
     private void validate() {

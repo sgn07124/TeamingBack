@@ -2,6 +2,7 @@ package com.project.Teaming.domain.project.controller;
 
 import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
 import com.project.Teaming.domain.project.dto.request.ReportDto;
+import com.project.Teaming.domain.project.dto.request.ReviewDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
@@ -90,5 +91,12 @@ public class ProjectParticipateController {
     public ResultDetailResponse<Void> reportUser(@RequestBody ReportDto dto) {
         projectParticipationService.reportUser(dto.getTeamId(), dto.getReportedUserId());
         return new ResultDetailResponse<>(ResultCode.REPORT_MEMBER, null);
+    }
+
+    @PostMapping("/project/review")
+    @Operation(summary = "프로젝트 팀 내 팀원 리뷰 작성", description = "프로젝트 내의 팀원들은 프로젝트 종료 후 팀원에 대해서 리뷰를 작성할 수 있다.")
+    public ResultDetailResponse<Void> reviewUser(@RequestBody ReviewDto dto) {
+        projectParticipationService.reviewUser(dto);
+        return new ResultDetailResponse<>(ResultCode.REVIEW_MEMBER, null);
     }
 }
