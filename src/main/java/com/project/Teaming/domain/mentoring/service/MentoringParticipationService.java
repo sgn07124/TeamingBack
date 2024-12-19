@@ -135,21 +135,30 @@ public class MentoringParticipationService {
         }
     }
 
+    /**
+     * 강퇴하는 로직
+     * @param teamId
+     * @param userId
+     */
+
     @Transactional
-    public void exportTeamUser(Long teamId, Long participationId) {
+    public void exportTeamUser(Long teamId, Long userId) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
+        User exportUser = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isEmpty()) {
             throw new NoAuthorityException(ErrorCode.NOT_A_LEADER);
         }
-        MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participationId).orElseThrow(MentoringParticipationNotFoundException::new);
-        if (mentoringParticipation.getMentoringTeam() == mentoringTeam && mentoringParticipation.getAuthority() == MentoringAuthority.CREW && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
-            mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.EXPORT);
-        } else {
-            throw new BusinessException(ErrorCode.NOT_A_MEMBER);
+        Optional<MentoringParticipation> export = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, exportUser);
+        if (export.isPresent()) {
+            if (export.get().getAuthority() == MentoringAuthority.CREW && export.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
+                export.get().setParticipationStatus(MentoringParticipationStatus.EXPORT);
+            } else {
+                throw new BusinessException(ErrorCode.NOT_A_MEMBER);
+            }
         }
-
+        else throw new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS);
     }
 
     /**
