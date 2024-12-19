@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.controller;
 
+import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
@@ -39,7 +40,8 @@ public class MentoringParticipationController {
     public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long post_id) {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
-        Long id = mentoringParticipationService.saveMentoringParticipation(mentoringTeam.getId(), mentoringPost.getRole());
+        RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
+        Long id = mentoringParticipationService.saveMentoringParticipation(mentoringTeam.getId(), participationDto);
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(id));
     }
 

@@ -48,19 +48,7 @@ public class MentoringTeamService {
 
     @Transactional
     public Long saveMentoringTeam(RqTeamDto dto) {
-        User user = getUser();
-        //participation 생성 로직
-        MentoringParticipation mentoringParticipation = MentoringParticipation.builder()
-                .participationStatus(MentoringParticipationStatus.ACCEPTED)
-                .authority(MentoringAuthority.LEADER)
-                .role(dto.getRole())
-                .reportingCnt(0)
-                .decisionDate(LocalDateTime.now())
-                .isDeleted(false)
-                .build();
 
-
-        //팀 생성 로직
         MentoringTeam mentoringTeam = MentoringTeam.builder()
                 .name(dto.getName())
                 .startDate(dto.getStartDate())
@@ -72,9 +60,6 @@ public class MentoringTeamService {
                 .flag(Status.FALSE)
                 .build();
 
-        //연관관계 매핑
-        mentoringParticipation.setUser(user);
-        mentoringParticipation.addMentoringTeam(mentoringTeam);
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
 
         //카테고리 생성

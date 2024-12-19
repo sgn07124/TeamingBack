@@ -1,9 +1,13 @@
 package com.project.Teaming.domain.mentoring.controller;
 
+import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
+import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
+import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
@@ -32,6 +36,7 @@ import java.util.stream.Collectors;
 public class MentoringTeamController {
 
     private final MentoringTeamService mentoringTeamService;
+    private final MentoringParticipationService mentoringParticipationService;
 
     @PostMapping("/team")
     @Operation(summary = "멘토링 팀 저장", description = "멘토링 팀을 생성하고 저장할 수 있으며, 멘토링 팀을 생성한 유저는 팀의 리더가 된다,  " +
@@ -40,6 +45,8 @@ public class MentoringTeamController {
     public ResultDetailResponse<String> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
         log.info("SecurityContext Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
         Long savedId = mentoringTeamService.saveMentoringTeam(dto);
+        RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
+        mentoringParticipationService.saveMentoringParticipation(savedId, participationDto);
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_TEAM, String.valueOf(savedId));
     }
 
