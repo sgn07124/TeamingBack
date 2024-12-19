@@ -4,6 +4,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.global.auditing.BaseEntity;
+import com.project.Teaming.global.auditing.BaseTimeEntity;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import jakarta.persistence.*;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "review")
 @NoArgsConstructor
 @AllArgsConstructor
-public class   Review extends BaseEntity {
+public class   Review extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

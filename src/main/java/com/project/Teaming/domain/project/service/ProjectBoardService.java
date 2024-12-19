@@ -16,12 +16,11 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
-import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -117,12 +116,14 @@ public class ProjectBoardService {
         projectBoardRepository.delete(projectBoard);
     }
 
-    public PaginatedResponse<ProjectPostListDto> getProjectPosts(PostStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Direction.DESC, "createdDate"));
+    public PaginatedCursorResponse<ProjectPostListDto> getProjectPosts(Long lastCursor, int pageSize) {
+        // Cursor 기준 게시글 가져오기
+        Pageable pageable = PageRequest.of(0, pageSize + 1, Sort.by(Direction.DESC, "createdDate"));  // pageSize+1은 다음 페이지의 첫 값을 nextCursor로 설정하기 위해
+        List<ProjectBoard> projectBoards = projectBoardRepository.findAllByCursor(lastCursor, pageable);
 
-        Page<ProjectBoard> projectBoards = projectBoardRepository.findAllByStatusOptional(status, pageable);
-
-        List<ProjectPostListDto> content = projectBoards.getContent().stream()
+        List<ProjectPostListDto> content = projectBoards.stream()
+                .distinct()  // 중복 제거
+                .limit(pageSize)  // 요청한 페이지 크기로 제한
                 .map(projectBoard -> {
                     ProjectTeam projectTeam = projectBoard.getProjectTeam();
                     List<String> stackIds = projectTeam.getStacks().stream()
@@ -131,16 +132,14 @@ public class ProjectBoardService {
                     return ProjectPostListDto.from(projectTeam, projectBoard, stackIds);
                 }).toList();
 
-        // PaginatedResponse로 변환
-        return new PaginatedResponse<>(
+        // Cursor 기반 페이징 응답
+        boolean isLast = projectBoards.size() <= pageSize; // 반환된 데이터 수가 요청한 pageSize보다 적으면 마지막 페이지
+        Long nextCursor = isLast ? null : projectBoards.get(pageSize).getId(); // 다음 커서 값 설정
+        return new PaginatedCursorResponse<>(
                 content,
-                projectBoards.getTotalPages(),
-                projectBoards.getTotalElements(),
-                projectBoards.getSize(),
-                projectBoards.getNumber(),
-                projectBoards.isFirst(),
-                projectBoards.isLast(),
-                projectBoards.getNumberOfElements()
+                nextCursor, // 다음 커서 값 반환
+                pageSize,
+                isLast  // 마지막 페이지 여부
         );
     }
 

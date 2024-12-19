@@ -4,13 +4,14 @@ import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
-import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
 import com.project.Teaming.global.result.ResultCode;
-import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.ResultListResponse;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -71,13 +72,29 @@ public class ProjectBoardController {
     }
 
     @GetMapping("/posts")
-    @Operation(summary = "프로젝트 게시글 리스트로 조회", description = "메인페이지의 프로젝트 게시글 목록을 조회. "
-            + "기본값으로 첫 페이지는 1이고, 페이지 당 글 개수는 4개이고 status는 선택(미기입 시, 전체 글 조회이고, status=RECRUITING는 모집 중인 글이고, status=COMPLETED는 모집 마감된 글)이다.")
-    public ResultDetailResponse<PaginatedResponse<ProjectPostListDto>> getPosts(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "4") int size,
-            @RequestParam(required = false) PostStatus status) {
-        PaginatedResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(status, page, size);
+    @Operation(
+            summary = "게시글 목록 조회",
+            description = "커서 기반 페이징을 사용하여 게시글 목록을 조회한다. cursor를 기준으로 이후 게시글을 가져옵니다.",
+            parameters = {
+                    @Parameter(
+                            name = "cursor",
+                            description = "마지막 게시글의 ID(다음 페이지 조회 시 필요)",
+                            required = false,
+                            schema = @Schema(type = "integer", example = "34")
+                    ),
+                    @Parameter(
+                            name = "pageSize",
+                            description = "페이지당 게시글 수",
+                            required = false,
+                            schema = @Schema(type = "integer", example = "10", defaultValue = "10")
+                    )
+            }
+    )
+    public ResultDetailResponse<PaginatedCursorResponse<ProjectPostListDto>> getPosts(
+            @RequestParam(required = false) Long cursor, // 마지막 게시글 ID
+            @RequestParam(defaultValue = "10") int pageSize) {
+
+        PaginatedCursorResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(cursor, pageSize);
         return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
     }
 
