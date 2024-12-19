@@ -5,6 +5,7 @@ import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
@@ -174,6 +175,22 @@ public class MentoringParticipationService {
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
             teamUser.get().setDeleted(true);
+            if (teamUser.get().getAuthority() == MentoringAuthority.LEADER) {
+                //제일 일찍 들어온 팀원 조회
+                Optional<MentoringParticipation> firstMember = mentoringParticipationRepository.findTeamUsers(mentoringTeam.getId(), MentoringParticipationStatus.ACCEPTED, MentoringAuthority.CREW)
+                        .stream()
+                        .findFirst();
+                // 새로운 리더 설정
+                firstMember.ifPresentOrElse(
+                        participation -> {
+                            participation.setAuthority(MentoringAuthority.LEADER);
+                            log.info("New team leader set: {}", participation.getUser().getId());
+                        },
+                        () -> {
+                            throw new BusinessException(ErrorCode.NO_ELIGIBLE_MEMBER_FOR_LEADER);
+                        }
+                );
+            }
         } else {
             throw new NoAuthorityException(ErrorCode.NOT_A_MEMBER);
         }
@@ -195,8 +212,8 @@ public class MentoringParticipationService {
         if (teamUser.isPresent()) {  //팀과의 연관관계가 있으면
             if (teamUser.get().getAuthority() == MentoringAuthority.LEADER && !teamUser.get().getIsDeleted()) {  //팀의 리더인 유저
                 List<RsTeamUserDto> allTeamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
-                setLoginStatus(allTeamUsers,String.valueOf(user.getId()));
-                List<RsTeamParticipationDto> participations = mentoringParticipationRepository.findAllForLeader(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
+                setLoginStatus(allTeamUsers,user.getId());
+                List<RsTeamParticipationDto> participations = mentoringParticipationRepository.findAllForLeader(teamId, 1L, MentoringParticipationStatus.EXPORT);
                 LeaderResponseDto dto = new LeaderResponseDto();
                 dto.setMembers(allTeamUsers);
                 dto.setParticipations(participations);
@@ -207,7 +224,7 @@ public class MentoringParticipationService {
 
             } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted() && teamUser.get().getParticipationStatus() != MentoringParticipationStatus.EXPORT) {  //팀의 멤버인 유저
                 List<RsTeamUserDto> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
-                setLoginStatus(members,String.valueOf(user.getId()));
+                setLoginStatus(members,user.getId());
                 List<Object> responseList = new ArrayList<>();
                 responseList.add(MentoringAuthority.CREW);
                 responseList.add(members);
@@ -215,8 +232,8 @@ public class MentoringParticipationService {
             }
         }
         //연관관계가 있지만 NoAuth인 경우 또는 연관관계가 없는경우
-        List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
-        setLoginStatus(forUser,String.valueOf(user.getId()));
+        List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(teamId, 1L, MentoringParticipationStatus.EXPORT);
+        setLoginStatus(forUser,user.getId());
         List<Object> responseList = new ArrayList<>();
         responseList.add(MentoringAuthority.NoAuth);
         responseList.add(forUser);
@@ -236,7 +253,7 @@ public class MentoringParticipationService {
      * @param dtos
      * @param userId
      */
-    private void setLoginStatus(List<?> dtos, String userId) {
+    private void setLoginStatus(List<?> dtos, Long userId) {
         dtos.forEach(dto -> {
             if (dto instanceof RsTeamUserDto teamDto && teamDto.getUserId().equals(userId)) {
                 teamDto.setIsLogined(true);

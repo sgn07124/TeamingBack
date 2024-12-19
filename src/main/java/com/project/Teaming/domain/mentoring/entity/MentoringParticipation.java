@@ -31,7 +31,6 @@ public class MentoringParticipation {
     private LocalDateTime decisionDate;  // 신청 수락/거절 날짜
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 역할
-
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
     @Column(name = "reporting_cnt")

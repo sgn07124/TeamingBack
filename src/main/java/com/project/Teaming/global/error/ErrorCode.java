@@ -63,6 +63,7 @@ public enum ErrorCode {
     EXPORTED_BY_TEAM(404, "M009", "이미 강퇴된 팀 입니다."),
     NOT_A_MEMBER(404, "M010", "팀 구성원이 아닙니다."),
     EXPORTED_MEMBER_NOT_EXISTS(404, "M011", "강퇴할 대상이 팀에 속해있지 않습니다."),
+    NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
 
     // Report
     INVALID_REPORT_TARGET(404, "R001", "신고자를 찾을 수 없습니다.");
