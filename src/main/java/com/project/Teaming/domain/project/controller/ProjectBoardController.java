@@ -77,8 +77,8 @@ public class ProjectBoardController {
             description = "커서 기반 페이징을 사용하여 게시글 목록을 조회한다. cursor를 기준으로 이후 게시글을 가져옵니다.",
             parameters = {
                     @Parameter(
-                            name = "nextCursor",
-                            description = "다음 게시글의 ID(다음 페이지 조회 시 필요)",
+                            name = "cursor",
+                            description = "다음 게시글의 ID(다음 페이지 조회 시 필요. nextCursor 값)",
                             required = false
                     ),
                     @Parameter(
