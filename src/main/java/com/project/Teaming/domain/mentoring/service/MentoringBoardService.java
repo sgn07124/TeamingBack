@@ -16,6 +16,7 @@ import com.project.Teaming.global.error.exception.MentoringPostNotFoundException
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import com.querydsl.core.Tuple;
 import lombok.RequiredArgsConstructor;
@@ -142,58 +143,39 @@ public class MentoringBoardService {
      *
      * @return
 */
-    public PaginatedResponse<RsBoardDto> findAllPosts(MentoringStatus status, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+    public PaginatedCursorResponse<RsBoardDto> findAllPosts(Long cursor, int size) {
+        List<Long> ids = mentoringBoardRepository.findMentoringBoardIds(cursor, size + 1, Status.FALSE);
 
-        List<Long> boardIds = mentoringBoardRepository.findMentoringBoardIds(status, Status.FALSE, pageable);  //삭제되지 않은 글들의 id
+        // 2. 다음 페이지 여부 확인
+        boolean isLast = ids.size() <= size;
+        if (!isLast) {
+            ids = ids.subList(0, size); // 추가된 데이터 제외하고 요청 크기만큼 자르기
+        }
 
-        List<Tuple> results = mentoringBoardRepository.findAllByIds(boardIds);
-        //메모리에서 그룹화,정렬 해줌, db에서 하면 집계되어 중복데이터
-        Map<Long, List<Tuple>> groupedResults = results.stream()
-                .collect(Collectors.groupingBy(tuple -> tuple.get(QMentoringBoard.mentoringBoard.id)));
-
-        List<RsBoardDto> dtoResults = boardIds.stream()
-                .map(boardId -> {
-                    List<Tuple> groupedTuples = groupedResults.get(boardId);
-                    if (groupedTuples == null || groupedTuples.isEmpty()) {
-                        return null;
-                    }
-                    Tuple firstTuple = groupedTuples.get(0);  //카테고리가 여러개여서 카테고리수만큼 중복 데이터가 생김. 하나만 활용
-
-                    // 각 보드에 대해 카테고리 리스트 생성
-                    List<String> categories = groupedTuples.stream()
-                            .map(tuple -> String.valueOf(tuple.get(QCategory.category.id)))
-                            .filter(Objects::nonNull)
+        List<MentoringBoard> boards = mentoringBoardRepository.findAllByIds(ids);
+        List<MentoringBoard> distinctBoards = boards.stream()
+                .distinct()
+                .toList();
+        List<RsBoardDto> boardDtos = distinctBoards.stream()
+                .map(board -> {
+                    MentoringTeam mentoringTeam = board.getMentoringTeam();
+                    List<String> categories = mentoringTeam.getCategories().stream()
+                            .map(category -> String.valueOf(category.getCategory().getId()))
                             .distinct()
-                            .collect(Collectors.toList());
-
-                    // RsBoardDto 객체 생성
-                    return new RsBoardDto(
-                            firstTuple.get(QMentoringBoard.mentoringBoard.id),
-                            firstTuple.get(QMentoringBoard.mentoringBoard.title),
-                            firstTuple.get(QMentoringTeam.mentoringTeam.name),
-                            firstTuple.get(QMentoringTeam.mentoringTeam.startDate),
-                            firstTuple.get(QMentoringTeam.mentoringTeam.endDate),
-                            categories,
-                            firstTuple.get(QMentoringBoard.mentoringBoard.contents)
-                    );
+                            .toList();
+                    return RsBoardDto.from(board, mentoringTeam, categories);
                 })
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
+
+        //  다음 커서 설정
+        Long nextCursor = (distinctBoards.isEmpty() || isLast) ? null : distinctBoards.get(distinctBoards.size() - 1).getId();
 
 
-        long total = mentoringBoardRepository.countAllByStatus(status, Status.FALSE);
-
-        Page<RsBoardDto> pageDto = new PageImpl<>(dtoResults, pageable, total);
-        return new PaginatedResponse<>(
-                pageDto.getContent(),
-                pageDto.getTotalPages(),
-                pageDto.getTotalElements(),
-                pageDto.getSize(),
-                pageDto.getNumber(),
-                pageDto.isFirst(),
-                pageDto.isLast(),
-                pageDto.getNumberOfElements()
+        return new PaginatedCursorResponse<>(
+                boardDtos,
+                nextCursor, // 다음 커서 값 반환
+                size,
+                isLast // 마지막 페이지 여부
         );
 
     }
