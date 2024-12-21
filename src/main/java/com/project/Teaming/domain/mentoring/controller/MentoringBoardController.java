@@ -16,8 +16,11 @@ import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.result.ResultListResponse;
+import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,11 +64,26 @@ public class MentoringBoardController {
 
 
     @GetMapping("/posts")
-    @Operation(summary = "멘토링 글 모두 조희", description = "모든 멘토링 게시물들을 조희할 수 있다. 멘토링 게시글페이지 보여 줄 때의 API, 한페이지당 4개의 글")
-    public ResultDetailResponse<PaginatedResponse<RsBoardDto>> findAllPosts(@RequestParam(defaultValue = "1") int page,
-                                                                          @RequestParam(defaultValue = "4") int size,
-                                                                          @RequestParam(required = false) MentoringStatus status) {
-        PaginatedResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(status, page, size);
+    @Operation(
+            summary = "게시글 목록 조회",
+            description = "커서 기반 페이징을 사용하여 게시글 목록을 조회한다. cursor를 기준으로 이후 게시글을 가져옵니다.",
+            parameters = {
+                    @Parameter(
+                            name = "cursor",
+                            description = "다음 게시글의 ID(다음 페이지 조회 시 필요. nextCursor 값)",
+                            required = false
+                    ),
+                    @Parameter(
+                            name = "size",
+                            description = "페이지당 게시글 수(기본값: 10)",
+                            required = false,
+                            schema = @Schema(type = "integer", example = "10", defaultValue = "10")
+                    )
+            }
+    )
+    public ResultDetailResponse<PaginatedCursorResponse<RsBoardDto>> findAllPosts(@RequestParam(required = false) Long cursor, // 커서
+                                                                            @RequestParam(defaultValue = "10") int size ) {
+        PaginatedCursorResponse<RsBoardDto> allPosts = mentoringBoardService.findAllPosts(cursor, size);
         return new ResultDetailResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, allPosts);
     }
 

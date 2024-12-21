@@ -23,7 +23,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
     }
 
     @Override
-    public List<Long> findMentoringBoardIds(MentoringStatus status, Status flag, Pageable pageable) {
+    public List<Long> findMentoringBoardIds(Long lastCursor, int size, Status flag) {
         QMentoringBoard mb = QMentoringBoard.mentoringBoard;
         QMentoringTeam mt = QMentoringTeam.mentoringTeam;
 
@@ -31,15 +31,17 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
                 .select(mb.id)
                 .from(mb)
                 .join(mb.mentoringTeam, mt)
-                .where(mt.flag.eq(flag), statusEq(status))
+                .where(
+                        mt.flag.eq(flag),
+                        lastCursorCondition(lastCursor)
+                        )
                 .orderBy(mb.createdDate.desc())
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(size)
                 .fetch();
     }
 
     @Override
-    public List<Tuple> findAllByIds(List<Long> boardIds) {
+    public List<MentoringBoard> findAllByIds(List<Long> boardIds) {
         if (boardIds.isEmpty()) {
             return List.of();
         }
@@ -50,31 +52,19 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
         QCategory c = QCategory.category;
 
         return queryFactory
-                .select(mb.id, mb.title, mt.name, mt.startDate, mt.endDate, c.id, mb.contents)
-                .from(mb)
-                .join(mb.mentoringTeam, mt)
-                .leftJoin(mt.categories, tc)
-                .leftJoin(tc.category, c)
+                .selectFrom(mb)
+                .join(mb.mentoringTeam, mt).fetchJoin()
+                .join(mt.categories, tc).fetchJoin()
+                .join(tc.category, c).fetchJoin()
                 .where(mb.id.in(boardIds))
-                .orderBy(mb.createdDate.desc())
+                .orderBy(mb.createdDate.desc(),
+                        c.id.asc())             // Category 기준 정렬 추가)
                 .fetch();
 
     }
 
-    @Override
-    public long countAllByStatus(MentoringStatus status, Status flag) {
+    private BooleanExpression lastCursorCondition(Long lastCursor) {
         QMentoringBoard mb = QMentoringBoard.mentoringBoard;
-        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
-
-        return queryFactory
-                .select(mb.count())
-                .from(mb)
-                .join(mb.mentoringTeam, mt)
-                .where(statusEq(status), mt.flag.eq(flag))
-                .fetchOne();
-    }
-
-    private BooleanExpression statusEq(MentoringStatus status) {
-        return status == null ? null : QMentoringTeam.mentoringTeam.status.eq(status);
+        return lastCursor == null ? null : mb.id.lt(lastCursor);
     }
 }
