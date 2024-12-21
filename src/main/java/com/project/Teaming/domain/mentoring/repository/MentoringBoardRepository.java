@@ -38,5 +38,8 @@ public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,L
                           @Param("currentStatus") PostStatus currentStatus,
                           @Param("now") LocalDate now);
 
+    @Modifying
+    @Query("DELETE FROM MentoringBoard mb WHERE mb.mentoringTeam.id = :teamId")
+    void deleteByTeamId(@Param("teamId") Long teamId);
 
 }

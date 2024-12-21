@@ -11,4 +11,7 @@ import java.util.Optional;
 
 public interface MentoringTeamRepository extends JpaRepository<MentoringTeam,Long> {
 
+    @Query("SELECT t FROM MentoringTeam t JOIN FETCH t.mentoringBoardList WHERE t.id = :teamId")
+    Optional<MentoringTeam> findWithBoardsById(@Param("teamId") Long teamId);
+
 }

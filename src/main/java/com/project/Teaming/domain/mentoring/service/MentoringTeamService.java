@@ -5,15 +5,14 @@ import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
 import com.project.Teaming.domain.mentoring.entity.*;
-import com.project.Teaming.domain.mentoring.repository.CategoryRepository;
-import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
-import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
-import com.project.Teaming.domain.mentoring.repository.TeamCategoryRepository;
+import com.project.Teaming.domain.mentoring.repository.*;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -35,11 +34,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MentoringTeamService {
 
+    @PersistenceContext
+    private final EntityManager entityManager;
+
     private final MentoringTeamRepository mentoringTeamRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final TeamCategoryRepository teamCategoryRepository;
     private final MentoringParticipationRepository mentoringParticipationRepository;
+    private final MentoringBoardRepository mentoringBoardRepository;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -159,10 +162,13 @@ public class MentoringTeamService {
     @Transactional
     public void deleteMentoringTeam(Long mentoringTeamId) {
         User user = getUser();
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findWithBoardsById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
             mentoringTeam.setFlag(Status.TRUE);
+            mentoringBoardRepository.deleteByTeamId(mentoringTeamId);
+            // 영속성 컨텍스트 초기화
+            entityManager.clear();
         }
         else throw new NoAuthorityException("삭제 할 권한이 없습니다");
     }

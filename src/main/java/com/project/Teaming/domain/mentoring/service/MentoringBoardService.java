@@ -223,7 +223,7 @@ public class MentoringBoardService {
     }
 
     /**
-     * 리더가 글에서 모집 현황을 수정할 수 있는 로직
+     * 팀원이 글에서 모집 현황을 수정할 수 있는 로직
      * @param teamId
      * @param postId
      * @return
@@ -232,9 +232,9 @@ public class MentoringBoardService {
     public MentoringPostStatusDto updatePostStatus(Long teamId, Long postId) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
-        Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
+        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
         MentoringBoard post = mentoringBoardRepository.findById(postId).orElseThrow(MentoringPostNotFoundException::new);
-        if (teamLeader.isPresent()) {
+        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
             post.updateStatus();
             return new MentoringPostStatusDto(PostStatus.COMPLETE);
         } else {
