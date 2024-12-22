@@ -1,18 +1,10 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
-import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
-import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
-import com.project.Teaming.domain.mentoring.service.TeamCategoryService;
-import com.project.Teaming.domain.user.entity.User;
-import com.project.Teaming.domain.user.service.UserService;
-import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.result.ResultListResponse;
@@ -21,9 +13,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

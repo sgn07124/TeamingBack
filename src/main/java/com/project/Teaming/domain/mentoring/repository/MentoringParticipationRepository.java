@@ -53,8 +53,13 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("participationStatus") MentoringParticipationStatus participationStatus,
             @Param("authority") MentoringAuthority authority);
 
-
-    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status);
+    @Query("select mp from " +
+    "MentoringParticipation mp " +
+    "join mp.mentoringTeam mt " +
+    "join mp.user u " +
+    "where mt = :mentoringTeam and u = :user and mp.participationStatus = :status and mp.isDeleted = false")
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(
+            @Param("mentoringTeam") MentoringTeam mentoringTeam,@Param("user") User user,@Param("status") MentoringParticipationStatus status);
 
     @Query("SELECT mp FROM MentoringParticipation mp " +
             "JOIN FETCH mp.mentoringTeam mt " +
@@ -63,5 +68,11 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("user") User user,
             @Param("status") MentoringParticipationStatus status,
             @Param("flag") Status flag);
+
+    @Query("SELECT COUNT(mp) FROM MentoringParticipation mp " +
+            "WHERE mp.mentoringTeam.id = :teamId " +
+            "AND mp.participationStatus = :status " +
+            "AND mp.isDeleted = false")
+    long countByMentoringTeamIdAndParticipationStatusAndIsDeleted(@Param("teamId") Long teamId, @Param("status") MentoringParticipationStatus status);
 
 }

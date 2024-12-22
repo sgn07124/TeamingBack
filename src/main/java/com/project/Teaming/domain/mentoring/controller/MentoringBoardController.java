@@ -6,18 +6,10 @@ import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
-import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
-import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
-import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
-import com.project.Teaming.domain.user.entity.User;
-import com.project.Teaming.domain.user.service.UserService;
-import com.project.Teaming.global.error.exception.NoAuthorityException;
-import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.result.ResultListResponse;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
-import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,14 +17,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController

@@ -38,7 +38,7 @@ public class Report extends BaseTimeEntity {
     @JoinColumn(name = "reported_user_id", referencedColumnName = "user_id", nullable = false)
     private User reportedUser;  // 신고 당한 사용자 ID (FK)
 
-    @Column(name = "warning_processed", nullable = false)
+    @Column(name = "warning_processed")
     private boolean warningProcessed; // warningCnt 증가 처리 여부
 
     @PrePersist
@@ -56,6 +56,13 @@ public class Report extends BaseTimeEntity {
         report.reportedUser = reportedUser;
         report.status = ReportStatus.REPORTED;
         report.warningProcessed = false;
+        return report;
+    }
+    public static Report mentoringReport(MentoringParticipation reportingParticipation, User reportedUser) {
+        Report report = new Report();
+        report.mentoringParticipation = reportingParticipation;
+        report.reportedUser = reportedUser;
+        report.status = ReportStatus.REPORTED;
         return report;
     }
 }

@@ -69,7 +69,10 @@ public enum ErrorCode {
     // Report & Review
     INVALID_REPORT_TARGET(404, "R001", "신고자를 찾을 수 없습니다."),
     INVALID_REVIEW_TARGET(404, "R002", "리뷰 대상자를 찾을 수 없습니다."),
-    INVALID_SELF_ACTION(404, "R003", "자기 자신에 대해서는 불가합니다.");
+    INVALID_SELF_ACTION(404, "R003", "자기 자신에 대해서는 불가합니다."),
+    STILL_TEAM_USER(404, "R004", "아직 팀구성원이여서 신고할 수 없습니다."),
+    NOT_A_TEAM_USER(404, "R005", "신고할 수 있는 권한이 없습니다."),
+    ALREADY_REPORTED(404, "R006", "이미 신고한 사용자입니다.");
 
     private int status;
     private final String code;
