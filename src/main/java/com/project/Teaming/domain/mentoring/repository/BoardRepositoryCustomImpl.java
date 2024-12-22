@@ -1,15 +1,9 @@
 package com.project.Teaming.domain.mentoring.repository;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
 import com.project.Teaming.domain.mentoring.entity.*;
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -58,7 +52,7 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
                 .join(tc.category, c).fetchJoin()
                 .where(mb.id.in(boardIds))
                 .orderBy(mb.createdDate.desc(),
-                        c.id.asc())             // Category 기준 정렬 추가)
+                        c.id.asc())             // Category 기준 정렬 추가
                 .fetch();
 
     }
