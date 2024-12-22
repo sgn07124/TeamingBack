@@ -83,7 +83,6 @@ public class MentoringTeam extends BaseEntity {
                 .content(this.getContent())
                 .status(this.getStatus())
                 .link(this.getLink())
-                .status(this.getStatus())
                 .build();
         return dto;
     }
@@ -94,7 +93,6 @@ public class MentoringTeam extends BaseEntity {
         this.endDate = dto.getEndDate();
         this.mentoringCnt = dto.getMentoringCnt();
         this.content = dto.getContent();
-        this.status = dto.getStatus();
         this.link = dto.getLink();
     }
 }

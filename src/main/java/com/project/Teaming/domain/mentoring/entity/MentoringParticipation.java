@@ -62,8 +62,6 @@ public class MentoringParticipation {
     }
 
 
-
-
     public void setParticipationStatus(MentoringParticipationStatus participationStatus) {
         this.participationStatus = participationStatus;
     }

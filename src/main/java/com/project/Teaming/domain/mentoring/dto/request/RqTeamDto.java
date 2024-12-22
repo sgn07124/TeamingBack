@@ -25,7 +25,6 @@ public class RqTeamDto {
     private int mentoringCnt;
     @NotBlank(message = "멘토링 팀 설명을 작성해 주세요")
     private String content;
-    private MentoringStatus status;
     @NotBlank(message = "연락방법을 작성해 주세요")
     private String link;
     @NotNull(message = "내 역할을 작성해 주세요")
@@ -34,13 +33,12 @@ public class RqTeamDto {
     private List<Long> categories;
 
     @Builder
-    public RqTeamDto(String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, MentoringStatus status, String link, MentoringRole role, List<Long> categories) {
+    public RqTeamDto(String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, String link, MentoringRole role, List<Long> categories) {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
         this.mentoringCnt = mentoringCnt;
         this.content = content;
-        this.status = status;
         this.link = link;
         this.role = role;
         this.categories = categories;

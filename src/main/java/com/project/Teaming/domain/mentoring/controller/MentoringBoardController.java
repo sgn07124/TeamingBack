@@ -96,7 +96,7 @@ public class MentoringBoardController {
     }
 
     @PostMapping("/post/{team_id}/{post_id}/complete")
-    @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀장이 모집 완료 처리를 직접 할 수 있다.")
+    @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀구성원이 모집 완료 처리를 직접 할 수 있다.")
     public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
         MentoringPostStatusDto statusDto = mentoringBoardService.updatePostStatus(team_id, post_id);
         return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,statusDto);

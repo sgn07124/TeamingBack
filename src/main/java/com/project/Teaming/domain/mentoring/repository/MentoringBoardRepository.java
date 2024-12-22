@@ -13,15 +13,14 @@ import java.util.List;
 
 public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,Long>, BoardRepositoryCustom {
 
-    @Query("SELECT new com.project.Teaming.domain.mentoring.dto.response.RsBoardDto(pb.id, pb.title,mt.name, mt.startDate, mt.endDate, pb.contents) " +
-            "FROM MentoringBoard pb " +
-            "JOIN pb.mentoringTeam mt " +
+    @Query("SELECT new com.project.Teaming.domain.mentoring.dto.response.RsBoardDto(mb.id, mb.title,mt.name, mt.startDate, mt.endDate, mb.contents, mb.status) " +
+            "FROM MentoringBoard mb " +
+            "JOIN mb.mentoringTeam mt " +
             "WHERE mt.id = :teamId " +
-            "ORDER BY pb.createdDate desc")
+            "ORDER BY mb.createdDate desc")
     List<RsBoardDto> findAllByMentoringTeamId(@Param("teamId") Long teamId);
 
     /**
-     * 수정필요, n+1문제고려
      * @param teamId
      * @return
      */
@@ -38,5 +37,8 @@ public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,L
                           @Param("currentStatus") PostStatus currentStatus,
                           @Param("now") LocalDate now);
 
+    @Modifying
+    @Query("DELETE FROM MentoringBoard mb WHERE mb.mentoringTeam.id = :teamId")
+    void deleteByTeamId(@Param("teamId") Long teamId);
 
 }

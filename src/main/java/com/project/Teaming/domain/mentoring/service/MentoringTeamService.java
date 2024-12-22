@@ -1,19 +1,19 @@
 package com.project.Teaming.domain.mentoring.service;
 
+import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
 import com.project.Teaming.domain.mentoring.entity.*;
-import com.project.Teaming.domain.mentoring.repository.CategoryRepository;
-import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
-import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
-import com.project.Teaming.domain.mentoring.repository.TeamCategoryRepository;
+import com.project.Teaming.domain.mentoring.repository.*;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -35,11 +35,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MentoringTeamService {
 
+    @PersistenceContext
+    private final EntityManager entityManager;
+
     private final MentoringTeamRepository mentoringTeamRepository;
     private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
-    private final TeamCategoryRepository teamCategoryRepository;
+    private final TeamCategoryService teamCategoryService;
+    private final MentoringParticipationService mentoringParticipationService;
     private final MentoringParticipationRepository mentoringParticipationRepository;
+    private final MentoringBoardRepository mentoringBoardRepository;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -61,18 +65,12 @@ public class MentoringTeamService {
                 .build();
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
+        //리더 생성
+        RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
+        mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
 
         //카테고리 생성
-        List<Long> categoryIds = dto.getCategories();
-        List<Category> categories = categoryRepository.findAllById(categoryIds);
-
-        //연관관계 매핑
-        for (Category category : categories) {
-            TeamCategory teamCategory = new TeamCategory();
-            teamCategory.setCategory(category);
-            teamCategory.setMentoringTeam(mentoringTeam);
-            teamCategoryRepository.save(teamCategory);
-        }
+        teamCategoryService.saveTeamCategories(saved,dto.getCategories());
         return saved.getId();
     }
 
@@ -91,32 +89,10 @@ public class MentoringTeamService {
         }
         if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
             mentoringTeam.mentoringTeamUpdate(dto); //업데이트 메서드
-            List<TeamCategory> categoriesToRemove = new ArrayList<>(mentoringTeam.getCategories()); // 리스트 복사,객체 참조
-            // 연관관계 해제
-            for (TeamCategory teamCategory : categoriesToRemove) {
-                teamCategory.removeCategory(teamCategory.getCategory());  // 팀 카테고리 연관관계 해제
-                teamCategory.removeMentoringTeam(mentoringTeam);          // 멘토링 팀 연관관계 해제
-            }
-
-            // 팀에서 TeamCategory 컬렉션 초기화(안정성 보장)
-            mentoringTeam.getCategories().clear();
-
-            // TeamCategory 삭제
-            for (TeamCategory teamCategory : categoriesToRemove) {
-                teamCategoryRepository.delete(teamCategory);
-            }
-
-            //업데이트 될 카테고리들
-            List<Long> categoriesId = dto.getCategories();
-            List<Category> updateCategories = categoryRepository.findAllById(categoriesId);
-            //연관관계 매핑
-            for (Category category : updateCategories) {
-                TeamCategory teamCategory = new TeamCategory();
-                teamCategory.setCategory(category);
-                teamCategory.setMentoringTeam(mentoringTeam);
-                teamCategoryRepository.save(teamCategory);
-            }
-
+            // 기존 카테고리 제거
+            teamCategoryService.removeTeamCategories(mentoringTeam);
+            // 새로운 카테고리 매핑
+            teamCategoryService.saveTeamCategories(mentoringTeam, dto.getCategories());
         }
         else throw new NoAuthorityException("수정 할 권한이 없습니다");
     }
@@ -141,14 +117,14 @@ public class MentoringTeamService {
      */
     public List<MentoringTeam> findMyMentoringTeams() {
         User user = getUser();
-        List<MentoringTeam> teams = new ArrayList<>();
-        List<MentoringParticipation> mentoringParticipants = user.getMentoringParticipations();
-        for (MentoringParticipation x : mentoringParticipants) {
-            if (x.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !x.getIsDeleted()) {
-                teams.add(x.getMentoringTeam());
-            }
-        }
-        return teams;
+        List<MentoringParticipation> participations = mentoringParticipationRepository.findParticipationsWithTeamsAndUser(
+                user,
+                MentoringParticipationStatus.ACCEPTED,
+                Status.TRUE
+        );
+        return participations.stream()
+                .map(MentoringParticipation::getMentoringTeam)
+                .toList();
     }
 
 
@@ -159,10 +135,13 @@ public class MentoringTeamService {
     @Transactional
     public void deleteMentoringTeam(Long mentoringTeamId) {
         User user = getUser();
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findWithBoardsById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
             mentoringTeam.setFlag(Status.TRUE);
+            mentoringBoardRepository.deleteByTeamId(mentoringTeamId);
+            // 영속성 컨텍스트 초기화
+            entityManager.clear();
         }
         else throw new NoAuthorityException("삭제 할 권한이 없습니다");
     }

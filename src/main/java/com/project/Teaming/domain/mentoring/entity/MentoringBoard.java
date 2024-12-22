@@ -2,6 +2,7 @@ package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
+import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -104,4 +105,10 @@ public class MentoringBoard extends BaseTimeEntity {
         mentoringTeam.getMentoringBoardList().add(this);
     }
 
+    public void removeMentoringBoard(MentoringTeam mentoringTeam) {
+        if (this.mentoringTeam != null) {
+            this.mentoringTeam.getMentoringBoardList().remove(this);
+            this.mentoringTeam = null;
+        }
+    }
 }

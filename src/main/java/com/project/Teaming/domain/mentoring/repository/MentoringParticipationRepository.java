@@ -3,10 +3,7 @@ package com.project.Teaming.domain.mentoring.repository;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
 import com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto;
-import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
-import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
-import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -38,12 +35,8 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             "where mt.id = :teamId and mp.id <> :id and mp.participationStatus <> :status")
     List<RsUserParticipationDto> findAllForUser(@Param("teamId") Long teamId, @Param("id") Long leader_id, @Param("status") MentoringParticipationStatus status);
 
-    @Query("select mp " +
-            "from MentoringParticipation mp " +
-            "join fetch mp.mentoringTeam mt " +
-            "join fetch mp.user u " +
-            "where mt = :mentoringTeam and u = :user and mp.authority = :authority")
-    Optional<MentoringParticipation> findByMentoringTeamAndUserAndAuthority(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("authority") MentoringAuthority authority);
+
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndAuthority(MentoringTeam mentoringTeam, User user, MentoringAuthority authority);
 
     @Query("select mp " +
     "from MentoringParticipation mp " +
@@ -52,7 +45,7 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
     "where mt = :mentoringTeam and u = :user")
     Optional<MentoringParticipation> findByMentoringTeamAndUser(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user);
 
-    @Query("SELECT mp FROM MentoringParticipation mp JOIN FETCH mp.mentoringTeam mt " +
+    @Query("SELECT mp FROM MentoringParticipation mp JOIN mp.mentoringTeam mt " +
             "WHERE mt.id = :teamId AND mp.isDeleted = false AND mp.participationStatus = :participationStatus AND mp.authority = :authority " +
             "ORDER BY mp.decisionDate ASC")
     List<MentoringParticipation> findTeamUsers(
@@ -61,10 +54,14 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("authority") MentoringAuthority authority);
 
 
-    @Query("select mp " +
-            "from MentoringParticipation mp " +
-            "join fetch mp.mentoringTeam mt " +
-            "join fetch mp.user u " +
-            "where mt = :mentoringTeam and u = :user and mp.participationStatus = :status")
-    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(@Param("mentoringTeam") MentoringTeam mentoringTeam, @Param("user") User user, @Param("status") MentoringParticipationStatus status);
+    Optional<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatus(MentoringTeam mentoringTeam, User user, MentoringParticipationStatus status);
+
+    @Query("SELECT mp FROM MentoringParticipation mp " +
+            "JOIN FETCH mp.mentoringTeam mt " +
+            "WHERE mp.user = :user AND mp.participationStatus = :status AND mp.isDeleted = false AND mt.flag != :flag")
+    List<MentoringParticipation> findParticipationsWithTeamsAndUser(
+            @Param("user") User user,
+            @Param("status") MentoringParticipationStatus status,
+            @Param("flag") Status flag);
+
 }
