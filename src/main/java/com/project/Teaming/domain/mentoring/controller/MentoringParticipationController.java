@@ -1,29 +1,20 @@
 package com.project.Teaming.domain.mentoring.controller;
 
+import com.project.Teaming.domain.mentoring.dto.request.ReportDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
-import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
-import com.project.Teaming.domain.user.entity.User;
-import com.project.Teaming.domain.user.service.UserService;
-import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
-import com.project.Teaming.global.result.ResultListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -73,11 +64,19 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_USER, null);
     }
 
+
     @PostMapping("/team/{team_id}/quit")
     @Operation(summary = "팀 구성원의 탈퇴", description = "팀 구성원들이 탈퇴하는 API")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id) {
         mentoringParticipationService.deleteUser(team_id);
         return new ResultDetailResponse<>(ResultCode.DELETE_PARTICIPATION, null);
+    }
+
+    @PostMapping("/report")
+    @Operation(summary = "팀 내 유저 신고하기", description = "팀 내 구성원을 신고하는 API")
+    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid ReportDto dto) {
+        mentoringParticipationService.reportTeamUser(dto);
+        return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
 
     @GetMapping("/{team_id}/status")

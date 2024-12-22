@@ -37,6 +37,8 @@ public class MentoringParticipation {
     private int reportingCnt;
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+    @Column(name = "warning_processed", nullable = false)
+    private Boolean warningProcessed = false; // 경고 처리 여부
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -44,11 +46,9 @@ public class MentoringParticipation {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
-    @OneToMany(mappedBy = "mentoringParticipation")
-    private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 
     @Builder
-    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, boolean isDeleted, User user, MentoringTeam mentoringTeam) {
+    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, User user, MentoringTeam mentoringTeam) {
         this.id = id;
         this.participationStatus = participationStatus;
         this.requestDate = requestDate;
@@ -56,7 +56,8 @@ public class MentoringParticipation {
         this.role = role;
         this.authority = authority;
         this.reportingCnt = reportingCnt;
-        this.isDeleted = isDeleted;
+        this.isDeleted = false;
+        this.warningProcessed = false;
         this.user = user;
         this.mentoringTeam = mentoringTeam;
     }
@@ -75,6 +76,13 @@ public class MentoringParticipation {
     }
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
+    }
+
+    public void setReportingCnt(int reportingCnt) {
+        this.reportingCnt = reportingCnt;
+    }
+    public void setWarningProcessed(Boolean warningProcessed) {
+        this.warningProcessed = warningProcessed;
     }
 
     /**
