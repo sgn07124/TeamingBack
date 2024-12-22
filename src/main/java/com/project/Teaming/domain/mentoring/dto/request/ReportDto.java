@@ -1,12 +1,12 @@
 package com.project.Teaming.domain.mentoring.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
 public class ReportDto {
-    @NotBlank
+    @NotNull
     private Long teamId;
-    @NotBlank
+    @NotNull
     private Long reportedUserId;
 }
