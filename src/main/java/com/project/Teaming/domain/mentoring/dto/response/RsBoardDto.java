@@ -45,13 +45,14 @@ public class RsBoardDto {
         this.contents = contents;
     }
 
-    public RsBoardDto(Long id, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents) {
+    public RsBoardDto(Long id, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents, PostStatus status) {
         this.id = id;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.contents = contents;
+        this.status = status;
     }
 
     public static RsBoardDto from(MentoringBoard mentoringBoard, MentoringTeam mentoringTeam, List<String> categories) {

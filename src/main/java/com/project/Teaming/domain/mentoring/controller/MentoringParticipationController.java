@@ -41,7 +41,7 @@ public class MentoringParticipationController {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
-        Long id = mentoringParticipationService.saveMentoringParticipation(mentoringTeam.getId(), participationDto);
+        Long id = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(id));
     }
 

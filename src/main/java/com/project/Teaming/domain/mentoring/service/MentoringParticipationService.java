@@ -5,7 +5,6 @@ import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
-import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
@@ -36,14 +35,12 @@ public class MentoringParticipationService {
 
     /**
      * 지원자로 등록하는 로직
-     * @param mentoringTeamId
      * @param dto
      * @return
      */
     @Transactional
-    public Long saveMentoringParticipation(Long mentoringTeamId, RqParticipationDto dto) {
+    public Long saveMentoringParticipation(MentoringTeam mentoringTeam, RqParticipationDto dto) {
         User user = getUser();
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, user);
         if (participation.isPresent()) {
             if (participation.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
@@ -184,7 +181,6 @@ public class MentoringParticipationService {
                 firstMember.ifPresentOrElse(
                         participation -> {
                             participation.setAuthority(MentoringAuthority.LEADER);
-                            log.info("New team leader set: {}", participation.getUser().getId());
                         },
                         () -> {
                             throw new BusinessException(ErrorCode.NO_ELIGIBLE_MEMBER_FOR_LEADER);
