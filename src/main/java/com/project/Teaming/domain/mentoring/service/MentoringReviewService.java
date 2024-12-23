@@ -47,7 +47,7 @@ public class MentoringReviewService {
         validateSelfReview(reviewingParticipation.getUser(), reviewedUser);
 
         // 리뷰 작성
-        if (validateParticipationForReview(user, reviewingParticipation,reviewedParticipation)) {
+        if (validateParticipationForReview(reviewedParticipation)) {
             Review review = Review.mentoringReview(reviewingParticipation, reviewedUser, dto.getRate(), dto.getContent());
             reviewRepository.save(review);
         }
@@ -86,10 +86,9 @@ public class MentoringReviewService {
         }
     }
 
-    private boolean validateParticipationForReview(User user, MentoringParticipation reviewingParticipation, MentoringParticipation reviewedParticipation) {
+    private boolean validateParticipationForReview(MentoringParticipation reviewedParticipation) {
         return reviewedParticipation.getParticipationStatus() != MentoringParticipationStatus.PENDING
-                && reviewedParticipation.getParticipationStatus() != MentoringParticipationStatus.REJECTED
-                && reviewingParticipation.getUser().equals(user);
+                && reviewedParticipation.getParticipationStatus() != MentoringParticipationStatus.REJECTED;
     }
     private User getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
