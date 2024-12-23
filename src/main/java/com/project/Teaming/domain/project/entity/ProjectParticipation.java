@@ -126,4 +126,8 @@ public class ProjectParticipation {
     public void exportTeam() {
         this.isExport = true;
     }
+
+    public void setRole(ProjectRole role) {
+        this.role = role;
+    }
 }
