@@ -1,18 +1,19 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.ReviewDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewDto;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
+import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
-import com.project.Teaming.global.error.exception.MentoringParticipationNotFoundException;
+import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -28,12 +29,13 @@ public class MentoringReviewService {
     private final UserRepository userRepository;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final ReviewRepository reviewRepository;
+    private final MentoringTeamRepository mentoringTeamRepository;
 
     @Transactional
-    public void review(ReviewDto dto) {
+    public void review(MentoringReviewDto dto) {
         User user = getUser();
-        MentoringParticipation reviewingParticipation = validateReviewingParticipation(dto.getReviewingParticipationId());
-        MentoringTeam mentoringTeam = reviewingParticipation.getMentoringTeam();
+        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(dto.getTeamId()).orElseThrow(MentoringTeamNotFoundException::new);
+        MentoringParticipation reviewingParticipation = validateReviewingParticipation(user,mentoringTeam);
         User reviewedUser = validateReviewedUser(dto.getReviewedUserId());
         MentoringParticipation reviewedParticipation = validateReviewedParticipation(mentoringTeam, reviewedUser);
 
@@ -51,9 +53,9 @@ public class MentoringReviewService {
         }
     }
 
-    private MentoringParticipation validateReviewingParticipation(Long participationId) {
-        return mentoringParticipationRepository.findById(participationId)
-                .orElseThrow(MentoringParticipationNotFoundException::new);
+    private MentoringParticipation validateReviewingParticipation(User user,MentoringTeam mentoringTeam) {
+        return mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam,user,MentoringParticipationStatus.ACCEPTED)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_A_MEMBER));
     }
 
     private User validateReviewedUser(Long userId) {
