@@ -72,7 +72,9 @@ public enum ErrorCode {
     INVALID_SELF_ACTION(404, "R003", "자기 자신에 대해서는 불가합니다."),
     STILL_TEAM_USER(404, "R004", "아직 팀구성원이여서 신고할 수 없습니다."),
     NOT_A_TEAM_USER(404, "R005", "신고할 수 있는 권한이 없습니다."),
-    ALREADY_REPORTED(404, "R006", "이미 신고한 사용자입니다.");
+    ALREADY_REPORTED(404, "R006", "이미 신고한 사용자입니다."),
+    ALREADY_REVIEWED(404, "R007", "이미 리뷰를 작성한 사용자입니다."),
+    STILL_IN_PROGRESS(404, "R008", "아직 완료되지 않은 팀 입니다.");
 
     private int status;
     private final String code;

@@ -4,9 +4,11 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
+import org.hibernate.engine.spi.ManagedEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByProjectParticipationAndReviewee(ProjectParticipation reviewer, User reviewee);
+    boolean existsByMentoringParticipationAndReviewee(MentoringParticipation reviewer, User reviewee);
 }

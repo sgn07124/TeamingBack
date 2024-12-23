@@ -68,7 +68,8 @@ public enum ResultCode {
     DELETE_PARTICIPATION(200, "M017", "멘토링팀 탈퇴 완료"),
     UPDATE_POST_STATUS(200, "M018", "멘토링 글에서 모집현황 업데이트 완료"),
     EXPORT_TEAM_USER(200, "M019", "멘토링 팀원 강퇴 완료"),
-    REPORT_TEAM_USER(200, "M020", "멘토링 팀원 신고 완료");
+    REPORT_TEAM_USER(200, "M020", "멘토링 팀원 신고 완료"),
+    REVIEW_TEAM_USER(200, "M021", "멘토링 팀원에게 리뷰작성 완료");
 
     private int status;
     private final String code;

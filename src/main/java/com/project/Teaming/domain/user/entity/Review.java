@@ -50,6 +50,18 @@ public class   Review extends BaseTimeEntity {
         return review;
     }
 
+    public static Review mentoringReview(MentoringParticipation reviewerParticipation, User reviewee, int rating, String content) {
+        Review review = new Review();
+        review.mentoringParticipation = reviewerParticipation;
+        review.rating = rating;
+        review.content = content;
+        review.reviewee = reviewee;
+        if (!reviewee.getReviews().contains(review)) {
+            reviewee.getReviews().add(review);
+        }
+        return review;
+    }
+
     @PrePersist
     @PreUpdate
     private void validate() {
