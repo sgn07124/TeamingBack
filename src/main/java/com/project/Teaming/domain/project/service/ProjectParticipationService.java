@@ -184,8 +184,8 @@ public class ProjectParticipationService {
         List<ProjectParticipation> teamMembers = projectParticipationRepository.findByProjectTeamIdAndParticipationStatus(teamId, ParticipationStatus.ACCEPTED);
 
         // 팀의 멤버인지 판별
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
