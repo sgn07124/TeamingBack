@@ -274,31 +274,20 @@ public class MentoringParticipationService {
             if (teamUser.get().getAuthority() == MentoringAuthority.LEADER && !teamUser.get().getIsDeleted()) {  //팀의 리더인 유저
                 List<RsTeamUserDto> allTeamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
                 setLoginStatus(allTeamUsers,user.getId());
-                List<RsTeamParticipationDto> participations = mentoringParticipationRepository.findAllForLeader(teamId, 1L, MentoringParticipationStatus.EXPORT);
+                List<RsTeamParticipationDto> participations = mentoringParticipationRepository.findAllForLeader(teamId, MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
                 LeaderResponseDto dto = new LeaderResponseDto();
                 dto.setMembers(allTeamUsers);
                 dto.setParticipations(participations);
-                List<Object> responseList = new ArrayList<>();
-                responseList.add(MentoringAuthority.LEADER);
-                responseList.add(dto);
-                return new ParticipantsDto<>(responseList);
+                return new ParticipantsDto<>(dto,MentoringAuthority.LEADER);
 
             } else if (teamUser.get().getAuthority() == MentoringAuthority.CREW && !teamUser.get().getIsDeleted() && teamUser.get().getParticipationStatus() != MentoringParticipationStatus.EXPORT) {  //팀의 멤버인 유저
                 List<RsTeamUserDto> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT);
                 setLoginStatus(members,user.getId());
-                List<Object> responseList = new ArrayList<>();
-                responseList.add(MentoringAuthority.CREW);
-                responseList.add(members);
-                return new ParticipantsDto<>(responseList);
+                return new ParticipantsDto<>(members,MentoringAuthority.CREW);
             }
+            else throw new BusinessException(ErrorCode.NOT_A_MEMBER);
         }
-        //연관관계가 있지만 NoAuth인 경우 또는 연관관계가 없는경우
-        List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(teamId, 1L, MentoringParticipationStatus.EXPORT);
-        setLoginStatus(forUser,user.getId());
-        List<Object> responseList = new ArrayList<>();
-        responseList.add(MentoringAuthority.NoAuth);
-        responseList.add(forUser);
-        return new ParticipantsDto<>(responseList);
+        else throw new BusinessException(ErrorCode.NOT_A_MEMBER);
     }
 
     private User getUser() {
