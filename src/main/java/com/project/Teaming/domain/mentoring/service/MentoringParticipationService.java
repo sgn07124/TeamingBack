@@ -1,15 +1,11 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.ReportDto;
-import com.project.Teaming.domain.mentoring.dto.request.ReviewDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
-import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
-import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.*;
@@ -23,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

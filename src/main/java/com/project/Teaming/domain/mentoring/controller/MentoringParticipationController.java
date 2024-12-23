@@ -1,7 +1,7 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.ReportDto;
-import com.project.Teaming.domain.mentoring.dto.request.ReviewDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReportDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
@@ -78,14 +78,14 @@ public class MentoringParticipationController {
 
     @PostMapping("/report")
     @Operation(summary = "팀 내 구성원 신고하기", description = "팀 내 구성원을 신고하는 API")
-    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid ReportDto dto) {
+    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportDto dto) {
         mentoringReportService.reportTeamUser(dto);
         return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
 
     @PostMapping("/review")
     @Operation(summary = "팀 내 구성원에게 리뷰쓰기", description = "팀 내 구성원에게 리뷰를 쓰는 API")
-    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid ReviewDto dto) {
+    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewDto dto) {
         mentoringReviewService.review(dto);
         return new ResultDetailResponse<>(ResultCode.REVIEW_TEAM_USER, null);
     }
