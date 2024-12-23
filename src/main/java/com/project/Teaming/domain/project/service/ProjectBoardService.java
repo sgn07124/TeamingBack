@@ -55,8 +55,8 @@ public class ProjectBoardService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
@@ -93,8 +93,8 @@ public class ProjectBoardService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
@@ -108,8 +108,8 @@ public class ProjectBoardService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
@@ -161,8 +161,8 @@ public class ProjectBoardService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }

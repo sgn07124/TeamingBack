@@ -99,11 +99,23 @@ public class ProjectParticipationService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
-        ProjectParticipation participation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
+        ProjectParticipation projectParticipation = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, user.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
 
-        if (participation.canQuit()) {
-            participation.quitTeam();
+        if (projectParticipation.canQuit()) {
+            if (projectParticipation.getRole().equals(ProjectRole.OWNER)) {
+                Optional<ProjectParticipation> firstMember = projectParticipationRepository.findTeamUsers(teamId, ParticipationStatus.ACCEPTED, ProjectRole.MEMBER)
+                        .stream().findFirst();
+                firstMember.ifPresentOrElse(
+                        participation -> {
+                            participation.setRole(ProjectRole.OWNER);
+                        },
+                        () -> {
+                            throw new BusinessException(ErrorCode.NO_ELIGIBLE_MEMBER_FOR_LEADER);
+                        }
+                );
+            }
+            projectParticipation.quitTeam();
         } else {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
         }
@@ -172,8 +184,8 @@ public class ProjectParticipationService {
         List<ProjectParticipation> teamMembers = projectParticipationRepository.findByProjectTeamIdAndParticipationStatus(teamId, ParticipationStatus.ACCEPTED);
 
         // 팀의 멤버인지 판별
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED);
+        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
+                ParticipationStatus.ACCEPTED, false);
         if (!isMember) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
