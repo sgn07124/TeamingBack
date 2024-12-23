@@ -25,15 +25,15 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
-            "where mt.id = :teamId and mp.id <> :id and mp.participationStatus <> :status")
-    List<RsTeamParticipationDto> findAllForLeader(@Param("teamId") Long teamId, @Param("id") Long leader_id, @Param("status") MentoringParticipationStatus status);
+            "where mt.id = :teamId and mp.authority <> :authority and mp.participationStatus <> :status")
+    List<RsTeamParticipationDto> findAllForLeader(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
 
     @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto(mp.requestDate,u.id,u.name,mp.participationStatus) " +
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
-            "where mt.id = :teamId and mp.id <> :id and mp.participationStatus <> :status")
-    List<RsUserParticipationDto> findAllForUser(@Param("teamId") Long teamId, @Param("id") Long leader_id, @Param("status") MentoringParticipationStatus status);
+            "where mt.id = :teamId and mp.authority <> :authority and mp.participationStatus <> :status")
+    List<RsUserParticipationDto> findAllForUser(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
 
 
     Optional<MentoringParticipation> findByMentoringTeamAndUserAndAuthority(MentoringTeam mentoringTeam, User user, MentoringAuthority authority);

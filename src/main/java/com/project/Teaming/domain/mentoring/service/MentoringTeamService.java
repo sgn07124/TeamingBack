@@ -2,9 +2,7 @@ package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
-import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
-import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
+import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.*;
 import com.project.Teaming.domain.user.entity.User;
@@ -27,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.util.Optionals.ifPresentOrElse;
 
 
 @Slf4j
@@ -149,12 +149,14 @@ public class MentoringTeamService {
 
     /**
      * 멘토링팀 responseDto 반환로직
-     * 팀 정보만 일단 반환해주고 participation쪽 완성되면 권한에따라서 다르게 보내는 메서드 생성
+     * 팀구성원이면 team정보만 반환,
+     * 일반사용자용 페이지는 지원현황 포함해서 반환
      * @param team
      * @return
      */
     public TeamResponseDto getMentoringTeam( MentoringTeam team) {
-        User user = getUser();
+        // 로그인 여부 확인 메서드
+        User user = getOptionalUser();
 
         RsTeamDto dto = team.toDto();
         List<String> categories = team.getCategories().stream()
@@ -164,21 +166,23 @@ public class MentoringTeamService {
 
         //리스폰스 dto생성
         TeamResponseDto teamResponseDto = new TeamResponseDto();
-
-        //권한 반환하는 로직
-        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUser(team, user);
-
-        if (teamUser.isEmpty()) {
-            teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-        } else {
-            if (teamUser.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !teamUser.get().getIsDeleted()) {
-                teamResponseDto.setAuthority(teamUser.get().getAuthority());
-            } else {
-                teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-            }
-        }
         teamResponseDto.setDto(dto);
 
+        // 로그인하지 않은 사용자
+        if (user == null) {
+            handleNoAuthUser(teamResponseDto, team, null);
+            return teamResponseDto;
+        }
+        //로그인 사용자
+        mentoringParticipationRepository.findByMentoringTeamAndUser(team, user)
+        .ifPresentOrElse(
+                participation -> {
+                    if (participation.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !participation.getIsDeleted()) {
+                        teamResponseDto.setAuthority(participation.getAuthority());
+                    } else handleNoAuthUser(teamResponseDto, team, user);
+                },
+                () -> handleNoAuthUser(teamResponseDto, team, user)
+        );
         return teamResponseDto;
     }
 
@@ -207,11 +211,49 @@ public class MentoringTeamService {
         return teamDto;
     }
 
+
     private User getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         Long userId = securityUser.getUserId();
         User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         return user;
+    }
+
+    /**
+     * 로그인 하지 않은 사용자면 null반환
+     * @return
+     */
+    private User getOptionalUser() {
+        try {
+            return getUser(); // getUser() 호출
+        } catch (Exception e) {
+            return null; // 로그인하지 않은 경우 null 반환
+        }
+    }
+
+    private void handleNoAuthUser(TeamResponseDto teamResponseDto, MentoringTeam team, User user) {
+        teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
+        List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(
+                team.getId(), MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
+        if (user != null) {
+            setLoginStatus(forUser, user.getId());
+        }
+        teamResponseDto.setUserParticipations(forUser);
+    }
+
+    /**
+     * 로그인 한 사용자 있는지 확인하는 로직
+     * @param dtos
+     * @param userId
+     */
+    private void setLoginStatus(List<?> dtos, Long userId) {
+        dtos.forEach(dto -> {
+            if (dto instanceof RsTeamUserDto teamDto && teamDto.getUserId().equals(userId)) {
+                teamDto.setIsLogined(true);
+            } else if (dto instanceof RsUserParticipationDto userDto && userDto.getUserId().equals(userId)) {
+                userDto.setIsLogined(true);
+            }
+        });
     }
 }
