@@ -21,8 +21,9 @@ public class UserInfoDto {
 
     private String introduce;
     private List<String> stacks;  // 기술 스택(문자열id로)
+    private List<ReviewDto> reviews;
 
-    public void setUserInfoDto(User user, Portfolio portfolio, List<String> stackIds) {
+    public void setUserInfoDto(User user, Portfolio portfolio, List<String> stackIds,List<ReviewDto> reviews) {
         this.email = user.getEmail();
         this.name = user.getName();
         this.provider = user.getProvider();
@@ -30,5 +31,6 @@ public class UserInfoDto {
 
         this.introduce = portfolio.getIntroduce();
         this.stacks = stackIds;
+        this.reviews = reviews;
     }
 }
