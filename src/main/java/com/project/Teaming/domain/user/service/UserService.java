@@ -2,6 +2,7 @@ package com.project.Teaming.domain.user.service;
 
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
+import com.project.Teaming.domain.user.dto.response.ReviewDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.entity.UserStack;
@@ -10,6 +11,7 @@ import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.entity.Portfolio;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.PortfolioRepository;
+import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.domain.user.repository.UserStackRepository;
 import com.project.Teaming.global.error.ErrorCode;
@@ -36,6 +38,7 @@ public class UserService {
     private final PortfolioRepository portfolioRepository;
     private final StackRepository stackRepository;
     private final UserStackRepository userStackRepository;
+    private final ReviewRepository reviewRepository;
 
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
@@ -118,7 +121,10 @@ public class UserService {
                 .map(userStack -> String.valueOf(userStack.getStack().getId()))
                 .collect(Collectors.toList());
 
-        dto.setUserInfoDto(user, portfolio, stackIds);
+        //리뷰 생성
+        List<ReviewDto> reviews = reviewRepository.findAllByUser(user);
+
+        dto.setUserInfoDto(user, portfolio, stackIds, reviews);
         return dto;
     }
 

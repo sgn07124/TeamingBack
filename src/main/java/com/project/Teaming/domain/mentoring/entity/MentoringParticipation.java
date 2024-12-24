@@ -24,7 +24,8 @@ public class MentoringParticipation {
     private Long id;  // 신청 ID
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private MentoringParticipationStatus participationStatus;  // 신청 상태
+    private MentoringParticipationStatus
+            participationStatus;  // 신청 상태
     @CreatedDate
     @Column(updatable = false)
     private LocalDateTime requestDate;  // 신청 날짜
