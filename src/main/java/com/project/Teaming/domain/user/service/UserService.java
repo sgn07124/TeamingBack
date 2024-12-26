@@ -23,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -121,11 +122,14 @@ public class UserService {
                 .map(userStack -> String.valueOf(userStack.getStack().getId()))
                 .collect(Collectors.toList());
 
-        //리뷰 생성
-        List<ReviewDto> reviews = reviewRepository.findAllByUser(user);
-
-        dto.setUserInfoDto(user, portfolio, stackIds, reviews);
+        dto.setUserInfoDto(user, portfolio, stackIds);
         return dto;
+    }
+
+    public List<ReviewDto> getReviews(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        List<ReviewDto> reviews = reviewRepository.findAllByUser(user);
+        return reviews;
     }
 
     public UserReportCnt getWarningCnt() {

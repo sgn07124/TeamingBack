@@ -2,6 +2,7 @@ package com.project.Teaming.domain.user.controller;
 
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
+import com.project.Teaming.domain.user.dto.response.ReviewDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
 import com.project.Teaming.domain.user.service.PortfolioService;
@@ -14,6 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,7 +46,23 @@ public class UserController {
         return new ResultDetailResponse<>(ResultCode.GET_USER_INFO, userInfoDto);
     }
 
-    @GetMapping("/user/report")
+    @GetMapping("/user/my-page/reviews")
+    @Operation(summary = "사용자의 리뷰 조회", description = "해당 사용자의 리뷰를 가져온다, 마이페이지에서 사용")
+    public ResultListResponse<ReviewDto> getReviews() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = Long.valueOf(authentication.getName());
+        List<ReviewDto> reviews = userService.getReviews(userId);
+        return new ResultListResponse<>(ResultCode.GET_USER_REVIEWS, reviews);
+    }
+
+    @GetMapping("/user/{user_id}/reviews")
+    @Operation(summary = "회원의 리뷰 조회", description = "해당 회원의 리뷰를 가져온다, 유저페이지에서 사용")
+    public ResultListResponse<ReviewDto> getUserReviews(@PathVariable Long user_id) {
+        List<ReviewDto> reviews = userService.getReviews(user_id);
+        return new ResultListResponse<>(ResultCode.GET_USER_REVIEWS, reviews);
+    }
+
+    @GetMapping("/user/my-page/report")
     @Operation(summary = "사용자의 경고 횟수 조회", description = "특정유저의 경고 누적 횟수를 조회하는 API")
     public ResultDetailResponse<UserReportCnt> userReportInfo() {
         UserReportCnt cnt = userService.getWarningCnt();
