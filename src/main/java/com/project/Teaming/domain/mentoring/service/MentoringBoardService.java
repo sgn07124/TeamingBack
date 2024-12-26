@@ -19,6 +19,8 @@ import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
 import com.querydsl.core.Tuple;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -39,6 +41,9 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MentoringBoardService {
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     private final MentoringBoardRepository mentoringBoardRepository;
     private final MentoringTeamRepository mentoringTeamRepository;
@@ -246,6 +251,7 @@ public class MentoringBoardService {
     @Transactional
     public void updateCheckCompleteStatus() {
         mentoringBoardRepository.bulkUpDateStatus(PostStatus.COMPLETE, PostStatus.RECRUITING, LocalDate.now());
+        entityManager.clear();
     }
 
     private User getUser() {

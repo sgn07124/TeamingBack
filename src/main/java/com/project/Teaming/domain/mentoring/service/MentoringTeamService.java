@@ -251,6 +251,7 @@ public class MentoringTeamService {
     public void updateMentoringStatus() {
         mentoringTeamRepository.updateStatusToWorking(MentoringStatus.WORKING, MentoringStatus.RECRUITING);
         mentoringTeamRepository.updateStatusToComplete(MentoringStatus.COMPLETE, MentoringStatus.WORKING);
+        entityManager.clear();
     }
 
     /**
