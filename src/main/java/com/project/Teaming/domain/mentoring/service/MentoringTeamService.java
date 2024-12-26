@@ -14,6 +14,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -240,6 +241,17 @@ public class MentoringTeamService {
             setLoginStatus(forUser, user.getId());
         }
         teamResponseDto.setUserParticipations(forUser);
+    }
+
+    /**
+     * MentoringStatus의 상태를 자동 변경
+     */
+    @Scheduled(cron = "0 0 0 * * *") // 매일 자정에 실행
+    @Transactional
+    public void updateMentoringStatus() {
+        mentoringTeamRepository.updateStatusToWorking(MentoringStatus.WORKING, MentoringStatus.RECRUITING);
+        mentoringTeamRepository.updateStatusToComplete(MentoringStatus.COMPLETE, MentoringStatus.WORKING);
+        entityManager.clear();
     }
 
     /**
