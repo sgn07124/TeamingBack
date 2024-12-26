@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.user.service;
 
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
@@ -111,9 +112,16 @@ public class UserService {
         portfolio.updateStacks(stacks);
     }
 
-    public UserInfoDto getUserInfo(UserInfoDto dto) {
-        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+    public UserInfoDto getAuthenticatedUserInfo() {
+        SecurityUserDto securityUserDto = getSecurityUserDto();
+        return getUserInfo(securityUserDto.getUserId());
+    }
 
+
+    public UserInfoDto getUserInfo(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+
+        UserInfoDto dto = new UserInfoDto();
         Portfolio portfolio = portfolioRepository.findById(user.getPortfolio().getId())
                         .orElseThrow(() -> new BusinessException(ErrorCode.PORTFOLIO_NOT_EXIST));
 
@@ -126,8 +134,13 @@ public class UserService {
         return dto;
     }
 
+    public List<ReviewDto> getAuthenticatedUserReviews() {
+        SecurityUserDto securityUserDto = getSecurityUserDto();
+        return getReviews(securityUserDto.getUserId());
+    }
+
     public List<ReviewDto> getReviews(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         List<ReviewDto> reviews = reviewRepository.findAllByUser(user);
         return reviews;
     }
