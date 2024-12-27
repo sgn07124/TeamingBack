@@ -47,21 +47,21 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.CANCEL_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/teams/{team-id}/participants/{participant-id}/accept")
+    @PatchMapping("/teams/{team-id}/participants/{participant-id}/accept")
     @Operation(summary = "리더의 멘토링 지원 수락" , description = "멘토링 팀 리더가 지원을 수락 하는 API")
     public ResultDetailResponse<Void> acceptParticipant(@PathVariable Long team_id, @PathVariable Long participant_id) {
         mentoringParticipationService.acceptMentoringParticipation(team_id, participant_id);
         return new ResultDetailResponse<>(ResultCode.ACCEPT_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/teams/{team-id}/participants/{participant-id}/reject")
+    @PatchMapping("/teams/{team-id}/participants/{participant-id}/reject")
     @Operation(summary = "리더의 멘토링 지원 거절" , description = "멘토링 팀 리더가 지원을 거절 하는 API")
     public ResultDetailResponse<Void> rejectParticipant(@PathVariable Long team_id, @PathVariable Long participant_id) {
         mentoringParticipationService.rejectMentoringParticipation(team_id, participant_id);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/teams/{team-id}/users/{user-id}/export")
+    @PatchMapping("/teams/{team-id}/users/{user-id}/export")
     @Operation(summary = "리더의 멘토링 팀원 강퇴" , description = "멘토링 팀 리더가 팀원을 강퇴하는 API")
     public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long team_id, @PathVariable Long user_id) {
         mentoringParticipationService.exportTeamUser(team_id, user_id);
@@ -69,7 +69,7 @@ public class MentoringParticipationController {
     }
 
 
-    @PostMapping("/teams/{team-id}/quit")
+    @PatchMapping("/teams/{team-id}/quit")
     @Operation(summary = "팀 구성원의 탈퇴", description = "팀 구성원들이 탈퇴하는 API")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id) {
         mentoringParticipationService.deleteUser(team_id);

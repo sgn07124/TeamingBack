@@ -39,7 +39,7 @@ public class MentoringBoardController {
     }
 
 
-    @PostMapping("/posts/{post-id}")
+    @PutMapping("/posts/{post-id}")
     @Operation(summary = "멘토링 글 수정", description = "나의 팀에서 등록된 멘토링 게시물을 팀 구성원(팀장과 팀원) 모두가 수정 할 수 있다. 수정버튼이 있는 멘토링 글 상세페이지로 이동.")
     public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long post_id,
                                                      @RequestBody @Valid RqBoardDto dto) {
@@ -82,7 +82,7 @@ public class MentoringBoardController {
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
     }
 
-    @PostMapping("/teams/{team-id}/posts/{post-id}/complete")
+    @PatchMapping("/teams/{team-id}/posts/{post-id}/complete")
     @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀구성원이 모집 완료 처리를 직접 할 수 있다.")
     public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
         MentoringPostStatusDto statusDto = mentoringBoardService.updatePostStatus(team_id, post_id);

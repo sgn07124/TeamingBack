@@ -38,7 +38,7 @@ public class MentoringTeamController {
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_TEAM, String.valueOf(savedId));
     }
 
-    @PostMapping("/teams/{team-id}")
+    @PutMapping("/teams/{team-id}")
     @Operation(summary = "멘토링 팀 수정", description = "멘토링 팀을 수정할 수 있다.")
     public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long teamId,
                                                                    @RequestBody @Valid RqTeamDto dto) {
