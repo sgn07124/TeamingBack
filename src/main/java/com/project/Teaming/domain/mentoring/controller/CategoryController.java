@@ -25,14 +25,14 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/category/{category_id}")
+    @GetMapping("/categories/{category-id}")
     @Operation(summary = "멘토링 카테고리 조회" , description = "멘토링 모집카테고리를 조회한다")
     public ResultDetailResponse<MentoringCategoryDto> findCategory(@PathVariable Long category_id) {
         MentoringCategoryDto category = categoryService.findCategory(category_id);
         return new ResultDetailResponse<>(ResultCode.FIND_MENTORING_CATEGORY, category);
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     @Operation(summary = "멘토링 카테고리 모두 조회" , description = "멘토링 모집 카테고리를 모두 조회한다")
     public ResultListResponse<MentoringCategoryDto> findAllCategory() {
         List<MentoringCategoryDto> allCategory = categoryService.findAllCategory();

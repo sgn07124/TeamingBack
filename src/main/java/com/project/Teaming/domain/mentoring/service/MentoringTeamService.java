@@ -32,7 +32,6 @@ import static org.springframework.data.util.Optionals.ifPresentOrElse;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MentoringTeamService {
 
@@ -104,6 +103,7 @@ public class MentoringTeamService {
      * @param mentoringTeamId
      * @return
      */
+    @Transactional(readOnly = true)
     public MentoringTeam findMentoringTeam(Long mentoringTeamId) {
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         if (mentoringTeam.getFlag() == Status.TRUE) {
@@ -116,6 +116,7 @@ public class MentoringTeamService {
      * 내 멘토링 팀들을 모두 찾는 로직
      * @return
      */
+    @Transactional(readOnly = true)
     public List<MentoringTeam> findMyMentoringTeams() {
         User user = getUser();
         List<MentoringParticipation> participations = mentoringParticipationRepository.findParticipationsWithTeamsAndUser(
@@ -155,6 +156,7 @@ public class MentoringTeamService {
      * @param team
      * @return
      */
+    @Transactional(readOnly = true)
     public TeamResponseDto getMentoringTeam( MentoringTeam team) {
         // 로그인 여부 확인 메서드
         User user = getOptionalUser();
@@ -192,6 +194,7 @@ public class MentoringTeamService {
      * @param team
      * @return
      */
+    @Transactional(readOnly = true)
     public MyTeamDto getMyTeam(MentoringTeam team) {
         User user = getUser();
 

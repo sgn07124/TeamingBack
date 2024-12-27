@@ -24,7 +24,6 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MentoringParticipationService {
 
@@ -198,7 +197,7 @@ public class MentoringParticipationService {
      * @param teamId
      * @return
      */
-
+    @Transactional(readOnly = true)
     public ParticipantsDto<?> getParticipantsInfo(Long teamId) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
@@ -222,7 +221,6 @@ public class MentoringParticipationService {
         }
         else throw new BusinessException(ErrorCode.NOT_A_MEMBER);
     }
-
 
 
     private User getUser() {
