@@ -14,18 +14,19 @@ import java.util.List;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    @Transactional(readOnly = true)
     public MentoringCategoryDto findCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NO_SUCH_CATEGORY));
         return new MentoringCategoryDto(category.getId(),category.getName());
     }
 
+    @Transactional(readOnly = true)
     public List<MentoringCategoryDto> findAllCategory() {
         return categoryRepository.findAll()
                 .stream()

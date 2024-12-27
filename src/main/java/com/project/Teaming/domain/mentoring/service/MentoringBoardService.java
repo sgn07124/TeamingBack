@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class MentoringBoardService {
 
@@ -84,7 +83,7 @@ public class MentoringBoardService {
      * @param postId
      * @return
      */
-
+    @Transactional(readOnly = true)
     public MentoringBoard findMentoringPost(Long postId) {
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
@@ -95,6 +94,7 @@ public class MentoringBoardService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<String> findTeamCategories(Long teamId) {
         List<Object[]> teamCategories = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
         return teamCategories.stream()
@@ -103,7 +103,7 @@ public class MentoringBoardService {
                 .collect(Collectors.toList());
     }
 
-
+    @Transactional(readOnly = true)
     public RsSpecBoardDto toDto(MentoringBoard mentoringPost) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
@@ -124,6 +124,7 @@ public class MentoringBoardService {
      * @param teamId
      * @return
      */
+    @Transactional(readOnly = true)
     public List<RsBoardDto> findAllMyMentoringPost(Long teamId) {
         List<RsBoardDto> boards = mentoringBoardRepository.findAllByMentoringTeamId(teamId);
         List<Object[]> categoryResults = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
@@ -148,6 +149,7 @@ public class MentoringBoardService {
      *
      * @return
 */
+    @Transactional(readOnly = true)
     public PaginatedCursorResponse<RsBoardDto> findAllPosts(Long cursor, int size) {
         List<Long> ids = mentoringBoardRepository.findMentoringBoardIds(cursor, size + 1, Status.FALSE);
 
