@@ -30,7 +30,7 @@ public class MentoringBoardController {
 
     private final MentoringBoardService mentoringBoardService;
 
-    @PostMapping("/{team_id}/post")
+    @PostMapping("/teams/{team-id}/posts")
     @Operation(summary = "멘토링 글 등록" , description = "멘토링 팀에서(팀의 팀장, 팀원 모두 가능) 글을 등록 할 수 있다. 멘토링 글 id 반환")
     public ResultDetailResponse<String> savePost(@PathVariable Long team_id,
                                                @RequestBody @Valid RqBoardDto dto) {
@@ -39,7 +39,7 @@ public class MentoringBoardController {
     }
 
 
-    @PostMapping("/post/{post_id}")
+    @PostMapping("/posts/{post-id}")
     @Operation(summary = "멘토링 글 수정", description = "나의 팀에서 등록된 멘토링 게시물을 팀 구성원(팀장과 팀원) 모두가 수정 할 수 있다. 수정버튼이 있는 멘토링 글 상세페이지로 이동.")
     public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long post_id,
                                                      @RequestBody @Valid RqBoardDto dto) {
@@ -75,14 +75,14 @@ public class MentoringBoardController {
     }
 
 
-    @GetMapping("/{team_Id}/posts")
+    @GetMapping("/teams/{team-id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회" , description = "특정 멘토링 팀에서 쓴 모든 글을 조회 할 수 있다. 팀 페이지에서 시용")
     public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
         List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_Id);
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
     }
 
-    @PostMapping("/post/{team_id}/{post_id}/complete")
+    @PostMapping("/teams/{team-id}/posts/{post-id}/complete")
     @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀구성원이 모집 완료 처리를 직접 할 수 있다.")
     public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
         MentoringPostStatusDto statusDto = mentoringBoardService.updatePostStatus(team_id, post_id);
@@ -96,7 +96,7 @@ public class MentoringBoardController {
      * @param post_id
      * @return
      */
-    @GetMapping("/post/{post_id}")
+    @GetMapping("/posts/{post-id}")
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")
     public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long post_id) {
@@ -106,7 +106,7 @@ public class MentoringBoardController {
     }
 
 
-    @DeleteMapping("/post/{post_id}/del")
+    @DeleteMapping("/posts/{post-id}")
     @Operation(summary = "멘토링 글 삭제", description = "나의 멘토링 글을 삭제 할 수 있다. 멘토링 게시판으로 이동")
     public ResultDetailResponse<Void> deletePost(@PathVariable Long post_id) {
         mentoringBoardService.deleteMentoringPost(post_id);

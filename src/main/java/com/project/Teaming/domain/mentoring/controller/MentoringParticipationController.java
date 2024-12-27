@@ -30,7 +30,7 @@ public class MentoringParticipationController {
     private final MentoringReportService mentoringReportService;
     private final MentoringReviewService mentoringReviewService;
 
-    @PostMapping("/{post_id}/join")
+    @PostMapping("/posts/{post-id}/participants")
     @Operation(summary = "멘토링 지원자 등록", description = "멘토링 팀에 지원하는 API , 지원자 ID 반환")
     public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long post_id) {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
@@ -40,28 +40,28 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(id));
     }
 
-    @PostMapping("/{team_id}/cancel")
+    @DeleteMapping("/teams/{team-id}/participants")
     @Operation(summary = "멘토링 지원 취소" , description = "멘토링 팀 지원취소 하는 API")
     public ResultDetailResponse<Void> cancelMentoringParticipation(@PathVariable Long team_id) {
         mentoringParticipationService.cancelMentoringParticipation(team_id);
         return new ResultDetailResponse<>(ResultCode.CANCEL_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/team/{team_id}/{participant_id}/accept")
+    @PostMapping("/teams/{team-id}/participants/{participant-id}/accept")
     @Operation(summary = "리더의 멘토링 지원 수락" , description = "멘토링 팀 리더가 지원을 수락 하는 API")
     public ResultDetailResponse<Void> acceptParticipant(@PathVariable Long team_id, @PathVariable Long participant_id) {
         mentoringParticipationService.acceptMentoringParticipation(team_id, participant_id);
         return new ResultDetailResponse<>(ResultCode.ACCEPT_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/team/{team_id}/{participant_id}/reject")
+    @PostMapping("/teams/{team-id}/participants/{participant-id}/reject")
     @Operation(summary = "리더의 멘토링 지원 거절" , description = "멘토링 팀 리더가 지원을 거절 하는 API")
     public ResultDetailResponse<Void> rejectParticipant(@PathVariable Long team_id, @PathVariable Long participant_id) {
         mentoringParticipationService.rejectMentoringParticipation(team_id, participant_id);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
 
-    @PostMapping("/team/{team_id}/{user_id}/export")
+    @PostMapping("/teams/{team-id}/users/{user-id}/export")
     @Operation(summary = "리더의 멘토링 팀원 강퇴" , description = "멘토링 팀 리더가 팀원을 강퇴하는 API")
     public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long team_id, @PathVariable Long user_id) {
         mentoringParticipationService.exportTeamUser(team_id, user_id);
@@ -69,7 +69,7 @@ public class MentoringParticipationController {
     }
 
 
-    @PostMapping("/team/{team_id}/quit")
+    @PostMapping("/teams/{team-id}/quit")
     @Operation(summary = "팀 구성원의 탈퇴", description = "팀 구성원들이 탈퇴하는 API")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id) {
         mentoringParticipationService.deleteUser(team_id);
@@ -90,7 +90,7 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REVIEW_TEAM_USER, null);
     }
 
-    @GetMapping("/{team_id}/status")
+    @GetMapping("/mentoring/teams/{team-id}/status")
     @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
             "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환. " +
             "리더용, 팀원용 페이지에서 팀원 조회 시 isDeleted는 탈퇴 유무, isLogined는 현재 로그인 된 사용자 유무, status가 EXPORT면 강퇴된 사용자 입니다, " +
