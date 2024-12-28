@@ -34,6 +34,7 @@ public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final JwtExceptionFilter jwtExceptionFilter;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CorsFilter corsFilter;
 
 
     @Bean
@@ -61,11 +62,6 @@ public class SecurityConfig {
                                 "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{team_id}/{post_id}",
                                 "/project/posts","/mentoring/posts","/mentoring/team/{team_Id}","/mentoring/post/{post_id}","/mock/**",
                                 "mentoring/category/{category_id}").permitAll() // 특정 경로 허용
-                        .requestMatchers("/user/portfolio/save", "/user/portfolio", "/project/team", "/project/team/{team_id}/edit",
-                                "project/team/{team_id}/delete", "/project/join/**", "/user/report", "/user/update/**", "/project/{team_id}/quit",
-                                "/project/team/{team_id}/{user_id}/**", "/project/post/{team_id}", "/project/post/{team_id}/{post_id}/edit",
-                                "/project/post/{team_id}/{post_id}/complete", "/user", "/project/team/{team_id}/member/**", "/project/team/status",
-                                "/user/project", "/project/team/{team_id}/member", "/project/report").hasRole("USER")
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
 
@@ -76,24 +72,9 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler) // 로그인 성공 핸들러
                 );
 
-        // CORS 설정 추가
-        http.cors(cors -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowCredentials(true); // 쿠키 전송 허용
-            config.addAllowedOrigin("https://myspringserver.shop");
-            config.addAllowedOrigin("https://localhost:3000");
-            config.addAllowedOrigin("https://front.myspringserver.shop:3000");
-            config.addAllowedOrigin("http://localhost:3000");
-            config.addAllowedOrigin("http://localhost:8080"); // 도메인 모두 허용
-            config.addAllowedHeader("*");
-            config.addAllowedMethod("*");
-            config.setExposedHeaders(List.of("Authorization", "accessToken")); // 클라이언트에서 접근할 수 있도록 노출할 헤더
-
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", config);
-            CorsFilter corsFilter = new CorsFilter(source);
-            http.addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class);
-        });
+        // CORS 필터 추가
+        http
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class);
 
         // JWT 인증 필터를 UsernamePasswordAuthenticationFilter 앞에 추가
         return http
