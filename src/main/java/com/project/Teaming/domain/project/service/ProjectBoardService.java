@@ -65,12 +65,12 @@ public class ProjectBoardService {
         projectBoardRepository.save(post);
     }
 
-    public ProjectPostInfoDto getPostInfo(Long teamId, Long postId) {
-        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
-
+    public ProjectPostInfoDto getPostInfo(Long postId) {
         ProjectBoard projectBoard = projectBoardRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
+
+        ProjectTeam projectTeam = projectTeamRepository.findById(projectBoard.getProjectTeam().getId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
 
         List<String> stackIds = projectTeam.getStacks().stream()
                 .map(teamStack -> String.valueOf(teamStack.getStack().getId()))

@@ -11,6 +11,7 @@ public class ProjectPostInfoDto {
 
     private String title;
     private String teamName;
+    private Long teamId;
 
     private String startDate;
     private String endDate;
@@ -30,6 +31,7 @@ public class ProjectPostInfoDto {
         ProjectPostInfoDto dto = new ProjectPostInfoDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());
+        dto.setTeamId(projectTeam.getId());
         dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
         dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
         dto.setDeadline(String.valueOf(projectBoard.getDeadline()));

@@ -43,10 +43,10 @@ public class ProjectBoardController {
         return new ResultDetailResponse<>(ResultCode.REGISTER_PROJECT_POST, null);
     }
 
-    @GetMapping("/post/{team_id}/{post_id}")
+    @GetMapping("/post/{post_id}")
     @Operation(summary = "프로젝트 팀 게시물 상세 조회", description = "프로젝트 팀에서 작성한 게시물들 중 하나에 대한 상세 조회")
-    public ResultDetailResponse<ProjectPostInfoDto> getPostInfo(@PathVariable Long team_id, @PathVariable Long post_id) {
-        ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(team_id, post_id);
+    public ResultDetailResponse<ProjectPostInfoDto> getPostInfo(@PathVariable Long post_id) {
+        ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(post_id);
         return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_INFO, postInfoDto);
     }
 
