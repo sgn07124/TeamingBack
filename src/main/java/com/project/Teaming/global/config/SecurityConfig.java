@@ -6,25 +6,19 @@ import com.project.Teaming.global.oauth2.CustomOAuth2UserService;
 import com.project.Teaming.global.oauth2.MyAuthenticationFailureHandler;
 import com.project.Teaming.global.oauth2.MyAuthenticationSuccessHandler;
 import com.project.Teaming.global.properties.CustomAuthenticationEntryPoint;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 @Configuration
-@EnableWebSecurity(debug = true)
+@EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -59,7 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/token/**").permitAll() // 토큰 발급 경로 허용
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/login",
-                                "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{team_id}/{post_id}",
+                                "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{post_id}",
                                 "/project/posts","/mentoring/posts","/mentoring/team/{team_Id}","/mentoring/post/{post_id}","/mock/**",
                                 "mentoring/category/{category_id}").permitAll() // 특정 경로 허용
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
