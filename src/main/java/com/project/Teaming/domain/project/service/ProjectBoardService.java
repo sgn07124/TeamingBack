@@ -26,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ public class ProjectBoardService {
     }
 
     public ProjectPostInfoDto getPostInfo(Long postId) {
+
         ProjectBoard projectBoard = projectBoardRepository.findById(postId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_POST));
 
@@ -80,8 +82,30 @@ public class ProjectBoardService {
                 .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
 
-        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds);
+        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds, isProjectMember(projectTeam.getId()));
     }
+
+    public boolean isProjectMember(Long projectTeamId) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return false;  // 인증되지 않은 사용자(일반 사용자)
+        }
+        return isMember(user.getId(), projectTeamId);  // 로그인 한 사용자들 중 팀원 여부
+    }
+
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return userRepository.findById(getCurrentId()).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        }
+        return null;  // 인증되지 않은 사용자
+    }
+
+    private boolean isMember(Long userId, Long projectTeamId) {
+        return projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(projectTeamId, userId,
+                ParticipationStatus.ACCEPTED, false);
+    }
+
 
     public void updatePost(Long teamId, Long postId, CreatePostDto dto) {
         ProjectTeam projectTeam = projectTeamRepository.findById(teamId)

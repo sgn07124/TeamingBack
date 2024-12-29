@@ -1,8 +1,8 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectBoard;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
-import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
@@ -20,6 +20,8 @@ public class ProjectPostInfoDto {
     private String link;
     private String contents;
     private String postStatus;
+    @JsonProperty("isMember")
+    private boolean isMember;
 
     private Long projectTeamId;
     private Long postId;
@@ -27,7 +29,7 @@ public class ProjectPostInfoDto {
     private List<String> stacks;  // 기술 스택(id 조회)
     private List<String> recruitCategories;  // 모집 구분(id 조회)
 
-    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackIds, List<String> recruitCategoryIds) {
+    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackIds, List<String> recruitCategoryIds, boolean isMember) {
         ProjectPostInfoDto dto = new ProjectPostInfoDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());
@@ -39,6 +41,7 @@ public class ProjectPostInfoDto {
         dto.setLink(projectBoard.getLink());
         dto.setContents(projectBoard.getContents());
         dto.setPostStatus(projectBoard.getStatus().name());
+        dto.setMember(isMember);
         dto.setProjectTeamId(projectTeam.getId());
         dto.setPostId(projectBoard.getId());
         dto.setStacks(stackIds);
