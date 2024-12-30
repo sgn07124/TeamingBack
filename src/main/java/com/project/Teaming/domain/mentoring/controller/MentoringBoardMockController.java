@@ -46,7 +46,8 @@ public class MentoringBoardMockController {
 
         // Mock 데이터 생성
         RsSpecBoardDto mockResponse = RsSpecBoardDto.builder()
-                .id(post_id.toString()) // 요청받은 post_id를 그대로 사용
+                .boardId(post_id) // 요청받은 post_id를 그대로 사용
+                .teamId(7L)
                 .title(dto.getTitle()) // 수정된 제목
                 .mentoringTeamName("Mock 팀 이름") // 목데이터에서 고정된 팀 이름
                 .deadLine(dto.getDeadLine()) // 요청에서 전달된 모집 마감기한
@@ -179,7 +180,8 @@ public class MentoringBoardMockController {
 
         // Mock 데이터 생성
         RsSpecBoardDto mockPost = RsSpecBoardDto.builder()
-                .id(String.valueOf(post_id)) // 요청받은 post_id를 그대로 사용
+                .boardId(post_id) // 요청받은 post_id를 그대로 사용
+                .teamId(7L)
                 .title("Mock 게시글 제목")
                 .mentoringTeamName("Mock 팀 이름")
                 .deadLine(LocalDate.of(2024, 12, 31)) // 고정된 마감일
@@ -195,7 +197,6 @@ public class MentoringBoardMockController {
                 .category(List.of("1", "2")) // 고정된 카테고리
                 .authority(generateRandomAuthority(random)) // 랜덤 권한 설정
                 .build();
-
         // Mock 데이터 반환
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST, mockPost);
     }
