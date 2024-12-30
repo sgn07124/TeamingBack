@@ -43,12 +43,14 @@ public class ProjectParticipationService {
     private final ReviewRepository reviewRepository;
 
     public void createParticipation(ProjectTeam projectTeam) {
-        ProjectParticipation projectParticipation = new ProjectParticipation();
-        User user = userRepository.findById(getCurrentId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
-
-        projectParticipation.createProjectParticipation(user, projectTeam);
+        User user = getLoginUser();
+        ProjectParticipation projectParticipation = ProjectParticipation.create(user, projectTeam);
         projectParticipationRepository.save(projectParticipation);
+    }
+
+    private User getLoginUser() {
+        return userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
     }
 
     private Long getCurrentId() {
@@ -103,6 +105,7 @@ public class ProjectParticipationService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
 
         if (projectParticipation.canQuit()) {
+            // 팀장이 탈퇴 시
             if (projectParticipation.getRole().equals(ProjectRole.OWNER)) {
                 Optional<ProjectParticipation> firstMember = projectParticipationRepository.findTeamUsers(teamId, ParticipationStatus.ACCEPTED, ProjectRole.MEMBER)
                         .stream().findFirst();
@@ -114,6 +117,7 @@ public class ProjectParticipationService {
                             throw new BusinessException(ErrorCode.NO_ELIGIBLE_MEMBER_FOR_LEADER);
                         }
                 );
+                projectParticipation.updateOwnerRole();
             }
             projectParticipation.quitTeam();
         } else {

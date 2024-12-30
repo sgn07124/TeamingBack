@@ -1,7 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.user.entity.Report;
-import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
@@ -63,16 +62,18 @@ public class ProjectParticipation {
     private List<Report> reports = new ArrayList<>();  // 신고 테이블과 일대다
 
 
-    public void createProjectParticipation(User user, ProjectTeam team) {
-        this.participationStatus = ParticipationStatus.ACCEPTED;
-        this.isDeleted = false;
-        this.isExport = false;
-        this.requestDate = LocalDateTime.now();
-        this.decisionDate = LocalDateTime.now();
-        this.role = ProjectRole.OWNER;
-        this.recruitCategory = "OWNER";
-        this.user = user;
-        this.projectTeam = team;
+    public static ProjectParticipation create(User user, ProjectTeam team) {
+        ProjectParticipation projectParticipation = new ProjectParticipation();
+        projectParticipation.participationStatus = ParticipationStatus.ACCEPTED;
+        projectParticipation.isDeleted = false;
+        projectParticipation.isExport = false;
+        projectParticipation.requestDate = LocalDateTime.now();
+        projectParticipation.decisionDate = LocalDateTime.now();
+        projectParticipation.role = ProjectRole.OWNER;
+        projectParticipation.recruitCategory = "OWNER";
+        projectParticipation.user = user;
+        projectParticipation.projectTeam = team;
+        return projectParticipation;
     }
 
     public void joinTeamMember(User user, ProjectTeam projectTeam, String recruitCategory) {
@@ -129,5 +130,9 @@ public class ProjectParticipation {
 
     public void setRole(ProjectRole role) {
         this.role = role;
+    }
+
+    public void updateOwnerRole() {
+        this.role = ProjectRole.MEMBER;
     }
 }
