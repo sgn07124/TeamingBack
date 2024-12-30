@@ -40,10 +40,10 @@ public class MentoringTeamController {
 
     @PutMapping("/teams/{team_id}")
     @Operation(summary = "멘토링 팀 수정", description = "멘토링 팀을 수정할 수 있다.")
-    public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long teamId,
+    public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long team_id,
                                                                    @RequestBody @Valid RqTeamDto dto) {
-        mentoringTeamService.updateMentoringTeam(teamId, dto);
-        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(teamId);
+        mentoringTeamService.updateMentoringTeam(team_id, dto);
+        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
         TeamResponseDto teamDto = mentoringTeamService.getMentoringTeam(mentoringTeam);
 
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_TEAM, teamDto);
@@ -62,21 +62,16 @@ public class MentoringTeamController {
     @GetMapping("/teams/{team_id}")
     @Operation(summary = "멘토링 팀 조회", description = "특정 멘토링 팀을 조회할 수 있다. " +
             "멘토링 팀페이지 조회용, authority가 LEADER면 팀장용페이지,CREW이면 팀원용페이지, NoAuth면 일반사용자용 페이지 띄워주세요 ")
-    public ResultDetailResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long teamId) {
-        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(teamId);
+    public ResultDetailResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long team_id) {
+        MentoringTeam mentoringTeam = mentoringTeamService.findMentoringTeam(team_id);
         TeamResponseDto teamDto = mentoringTeamService.getMentoringTeam(mentoringTeam);
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_TEAM, teamDto);
     }
 
-    /**
-     * 멘토링팀의 게시글 같이 삭제함
-     * @param teamId
-     * @return
-     */
     @DeleteMapping("/mentoring/teams/{team_id}")
     @Operation(summary = "멘토링 팀 삭제", description = "특정 멘토링 팀을 삭제할 수 있다.")
-    public ResultDetailResponse<Void> deleteMentoringTeam(@PathVariable Long teamId) {
-        mentoringTeamService.deleteMentoringTeam(teamId);  //멘토링팀 삭제처리
+    public ResultDetailResponse<Void> deleteMentoringTeam(@PathVariable Long team_id) {
+        mentoringTeamService.deleteMentoringTeam(team_id);  //멘토링팀 삭제처리
         return new ResultDetailResponse<>(ResultCode.DELETE_MENTORING_TEAM, null);
     }
 }
