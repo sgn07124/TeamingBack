@@ -71,7 +71,8 @@ public class MentoringBoard extends BaseTimeEntity {
 
     public RsSpecBoardDto toDto(MentoringTeam mentoringTeam) {
         RsSpecBoardDto dto = RsSpecBoardDto.builder()
-                .id(String.valueOf(this.getId()))
+                .boardId(this.getId())
+                .teamId(mentoringTeam.getId())
                 .title(this.getTitle())
                 .mentoringTeamName(mentoringTeam.getName())
                 .deadLine(this.getDeadLine())

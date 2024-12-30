@@ -13,7 +13,8 @@ import java.util.List;
 @Data
 public class RsSpecBoardDto {
 
-    private String id;
+    private Long boardId;
+    private Long teamId;
     private String title;
     private String mentoringTeamName;
     private LocalDate deadLine;
@@ -30,8 +31,9 @@ public class RsSpecBoardDto {
     private MentoringAuthority authority;
 
     @Builder
-    public RsSpecBoardDto(String id, String title, String mentoringTeamName, LocalDate deadLine, PostStatus status, LocalDate startDate, LocalDate endDate, MentoringRole role, int mentoringCnt, String link, List<String> category, String contents, LocalDateTime createdDate, LocalDateTime modifiedDate, MentoringAuthority authority) {
-        this.id = id;
+    public RsSpecBoardDto(Long boardId, Long teamId, String title, String mentoringTeamName, LocalDate deadLine, PostStatus status, LocalDate startDate, LocalDate endDate, MentoringRole role, int mentoringCnt, String link, List<String> category, String contents, LocalDateTime createdDate, LocalDateTime modifiedDate, MentoringAuthority authority) {
+        this.boardId = boardId;
+        this.teamId = teamId;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
         this.deadLine = deadLine;
