@@ -77,8 +77,8 @@ public class MentoringBoardController {
 
     @GetMapping("/teams/{team_id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회" , description = "특정 멘토링 팀에서 쓴 모든 글을 조회 할 수 있다. 팀 페이지에서 시용")
-    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_Id) {
-        List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_Id);
+    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_id) {
+        List<RsBoardDto> allMyMentoringPost = mentoringBoardService.findAllMyMentoringPost(team_id);
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, allMyMentoringPost);
     }
 
