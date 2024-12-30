@@ -43,12 +43,14 @@ public class ProjectParticipationService {
     private final ReviewRepository reviewRepository;
 
     public void createParticipation(ProjectTeam projectTeam) {
-        ProjectParticipation projectParticipation = new ProjectParticipation();
-        User user = userRepository.findById(getCurrentId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
-
-        projectParticipation.createProjectParticipation(user, projectTeam);
+        User user = getLoginUser();
+        ProjectParticipation projectParticipation = ProjectParticipation.create(user, projectTeam);
         projectParticipationRepository.save(projectParticipation);
+    }
+
+    private User getLoginUser() {
+        return userRepository.findById(getCurrentId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
     }
 
     private Long getCurrentId() {
