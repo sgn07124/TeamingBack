@@ -131,4 +131,8 @@ public class ProjectParticipation {
     public void setRole(ProjectRole role) {
         this.role = role;
     }
+
+    public void updateOwnerRole() {
+        this.role = ProjectRole.MEMBER;
+    }
 }
