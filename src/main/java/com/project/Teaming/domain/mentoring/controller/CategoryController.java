@@ -25,7 +25,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping("/categories/{category-id}")
+    @GetMapping("/categories/{category_id}")
     @Operation(summary = "멘토링 카테고리 조회" , description = "멘토링 모집카테고리를 조회한다")
     public ResultDetailResponse<MentoringCategoryDto> findCategory(@PathVariable Long category_id) {
         MentoringCategoryDto category = categoryService.findCategory(category_id);
