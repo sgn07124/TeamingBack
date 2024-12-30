@@ -8,7 +8,6 @@ import com.project.Teaming.domain.project.dto.response.ProjectTeamInfoDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
-import com.project.Teaming.domain.project.entity.ProjectStatus;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.entity.RecruitCategory;
 import com.project.Teaming.domain.project.entity.Stack;
@@ -25,8 +24,6 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -90,8 +87,7 @@ public class ProjectTeamService {
     }
 
     public ProjectTeamInfoDto getTeam(Long teamId) {
-        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        ProjectTeam projectTeam = findProjectTeamById(teamId);
 
         // 기술 스택 id 리스트 생성
         List<String> stackIds = projectTeam.getStacks().stream()
@@ -106,9 +102,10 @@ public class ProjectTeamService {
         return ProjectTeamInfoDto.from(projectTeam, stackIds, recruitCategoryIds);
     }
 
+
+
     public void editTeam(Long teamId, UpdateTeamDto dto) {
-        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        ProjectTeam projectTeam = findProjectTeamById(teamId);
 
         List<Stack> stacks = stackRepository.findAllById(dto.getStackIds());
         List<Long> missingStackIds = dto.getStackIds().stream()
@@ -132,8 +129,7 @@ public class ProjectTeamService {
     }
 
     public void deleteTeam(Long teamId) {
-        ProjectTeam projectTeam = projectTeamRepository.findById(teamId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        ProjectTeam projectTeam = findProjectTeamById(teamId);
 
         projectTeamRepository.delete(projectTeam);
     }
@@ -143,8 +139,7 @@ public class ProjectTeamService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
         ProjectParticipation teamOwner = projectParticipationRepository.findByProjectTeamIdAndRole(dto.getTeamId(), ProjectRole.OWNER)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
-        ProjectTeam projectTeam = projectTeamRepository.findById(dto.getTeamId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        ProjectTeam projectTeam = findProjectTeamById(dto.getTeamId());
 
         if (user.getId().equals(teamOwner.getUser().getId())) {
             projectTeam.updateTeamStatus(dto.getStatus());
@@ -173,5 +168,10 @@ public class ProjectTeamService {
                 })
                 .collect(Collectors.toList());
         return projectLists;
+    }
+
+    private ProjectTeam findProjectTeamById(Long teamId) {
+        return projectTeamRepository.findById(teamId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
     }
 }
