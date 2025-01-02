@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParticipantsDto<T> {
-    private T details;
-    private MentoringAuthority authority;
 
+    private MentoringAuthority authority;
+    private T details;
 }

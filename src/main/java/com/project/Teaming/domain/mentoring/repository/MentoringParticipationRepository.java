@@ -14,12 +14,27 @@ import java.util.Optional;
 
 public interface MentoringParticipationRepository extends JpaRepository<MentoringParticipation, Long> {
 
-    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto(mp.decisionDate,u.id,u.name,mp.role,mp.participationStatus,mp.isDeleted) " +
+    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto(" +
+            "mp.decisionDate, u.id, u.name, mp.role, mp.participationStatus, mp.isDeleted, " +
+            "case when mt.status = :teamStatus then " +
+            "     case when r.id is not null then true " +
+            "          else false end " +
+            "else cast(null as boolean) end) " +
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
-            "where mt = :team and (mp.participationStatus = :status or mp.participationStatus = :status2)")
-    List<RsTeamUserDto> findAllByMemberStatus(@Param("team") MentoringTeam team, @Param("status") MentoringParticipationStatus status,@Param("status2") MentoringParticipationStatus status2);
+            "left join Review r " +
+            "on r.reviewee.id = u.id " +
+            "and r.mentoringParticipation.id = :reviewerParticipationId " +
+            "where mt = :team " +
+            "and (mp.participationStatus = :status or mp.participationStatus = :status2)")
+    List<RsTeamUserDto> findAllByMemberStatus(
+            @Param("team") MentoringTeam team,
+            @Param("teamStatus") MentoringStatus teamStatus,
+            @Param("status") MentoringParticipationStatus status,
+            @Param("status2") MentoringParticipationStatus status2,
+            @Param("reviewerParticipationId") Long reviewerParticipationId
+    );
 
     @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto(mp.requestDate,u.id,u.name,u.warningCnt,mp.participationStatus) " +
             "from MentoringParticipation mp " +

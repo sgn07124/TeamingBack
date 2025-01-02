@@ -3,6 +3,7 @@ package com.project.Teaming.domain.mentoring.controller;
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
+import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.global.result.ResultCode;
@@ -47,16 +48,6 @@ public class MentoringTeamController {
         TeamResponseDto teamDto = mentoringTeamService.getMentoringTeam(mentoringTeam);
 
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_TEAM, teamDto);
-    }
-
-    @GetMapping("/teams")
-    @Operation(summary = "나의 모든 멘토링 팀 조회", description = "나의 모든 멘토링 팀을 조회할 수 있다. 마이페이지에서 사용")
-    public ResultListResponse<MyTeamDto> findMyMentoringTeams() {
-        List<MentoringTeam> myMentoringTeams = mentoringTeamService.findMyMentoringTeams();
-        List<MyTeamDto> teams = myMentoringTeams.stream()
-                .map(mentoringTeamService::getMyTeam)
-                .collect(Collectors.toList());
-        return new ResultListResponse<>(ResultCode.GET_MY_ALL_MENTORING_TEAM, teams);
     }
 
     @GetMapping("/teams/{team_id}")
