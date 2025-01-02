@@ -7,6 +7,8 @@ import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.*;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.UserRepository;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
@@ -67,7 +69,8 @@ public class MentoringTeamService {
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
         //리더 생성
         RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
-        mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
+        MentoringParticipation leader = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
+        leader.setDecisionDate(LocalDateTime.now());
 
         //카테고리 생성
         teamCategoryService.saveTeamCategories(saved,dto.getCategories());
@@ -81,7 +84,9 @@ public class MentoringTeamService {
      */
     @Transactional
     public void updateMentoringTeam(Long mentoringTeamId, RqTeamDto dto) {
-        User user = getUser();
+        Long userId = getUser();
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (mentoringTeam.getFlag() == Status.TRUE) {
@@ -117,8 +122,8 @@ public class MentoringTeamService {
      * @return
      */
     @Transactional(readOnly = true)
-    public List<MentoringTeam> findMyMentoringTeams() {
-        User user = getUser();
+    public List<MentoringTeam> findMyMentoringTeams(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         List<MentoringParticipation> participations = mentoringParticipationRepository.findParticipationsWithTeamsAndUser(
                 user,
                 MentoringParticipationStatus.ACCEPTED,
@@ -129,6 +134,13 @@ public class MentoringTeamService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<MentoringTeam> getAuthenticateTeams() {
+        Long userId = getUser();
+        return findMyMentoringTeams(userId);
+    }
+
+
 
     /**
      * 멘토링 팀 삭제 로직, 팀 구성원이고 리더여야 가능하다
@@ -136,7 +148,8 @@ public class MentoringTeamService {
      */
     @Transactional
     public void deleteMentoringTeam(Long mentoringTeamId) {
-        User user = getUser();
+        Long userId = getUser();
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         MentoringTeam mentoringTeam = mentoringTeamRepository.findWithBoardsById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
@@ -159,7 +172,7 @@ public class MentoringTeamService {
     @Transactional(readOnly = true)
     public TeamResponseDto getMentoringTeam( MentoringTeam team) {
         // 로그인 여부 확인 메서드
-        User user = getOptionalUser();
+        Long userId = getOptionalUser();
 
         RsTeamDto dto = team.toDto();
         List<String> categories = team.getCategories().stream()
@@ -172,11 +185,13 @@ public class MentoringTeamService {
         teamResponseDto.setDto(dto);
 
         // 로그인하지 않은 사용자
-        if (user == null) {
+        if (userId == null) {
             handleNoAuthUser(teamResponseDto, team, null);
             return teamResponseDto;
         }
+
         //로그인 사용자
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         mentoringParticipationRepository.findByMentoringTeamAndUser(team, user)
         .ifPresentOrElse(
                 participation -> {
@@ -196,7 +211,8 @@ public class MentoringTeamService {
      */
     @Transactional(readOnly = true)
     public MyTeamDto getMyTeam(MentoringTeam team) {
-        User user = getUser();
+        Long userId = getUser();
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
         MyTeamDto teamDto = new MyTeamDto(team.getId(),
                 team.getName(),
@@ -216,19 +232,17 @@ public class MentoringTeamService {
     }
 
 
-    private User getUser() {
+    private Long getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
-        Long userId = securityUser.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return user;
+        return securityUser.getUserId();
     }
 
     /**
      * 로그인 하지 않은 사용자면 null반환
      * @return
      */
-    private User getOptionalUser() {
+    private Long getOptionalUser() {
         try {
             return getUser(); // getUser() 호출
         } catch (Exception e) {

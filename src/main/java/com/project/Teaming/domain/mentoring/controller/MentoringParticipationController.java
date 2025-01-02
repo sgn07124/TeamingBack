@@ -36,8 +36,8 @@ public class MentoringParticipationController {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
-        Long id = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(id));
+        MentoringParticipation participation = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(participation.getId()));
     }
 
     @DeleteMapping("/teams/{team_id}/participants")
@@ -90,7 +90,7 @@ public class MentoringParticipationController {
         return new ResultDetailResponse<>(ResultCode.REVIEW_TEAM_USER, null);
     }
 
-    @GetMapping("/mentoring/teams/{team_id}/status")
+    @GetMapping("/teams/{team_id}/status")
     @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
             "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환. " +
             "리더용, 팀원용 페이지에서 팀원 조회 시 isDeleted는 탈퇴 유무, isLogined는 현재 로그인 된 사용자 유무, status가 EXPORT면 강퇴된 사용자 입니다, " +
