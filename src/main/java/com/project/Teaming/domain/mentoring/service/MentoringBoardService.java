@@ -137,7 +137,7 @@ public class MentoringBoardService {
                 categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryId);
             }
             boards.forEach(post -> {
-                List<String> categories = categoryMap.getOrDefault(post.getId(), Collections.emptyList());
+                List<String> categories = categoryMap.getOrDefault(post.getBoardId(), Collections.emptyList());
                 post.setCategory(categories);
             });
             return boards;
