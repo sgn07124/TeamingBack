@@ -26,18 +26,18 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
     private final MentoringBoardService mentoringBoardService;
 
     @Override
-    @PostMapping("/teams/{team_id}/posts")
-    public ResultDetailResponse<String> savePost(@PathVariable Long team_id,
+    @PostMapping("/teams/{teamId}/posts")
+    public ResultDetailResponse<String> savePost(@PathVariable Long teamId,
                                                @RequestBody @Valid RqBoardDto dto) {
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, String.valueOf(mentoringBoardService.saveMentoringPost(team_id, dto)));
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, String.valueOf(mentoringBoardService.saveMentoringPost(teamId, dto)));
     }
 
     @Override
-    @PutMapping("/posts/{post_id}")
-    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long post_id,
+    @PutMapping("/posts/{postId}")
+    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long postId,
                                                      @RequestBody @Valid RqBoardDto dto) {
-        mentoringBoardService.updateMentoringPost(post_id, dto);
-        MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(post_id);
+        mentoringBoardService.updateMentoringPost(postId, dto);
+        MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_POST, mentoringBoardService.toDto(mentoringPost));
     }
 
@@ -49,26 +49,26 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
     }
 
     @Override
-    @GetMapping("/teams/{team_id}/posts")
-    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long team_id) {
-        return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, mentoringBoardService.findAllMyMentoringPost(team_id));
+    @GetMapping("/teams/{teamId}/posts")
+    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long teamId) {
+        return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, mentoringBoardService.findAllMyMentoringPost(teamId));
     }
     @Override
-    @PatchMapping("/teams/{team_id}/posts/{post_id}/complete")
-    public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
-        return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,mentoringBoardService.updatePostStatus(team_id, post_id));
+    @PatchMapping("/teams/{teamId}/posts/{postId}/complete")
+    public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long teamId, @PathVariable Long postId) {
+        return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,mentoringBoardService.updatePostStatus(teamId, postId));
     }
     @Override
-    @GetMapping("/posts/{post_id}")
-    public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long post_id) {
+    @GetMapping("/posts/{postId}")
+    public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long postId) {
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST,
-                mentoringBoardService.toDto(mentoringBoardService.findMentoringPost(post_id)));
+                mentoringBoardService.toDto(mentoringBoardService.findMentoringPost(postId)));
     }
 
     @Override
-    @DeleteMapping("/posts/{post_id}")
-    public ResultDetailResponse<Void> deletePost(@PathVariable Long post_id) {
-        mentoringBoardService.deleteMentoringPost(post_id);
+    @DeleteMapping("/posts/{postId}")
+    public ResultDetailResponse<Void> deletePost(@PathVariable Long postId) {
+        mentoringBoardService.deleteMentoringPost(postId);
         return new ResultDetailResponse<>(ResultCode.DELETE_MENTORING_POST, null);
     }
 
