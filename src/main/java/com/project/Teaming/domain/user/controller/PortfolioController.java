@@ -20,19 +20,17 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Portfolio", description = "사용자 정보 관련 API")
-public class PortfolioController {
+public class PortfolioController implements SwaggerPortfolioController{
 
     private final PortfolioService portfolioService;
     private final UserService userService;
 
     // 수정 필요
-    @GetMapping("/user/{id}/portfolio")
-    @Operation(summary = "특정 사용자 정보 조회", description = "특정 사용자의 정보를 조회 할 수 있다.")
-    public ResultDetailResponse<PortfolioDto> getUserInfo(@PathVariable Long id) {
-        User user = userService.findById(id).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
-        PortfolioDto dto = portfolioService.getPortfolio(user.getEmail());
-        return new ResultDetailResponse<>(ResultCode.GET_USER_PORTFOLIO, dto);
+    @Override
+    @GetMapping("/users/{userId}/portfolios")
+    public ResultDetailResponse<PortfolioDto> getUserInfo(@PathVariable Long userId) {
+        User user = userService.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        return new ResultDetailResponse<>(ResultCode.GET_USER_PORTFOLIO, portfolioService.getPortfolio(user.getEmail()));
 
     }
 }
