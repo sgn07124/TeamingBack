@@ -72,14 +72,14 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     }
 
     @Override
-    @PostMapping("/report")
+    @PostMapping("/reports")
     public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportDto dto) {
         mentoringReportService.reportTeamUser(dto);
         return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
 
     @Override
-    @PostMapping("/review")
+    @PostMapping("/reviews")
     public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewDto dto) {
         mentoringReviewService.review(dto);
         return new ResultDetailResponse<>(ResultCode.REVIEW_TEAM_USER, null);
