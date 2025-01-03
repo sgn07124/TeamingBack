@@ -2,7 +2,6 @@ package com.project.Teaming.domain.mentoring.controller;
 
 import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
-import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
@@ -28,26 +27,26 @@ public class MentoringTeamController implements SwaggerMentoringTeamController {
                 String.valueOf( mentoringTeamService.saveMentoringTeam(dto)));
     }
     @Override
-    @PutMapping("/teams/{team_id}")
-    public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long team_id,
+    @PutMapping("/teams/{teamId}")
+    public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long teamId,
                                                                    @RequestBody @Valid RqTeamDto dto) {
-        mentoringTeamService.updateMentoringTeam(team_id, dto);
+        mentoringTeamService.updateMentoringTeam(teamId, dto);
 
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_TEAM,
                 mentoringTeamService.getMentoringTeam(
-                        mentoringTeamService.findMentoringTeam(team_id)));
+                        mentoringTeamService.findMentoringTeam(teamId)));
     }
     @Override
-    @GetMapping("/teams/{team_id}")
-    public ResultDetailResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long team_id) {
+    @GetMapping("/teams/{teamId}")
+    public ResultDetailResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long teamId) {
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_TEAM,
                 mentoringTeamService.getMentoringTeam(
-                        mentoringTeamService.findMentoringTeam(team_id)));
+                        mentoringTeamService.findMentoringTeam(teamId)));
     }
     @Override
-    @DeleteMapping("/teams/{team_id}")
-    public ResultDetailResponse<Void> deleteMentoringTeam(@PathVariable Long team_id) {
-        mentoringTeamService.deleteMentoringTeam(team_id);  //멘토링팀 삭제처리
+    @DeleteMapping("/teams/{teamId}")
+    public ResultDetailResponse<Void> deleteMentoringTeam(@PathVariable Long teamId) {
+        mentoringTeamService.deleteMentoringTeam(teamId);  //멘토링팀 삭제처리
         return new ResultDetailResponse<>(ResultCode.DELETE_MENTORING_TEAM, null);
     }
 }
