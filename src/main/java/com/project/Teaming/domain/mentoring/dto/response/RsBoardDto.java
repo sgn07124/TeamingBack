@@ -34,17 +34,6 @@ public class RsBoardDto {
         this.status = status;
     }
 
-
-    public RsBoardDto(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String category, String contents) {
-        this.boardId = boardId;
-        this.title = title;
-        this.mentoringTeamName = mentoringTeamName;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.category = Arrays.asList(category.split(","));
-        this.contents = contents;
-    }
-
     public RsBoardDto(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents, PostStatus status) {
         this.boardId = boardId;
         this.title = title;
