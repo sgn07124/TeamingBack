@@ -25,7 +25,7 @@ public class Portfolio extends BaseTimeEntity {
     private String introduce;  // 사용자 자기소개
 
     // 외래키 : 사용자 id
-    @OneToOne(mappedBy = "portfolio")
+    @OneToOne(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private User user;
     @OneToMany(mappedBy = "portfolio", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<UserStack> userStacks = new ArrayList<>();

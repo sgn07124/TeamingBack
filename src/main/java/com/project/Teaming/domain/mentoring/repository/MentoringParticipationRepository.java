@@ -36,7 +36,7 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("reviewerParticipationId") Long reviewerParticipationId
     );
 
-    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto(mp.requestDate,u.id,u.name,u.warningCnt,mp.participationStatus) " +
+    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto(mp.requestDate,u.id,u.name,u.warningCount,mp.participationStatus) " +
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
