@@ -45,7 +45,7 @@ public class ProjectParticipation {
     private ProjectRole role;  // 역할
 
     @Column(name = "reporting_cnt", nullable = false, columnDefinition = "INT DEFAULT 0")
-    private int reportingCnt;  // 신고 누적
+    private int reportingCount;  // 신고 누적
 
     @Column(nullable = false)
     private String recruitCategory;  // 프로젝트 팀에 지원 시 신청자가 선택하는 모집 구분

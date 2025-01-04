@@ -31,7 +31,7 @@ public class ProjectParticipationInfoDto {
         this.decisionDate = participation.getDecisionDate() != null ? getFormattedDate(participation.getDecisionDate()) : "-";
         this.role = participation.getRole().toString();
         this.recruitCategory = participation.getRecruitCategory();
-        this.reportingCnt = participation.getReportingCnt();
+        this.reportingCnt = participation.getReportingCount();
     }
 
     public String getFormattedDate(LocalDateTime dateTime) {

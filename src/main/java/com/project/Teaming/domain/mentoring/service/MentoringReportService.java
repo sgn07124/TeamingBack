@@ -62,7 +62,7 @@ public class MentoringReportService {
         if (reportedParticipation.getParticipationStatus() == MentoringParticipationStatus.EXPORT || reportedParticipation.getIsDeleted()) {
             Report report = Report.mentoringReport(reportingParticipation, reportedUser);
             reportRepository.save(report);
-            reportedParticipation.setReportingCnt(reportedParticipation.getReportingCnt() + 1);
+            reportedParticipation.setReportingCount(reportedParticipation.getReportingCount() + 1);
             updateReportedWarningCount(reportedParticipation);
         }
         else throw new BusinessException(ErrorCode.STILL_TEAM_USER);
@@ -80,7 +80,7 @@ public class MentoringReportService {
         long totalMembers = mentoringParticipationRepository.countByMentoringTeamIdAndParticipationStatusAndIsDeleted(teamId, MentoringParticipationStatus.ACCEPTED);
 
         // 과반수 이상의 신고 횟수인지 확인
-        if (reportedParticipation.getReportingCnt() >= Math.ceil(totalMembers / 2.0)) {
+        if (reportedParticipation.getReportingCount() >= Math.ceil(totalMembers / 2.0)) {
             // 경고 횟수 증가
             User reportedUser = reportedParticipation.getUser();
             reportedUser.incrementWarningCnt();
@@ -93,7 +93,6 @@ public class MentoringReportService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         Long userId = securityUser.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return user;
+        return userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }

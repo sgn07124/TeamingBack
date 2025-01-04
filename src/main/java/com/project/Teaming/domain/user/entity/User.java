@@ -14,7 +14,7 @@ import java.util.List;
 
 @Getter
 @Entity
-@Table(name = "users")
+@Table(name = "user")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User extends BaseTimeEntity {
@@ -30,8 +30,8 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_name", length = 50)
     private String name;  // 사용자 이름
 
-    @Column(name = "warning_cnt", nullable = false)
-    private Integer warningCnt;  // 사용자가 받은 경고 횟수
+    @Column(name = "warning_count", nullable = false)
+    private Integer warningCount;  // 사용자가 받은 경고 횟수
 
     @Column(name = "user_role")
     private String userRole;
@@ -48,8 +48,8 @@ public class User extends BaseTimeEntity {
     @OneToMany(mappedBy = "reviewee", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "portfolio_id")
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "portfolio_id", referencedColumnName = "portfolio_id", nullable = true)
     private Portfolio portfolio;
 
     @OneToMany(mappedBy = "user")
@@ -59,7 +59,7 @@ public class User extends BaseTimeEntity {
         this.email = email;
         this.provider = provider;
         this.userRole = role;
-        this.warningCnt = 0;  // 처음 경고 횟수는 0으로 설정
+        this.warningCount = 0;  // 처음 경고 횟수는 0으로 설정
     }
 
     // 추가 정보 기입
@@ -84,6 +84,6 @@ public class User extends BaseTimeEntity {
     }
 
     public void incrementWarningCnt() {
-        this.warningCnt += 1;
+        this.warningCount += 1;
     }
 }

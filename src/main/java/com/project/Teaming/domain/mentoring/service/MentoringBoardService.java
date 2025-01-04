@@ -105,17 +105,28 @@ public class MentoringBoardService {
 
     @Transactional(readOnly = true)
     public RsSpecBoardDto toDto(MentoringBoard mentoringPost) {
-        User user = getUser();
+        User optionalUser = getOptionalUser();
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         RsSpecBoardDto dto = mentoringPost.toDto(mentoringTeam);
         List<String> teamCategories = findTeamCategories(mentoringTeam.getId());
         dto.setCategory(teamCategories);
-        Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringPost.getMentoringTeam(), user,MentoringParticipationStatus.ACCEPTED);
-        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
-            dto.setAuthority(teamUser.get().getAuthority());
+        // 로그인된 사용자가 있는 경우 권한 설정
+        if (optionalUser != null) {
+            Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(
+                    mentoringPost.getMentoringTeam(),
+                    optionalUser,
+                    MentoringParticipationStatus.ACCEPTED
+            );
+            if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
+                dto.setAuthority(teamUser.get().getAuthority());
+            } else {
+                dto.setAuthority(MentoringAuthority.NoAuth);
+            }
         } else {
+            // 로그인되지 않은 경우 기본 권한 설정
             dto.setAuthority(MentoringAuthority.NoAuth);
         }
+
         return dto;
     }
 
@@ -137,7 +148,7 @@ public class MentoringBoardService {
                 categoryMap.computeIfAbsent(boardId, k -> new ArrayList<>()).add(categoryId);
             }
             boards.forEach(post -> {
-                List<String> categories = categoryMap.getOrDefault(post.getId(), Collections.emptyList());
+                List<String> categories = categoryMap.getOrDefault(post.getBoardId(), Collections.emptyList());
                 post.setCategory(categories);
             });
             return boards;
@@ -256,12 +267,23 @@ public class MentoringBoardService {
         entityManager.clear();
     }
 
+    /**
+     * 로그인 하지 않은 사용자면 null반환
+     * @return
+     */
+    private User getOptionalUser() {
+        try {
+            return getUser(); // getUser() 호출
+        } catch (Exception e) {
+            return null; // 로그인하지 않은 경우 null 반환
+        }
+    }
+
     private User getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         Long userId = securityUser.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        return user;
+        return userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
 }

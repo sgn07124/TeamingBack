@@ -88,7 +88,7 @@ public class MentoringBoardMockController {
         for (long i = start; i >= end; i--) { // 역순으로 게시글 생성
             mockPosts.add(
                     RsBoardDto.builder()
-                            .id(i) // ID 생성
+                            .boardId(i) // ID 생성
                             .title("Mock 제목 " + i)
                             .mentoringTeamName("Mock 팀 이름 " + i)
                             .startDate(LocalDate.of(2024, 1, 1)) // 고정된 시작일
@@ -128,7 +128,7 @@ public class MentoringBoardMockController {
         for (int i = 1; i <= 5; i++) { // 5개의 게시글 생성
             mockPosts.add(
                     RsBoardDto.builder()
-                            .id((team_Id * 100) + i) // 팀 ID를 기반으로 고유한 ID 생성
+                            .boardId((team_Id * 100) + i) // 팀 ID를 기반으로 고유한 ID 생성
                             .title("Mock 팀 게시글 제목 " + i)
                             .mentoringTeamName("Mock 팀 이름 " + team_Id)
                             .startDate(LocalDate.of(2024, 1, i))

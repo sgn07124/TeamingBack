@@ -141,14 +141,13 @@ public class UserService {
 
     public List<ReviewDto> getReviews(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
-        List<ReviewDto> reviews = reviewRepository.findAllByUser(user);
-        return reviews;
+        return reviewRepository.findAllByUser(user);
     }
 
     public UserReportCnt getWarningCnt() {
         User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         UserReportCnt userReportCnt = new UserReportCnt();
-        userReportCnt.setReportCnt(user.getWarningCnt());
+        userReportCnt.setReportCnt(user.getWarningCount());
         return userReportCnt;
     }
 

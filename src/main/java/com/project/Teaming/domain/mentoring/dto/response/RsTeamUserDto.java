@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import lombok.Data;
@@ -16,9 +17,12 @@ public class RsTeamUserDto {
     private MentoringParticipationStatus status;
     private Boolean isLogined;
     private Boolean isDeleted;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean isReviewed; // MentoringStatus가 COMPLETE일 때만 값 설정
 
-
-    public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
+    // 기본 생성자 (isReviewed를 null로 설정)
+    public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username,
+                         MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
         this.acceptedTime = acceptedTime;
         this.userId = userId;
         this.username = username;
@@ -26,5 +30,17 @@ public class RsTeamUserDto {
         this.status = status;
         this.isLogined = false;
         this.isDeleted = isDeleted;
+        this.isReviewed = null; // 기본값 null
+    }
+
+    public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted, Boolean isReviewed) {
+        this.acceptedTime = acceptedTime;
+        this.userId = userId;
+        this.username = username;
+        this.role = role;
+        this.status = status;
+        this.isLogined = false;
+        this.isDeleted = isDeleted;
+        this.isReviewed = (isReviewed != null) ? isReviewed : null; // 기본값 설정
     }
 }
