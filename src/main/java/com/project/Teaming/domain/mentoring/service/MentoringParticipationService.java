@@ -54,7 +54,7 @@ public class MentoringParticipationService {
                     .authority(dto.getAuthority())
                     .role(dto.getRole())
                     .requestDate(LocalDateTime.now())
-                    .reportingCnt(0)
+                    .reportingCount(0)
                     .build();
             mentoringParticipation.setUser(user);
             mentoringParticipation.addMentoringTeam(mentoringTeam);

@@ -34,8 +34,8 @@ public class MentoringParticipation {
     private MentoringRole role;  // 역할
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
-    @Column(name = "reporting_cnt")
-    private int reportingCnt;
+    @Column(name = "reporting_count")
+    private int reportingCount;
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
     @Column(name = "warning_processed", nullable = false)
@@ -49,14 +49,14 @@ public class MentoringParticipation {
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 
     @Builder
-    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCnt, User user, MentoringTeam mentoringTeam) {
+    public MentoringParticipation(Long id, MentoringParticipationStatus participationStatus, LocalDateTime requestDate, LocalDateTime decisionDate, MentoringRole role, MentoringAuthority authority, int reportingCount, User user, MentoringTeam mentoringTeam) {
         this.id = id;
         this.participationStatus = participationStatus;
         this.requestDate = requestDate;
         this.decisionDate = decisionDate;
         this.role = role;
         this.authority = authority;
-        this.reportingCnt = reportingCnt;
+        this.reportingCount = reportingCount;
         this.isDeleted = false;
         this.warningProcessed = false;
         this.user = user;
@@ -79,9 +79,10 @@ public class MentoringParticipation {
         isDeleted = deleted;
     }
 
-    public void setReportingCnt(int reportingCnt) {
-        this.reportingCnt = reportingCnt;
+    public void setReportingCount(int reportingCount) {
+        this.reportingCount = reportingCount;
     }
+
     public void setWarningProcessed(Boolean warningProcessed) {
         this.warningProcessed = warningProcessed;
     }

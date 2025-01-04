@@ -35,7 +35,7 @@ public class ProjectTeamMemberDto {
         this.decisionDate = participation.getDecisionDate() != null ? Formatter.getFormattedDate(participation.getDecisionDate()) : "-";
         this.role = participation.getRole().toString();
         this.recruitCategory = participation.getRecruitCategory();
-        this.reportingCnt = participation.getReportingCnt();
+        this.reportingCnt = participation.getReportingCount();
         this.isLoginUser = false;
         this.isReported = false;
         this.isReviewed = false;

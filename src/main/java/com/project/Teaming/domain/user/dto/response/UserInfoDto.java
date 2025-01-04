@@ -26,7 +26,7 @@ public class UserInfoDto {
         this.email = user.getEmail();
         this.name = user.getName();
         this.provider = user.getProvider();
-        this.warningCnt = user.getWarningCnt();
+        this.warningCnt = user.getWarningCount();
 
         this.introduce = portfolio.getIntroduce();
         this.stacks = stackIds;
