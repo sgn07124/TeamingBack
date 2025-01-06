@@ -28,7 +28,6 @@ public class TeamRequest {
     @NotNull(message = "모집 카테고리를 작성해 주세요")
     private List<Long> categories;
 
-    @Builder
     public TeamRequest(String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, String link, MentoringRole role, List<Long> categories) {
         this.name = name;
         this.startDate = startDate;

@@ -1,18 +1,17 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
-import com.project.Teaming.domain.mentoring.entity.MentoringRole;
-import com.project.Teaming.domain.mentoring.entity.PostStatus;
-import lombok.Builder;
+import com.project.Teaming.domain.mentoring.entity.*;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BoardSpecResponse {
 
     private MentoringAuthority authority;
@@ -35,7 +34,6 @@ public class BoardSpecResponse {
     private LocalDateTime modifiedDate;
 
 
-    @Builder
     public BoardSpecResponse(MentoringAuthority authority, Boolean isParticipate, Long boardId, Long teamId, String title, String mentoringTeamName, LocalDate deadLine, PostStatus status, LocalDate startDate, LocalDate endDate, MentoringRole role, int mentoringCnt, String link, List<String> category, String contents, LocalDateTime createdDate, LocalDateTime modifiedDate) {
         this.authority = authority;
         this.isParticipate = isParticipate;
@@ -54,5 +52,24 @@ public class BoardSpecResponse {
         this.contents = contents;
         this.createdDate = createdDate;
         this.modifiedDate = modifiedDate;
+    }
+
+    public static BoardSpecResponse from(MentoringBoard mentoringBoard,MentoringTeam mentoringTeam) {
+        BoardSpecResponse dto = new BoardSpecResponse();
+        dto.setBoardId(mentoringBoard.getId());
+        dto.setTeamId(mentoringTeam.getId());
+        dto.setTitle(mentoringBoard.getTitle());
+        dto.setMentoringTeamName(mentoringTeam.getName());
+        dto.setDeadLine(mentoringBoard.getDeadLine());
+        dto.setStartDate(mentoringTeam.getStartDate());
+        dto.setEndDate(mentoringTeam.getEndDate());
+        dto.setStatus(mentoringBoard.getStatus());
+        dto.setRole(mentoringBoard.getRole());
+        dto.setMentoringCnt(mentoringBoard.getMentoringCnt());
+        dto.setContents(mentoringBoard.getContents());
+        dto.setCreatedDate(mentoringBoard.getCreatedDate());
+        dto.setModifiedDate(mentoringBoard.getLastModifiedDate());
+        dto.setLink(mentoringBoard.getLink());
+        return dto;
     }
 }

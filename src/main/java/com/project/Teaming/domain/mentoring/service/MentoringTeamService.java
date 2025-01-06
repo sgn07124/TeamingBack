@@ -51,16 +51,7 @@ public class MentoringTeamService {
     @Transactional
     public Long saveMentoringTeam(TeamRequest dto) {
 
-        MentoringTeam mentoringTeam = MentoringTeam.builder()
-                .name(dto.getName())
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
-                .mentoringCnt(dto.getMentoringCnt())
-                .content(dto.getContent())
-                .status(MentoringStatus.RECRUITING)
-                .link(dto.getLink())
-                .flag(Status.FALSE)
-                .build();
+        MentoringTeam mentoringTeam = MentoringTeam.from(dto);
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
         //리더 생성
@@ -149,7 +140,7 @@ public class MentoringTeamService {
         MentoringTeam mentoringTeam = mentoringTeamRepository.findWithBoardsById(mentoringTeamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamLeader = mentoringParticipationRepository.findByMentoringTeamAndUserAndAuthority(mentoringTeam, user, MentoringAuthority.LEADER);
         if (teamLeader.isPresent() && !teamLeader.get().getIsDeleted()) {
-            mentoringTeam.setFlag(Status.TRUE);
+            mentoringTeam.flag(Status.TRUE);
             mentoringBoardRepository.deleteByTeamId(mentoringTeamId);
             // 영속성 컨텍스트 초기화
             entityManager.clear();

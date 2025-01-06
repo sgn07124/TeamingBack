@@ -57,16 +57,9 @@ public class MentoringBoardService {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);  //명시적 조회, 최신 데이터 반영
         Optional<MentoringParticipation> TeamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
-        if (TeamUser.isPresent() && !TeamUser.get().getIsDeleted()) {
-            MentoringBoard mentoringBoard = MentoringBoard.builder()
-                    .title(boardDto.getTitle())
-                    .contents(boardDto.getContents())
-                    .role(boardDto.getRole())
-                    .status(PostStatus.RECRUITING)
-                    .deadLine(boardDto.getDeadLine())
-                    .mentoringCnt(boardDto.getMentoringCnt())
-                    .build();
-            mentoringBoard.setLink(Optional.ofNullable(boardDto.getLink())
+        if (TeamUser.isPresent()) {
+            MentoringBoard mentoringBoard = MentoringBoard.from(boardDto);
+            mentoringBoard.link(Optional.ofNullable(boardDto.getLink())
                     .orElse(mentoringTeam.getLink()));
             mentoringBoard.addMentoringBoard(mentoringTeam);  // 멘토링 팀과 연관관계 매핑
 
@@ -225,7 +218,7 @@ public class MentoringBoardService {
         MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
         Optional<MentoringParticipation> TeamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
         if (mentoringTeam.getFlag() == Status.FALSE) {  //team의 최신 데이터 업데이트
-            if (TeamUser.isPresent() && !TeamUser.get().getIsDeleted()) {
+            if (TeamUser.isPresent()) {
                 mentoringBoard.updateBoard(dto);
             } else throw new BusinessException(ErrorCode.NO_AUTHORITY);
         } else {
@@ -243,7 +236,7 @@ public class MentoringBoardService {
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringBoard.getMentoringTeam(), user, MentoringParticipationStatus.ACCEPTED);
-        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
+        if (teamUser.isPresent()) {
             if (mentoringBoard.getMentoringTeam().getFlag() == Status.FALSE) { //team의 최신 데이터 업데이트
                 mentoringBoardRepository.delete(mentoringBoard);
             } else {
@@ -265,7 +258,7 @@ public class MentoringBoardService {
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
         MentoringBoard post = mentoringBoardRepository.findById(postId).orElseThrow(MentoringPostNotFoundException::new);
-        if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
+        if (teamUser.isPresent()) {
             post.updateStatus();
             return new MentoringPostStatusResponse(PostStatus.COMPLETE);
         } else {

@@ -49,13 +49,7 @@ public class MentoringParticipationService {
                 throw new MentoringParticipationAlreadyExistException(ErrorCode.ALREADY_PARTICIPATED);
             }
         } else {
-            MentoringParticipation mentoringParticipation = MentoringParticipation.builder()
-                    .participationStatus(dto.getStatus())
-                    .authority(dto.getAuthority())
-                    .role(dto.getRole())
-                    .requestDate(LocalDateTime.now())
-                    .reportingCount(0)
-                    .build();
+            MentoringParticipation mentoringParticipation = MentoringParticipation.from(dto);
             mentoringParticipation.setUser(user);
             mentoringParticipation.addMentoringTeam(mentoringTeam);
             MentoringParticipation saved = mentoringParticipationRepository.save(mentoringParticipation);
@@ -102,8 +96,8 @@ public class MentoringParticipationService {
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
         if ( mentoringParticipation.getAuthority() == MentoringAuthority.NoAuth && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
-            mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.ACCEPTED);
-            mentoringParticipation.setAuthority(MentoringAuthority.CREW);
+            mentoringParticipation.accept();
+            mentoringParticipation.setCrew();
             mentoringParticipation.setDecisionDate(LocalDateTime.now());
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
@@ -125,7 +119,7 @@ public class MentoringParticipationService {
         }
         MentoringParticipation mentoringParticipation = mentoringParticipationRepository.findById(participant_id).orElseThrow(MentoringParticipationNotFoundException::new);
         if (mentoringParticipation.getAuthority() == MentoringAuthority.NoAuth && mentoringParticipation.getParticipationStatus() == MentoringParticipationStatus.PENDING) {
-            mentoringParticipation.setParticipationStatus(MentoringParticipationStatus.REJECTED);
+            mentoringParticipation.reject();
             mentoringParticipation.setDecisionDate(LocalDateTime.now());
         } else {
             throw new NoAuthorityException(ErrorCode.STATUS_IS_NOT_PENDING);
@@ -150,7 +144,7 @@ public class MentoringParticipationService {
         Optional<MentoringParticipation> export = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, exportUser);
         if (export.isPresent()) {
             if (export.get().getAuthority() == MentoringAuthority.CREW && export.get().getParticipationStatus() == MentoringParticipationStatus.ACCEPTED) {
-                export.get().setParticipationStatus(MentoringParticipationStatus.EXPORT);
+                export.get().export();
             } else {
                 throw new BusinessException(ErrorCode.NOT_A_MEMBER);
             }
@@ -176,9 +170,7 @@ public class MentoringParticipationService {
                         .findFirst();
                 // 새로운 리더 설정
                 firstMember.ifPresentOrElse(
-                        participation -> {
-                            participation.setAuthority(MentoringAuthority.LEADER);
-                        },
+                        MentoringParticipation::setLeader,
                         () -> {
                             throw new BusinessException(ErrorCode.NO_ELIGIBLE_MEMBER_FOR_LEADER);
                         }
