@@ -64,7 +64,20 @@ public class ProjectBoardService {
         List<String> recruitCategoryIds = extractRecruitCategoryIds(projectTeam);
 
         boolean isMember = isProjectMember(projectTeam.getId());
-        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds, isMember);
+        boolean isApply = isProjectApply(projectTeam.getId());
+        return ProjectPostInfoDto.from(projectTeam, projectBoard, stackIds, recruitCategoryIds, isMember, isApply);
+    }
+
+    private boolean isProjectApply(Long projectTeamId) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return false;  // 인증되지 않은 사용자(일반 사용자)
+        }
+        return isApply(user.getId(), projectTeamId);
+    }
+
+    private boolean isApply(Long userId, Long projectTeamId) {
+        return projectParticipationRepository.existsByProjectTeamIdAndUserIdAndDecisionDateIsNull(projectTeamId, userId);
     }
 
     private static List<String> extractStackIds(ProjectTeam projectTeam) {

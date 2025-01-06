@@ -22,6 +22,8 @@ public class ProjectPostInfoDto {
     private String postStatus;
     @JsonProperty("isMember")
     private boolean isMember;
+    @JsonProperty("isApply")
+    private boolean isApply;
 
     private Long projectTeamId;
     private Long postId;
@@ -29,7 +31,7 @@ public class ProjectPostInfoDto {
     private List<String> stacks;  // 기술 스택(id 조회)
     private List<String> recruitCategories;  // 모집 구분(id 조회)
 
-    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackIds, List<String> recruitCategoryIds, boolean isMember) {
+    public static ProjectPostInfoDto from(ProjectTeam projectTeam, ProjectBoard projectBoard, List<String> stackIds, List<String> recruitCategoryIds, boolean isMember, boolean isApply) {
         ProjectPostInfoDto dto = new ProjectPostInfoDto();
         dto.setTitle(projectBoard.getTitle());
         dto.setTeamName(projectTeam.getName());
@@ -42,6 +44,7 @@ public class ProjectPostInfoDto {
         dto.setContents(projectBoard.getContents());
         dto.setPostStatus(projectBoard.getStatus().name());
         dto.setMember(isMember);
+        dto.setApply(isApply);
         dto.setProjectTeamId(projectTeam.getId());
         dto.setPostId(projectBoard.getId());
         dto.setStacks(stackIds);
