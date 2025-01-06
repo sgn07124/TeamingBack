@@ -20,19 +20,6 @@ public class TeamUserResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isReviewed; // MentoringStatus가 COMPLETE일 때만 값 설정
 
-    // 기본 생성자 (isReviewed를 null로 설정)
-    public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username,
-                            MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
-        this.acceptedTime = acceptedTime;
-        this.userId = userId;
-        this.username = username;
-        this.role = role;
-        this.status = status;
-        this.isLogined = false;
-        this.isDeleted = isDeleted;
-        this.isReviewed = null; // 기본값 null
-    }
-
     public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted, Boolean isReviewed) {
         this.acceptedTime = acceptedTime;
         this.userId = userId;

@@ -1,13 +1,16 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
-import lombok.Builder;
+import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TeamResponse {
 
     private Long id;
@@ -20,7 +23,6 @@ public class TeamResponse {
     private String link;
     private List<String> categories;
 
-    @Builder
     public TeamResponse(Long id, String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, MentoringStatus status, String link, List<String> categories) {
         this.id = id;
         this.name = name;
@@ -31,5 +33,18 @@ public class TeamResponse {
         this.status = status;
         this.link = link;
         this.categories = categories;
+    }
+
+    public static TeamResponse from(MentoringTeam mentoringTeam) {
+        TeamResponse dto = new TeamResponse();
+        dto.setId(mentoringTeam.getId());
+        dto.setName(mentoringTeam.getName());
+        dto.setStartDate(mentoringTeam.getStartDate());
+        dto.setEndDate(mentoringTeam.getEndDate());
+        dto.setMentoringCnt(mentoringTeam.getMentoringCnt());
+        dto.setContent(mentoringTeam.getContent());
+        dto.setStatus(mentoringTeam.getStatus());
+        dto.setLink(mentoringTeam.getLink());
+        return dto;
     }
 }

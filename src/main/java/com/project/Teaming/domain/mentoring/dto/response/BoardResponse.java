@@ -21,7 +21,6 @@ public class BoardResponse {
     private String contents;
     private PostStatus status;
 
-    @Builder
     public BoardResponse(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, List<String> category, String contents, PostStatus status) {
         this.boardId = boardId;
         this.title = title;
