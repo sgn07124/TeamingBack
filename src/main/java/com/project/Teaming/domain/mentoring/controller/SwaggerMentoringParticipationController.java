@@ -1,7 +1,7 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReportDto;
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReportRequest;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewRequest;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,10 +31,10 @@ public interface SwaggerMentoringParticipationController {
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long team_id);
 
     @Operation(summary = "팀 내 구성원 신고하기", description = "팀 내 구성원을 신고하는 API")
-    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportDto dto);
+    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportRequest dto);
 
     @Operation(summary = "팀 내 구성원에게 리뷰쓰기", description = "팀 내 구성원에게 리뷰를 쓰는 API")
-    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewDto dto);
+    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewRequest dto);
 
     @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
             "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환. " +

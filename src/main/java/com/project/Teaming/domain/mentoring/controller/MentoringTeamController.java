@@ -1,7 +1,7 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
-import com.project.Teaming.domain.mentoring.dto.response.TeamResponseDto;
+import com.project.Teaming.domain.mentoring.dto.request.TeamRequest;
+import com.project.Teaming.domain.mentoring.dto.response.TeamAuthorityResponse;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
@@ -21,15 +21,15 @@ public class MentoringTeamController implements SwaggerMentoringTeamController {
 
     @Override
     @PostMapping("/teams")
-    public ResultDetailResponse<String> saveMentoringTeam(@RequestBody @Valid RqTeamDto dto) {
+    public ResultDetailResponse<String> saveMentoringTeam(@RequestBody @Valid TeamRequest dto) {
         log.info("SecurityContext Authentication: {}", SecurityContextHolder.getContext().getAuthentication());
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_TEAM,
                 String.valueOf( mentoringTeamService.saveMentoringTeam(dto)));
     }
     @Override
     @PutMapping("/teams/{teamId}")
-    public ResultDetailResponse<TeamResponseDto> updateMentoringTeam(@PathVariable Long teamId,
-                                                                   @RequestBody @Valid RqTeamDto dto) {
+    public ResultDetailResponse<TeamAuthorityResponse> updateMentoringTeam(@PathVariable Long teamId,
+                                                                           @RequestBody @Valid TeamRequest dto) {
         mentoringTeamService.updateMentoringTeam(teamId, dto);
 
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_TEAM,
@@ -38,7 +38,7 @@ public class MentoringTeamController implements SwaggerMentoringTeamController {
     }
     @Override
     @GetMapping("/teams/{teamId}")
-    public ResultDetailResponse<TeamResponseDto> findMentoringTeam(@PathVariable Long teamId) {
+    public ResultDetailResponse<TeamAuthorityResponse> findMentoringTeam(@PathVariable Long teamId) {
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_TEAM,
                 mentoringTeamService.getMentoringTeam(
                         mentoringTeamService.findMentoringTeam(teamId)));

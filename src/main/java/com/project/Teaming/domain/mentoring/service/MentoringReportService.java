@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReportDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReportRequest;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
@@ -32,7 +32,7 @@ public class MentoringReportService {
     private final ReportRepository reportRepository;
 
     @Transactional
-    public void reportTeamUser(MentoringReportDto dto) {
+    public void reportTeamUser(MentoringReportRequest dto) {
         // 신고자
         User reporter = getUser();
         //관련된 팀
@@ -62,7 +62,7 @@ public class MentoringReportService {
         if (reportedParticipation.getParticipationStatus() == MentoringParticipationStatus.EXPORT || reportedParticipation.getIsDeleted()) {
             Report report = Report.mentoringReport(reportingParticipation, reportedUser);
             reportRepository.save(report);
-            reportedParticipation.setReportingCount(reportedParticipation.getReportingCount() + 1);
+            reportedParticipation.addReportingCount();
             updateReportedWarningCount(reportedParticipation);
         }
         else throw new BusinessException(ErrorCode.STILL_TEAM_USER);
@@ -86,7 +86,7 @@ public class MentoringReportService {
             reportedUser.incrementWarningCnt();
 
             // 경고 처리 상태 업데이트
-            reportedParticipation.setWarningProcessed(true);
+            reportedParticipation.setWarningProcessed();
         }
     }
     private User getUser() {

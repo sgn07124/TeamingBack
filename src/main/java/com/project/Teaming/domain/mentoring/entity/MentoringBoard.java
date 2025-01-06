@@ -1,8 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
-import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.mentoring.dto.request.BoardRequest;
+import com.project.Teaming.domain.mentoring.dto.response.BoardSpecResponse;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -39,7 +38,7 @@ public class MentoringBoard extends BaseTimeEntity {
     @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
 
-    @Builder
+
     public MentoringBoard(Long id, String title, String contents, MentoringRole role, LocalDate deadLine, PostStatus status, Integer mentoringCnt, String link, MentoringTeam mentoringTeam) {
         this.id = id;
         this.title = title;
@@ -52,12 +51,23 @@ public class MentoringBoard extends BaseTimeEntity {
         this.mentoringTeam = mentoringTeam;
     }
 
-    public void setLink(String link) {
-        this.link = link;
+    public MentoringBoard(String title, String contents, MentoringRole role, LocalDate deadLine, PostStatus status, Integer mentoringCnt) {
+        this.title = title;
+        this.contents = contents;
+        this.role = role;
+        this.deadLine = deadLine;
+        this.status = status;
+        this.mentoringCnt = mentoringCnt;
     }
 
-    public void setDeadLine(LocalDate deadLine) {
-        this.deadLine = deadLine;
+    public static MentoringBoard from(BoardRequest request) {
+        return new MentoringBoard(
+                request.getTitle(),request.getContents(),request.getRole(),request.getDeadLine(),
+                PostStatus.RECRUITING, request.getMentoringCnt());
+    }
+
+    public void link(String link) {
+        this.link = link;
     }
 
     public void setStatus(PostStatus status) {
@@ -69,27 +79,11 @@ public class MentoringBoard extends BaseTimeEntity {
         this.deadLine = LocalDate.now().minusDays(1);
     }
 
-    public RsSpecBoardDto toDto(MentoringTeam mentoringTeam) {
-        RsSpecBoardDto dto = RsSpecBoardDto.builder()
-                .boardId(this.getId())
-                .teamId(mentoringTeam.getId())
-                .title(this.getTitle())
-                .mentoringTeamName(mentoringTeam.getName())
-                .deadLine(this.getDeadLine())
-                .startDate(mentoringTeam.getStartDate())
-                .endDate(mentoringTeam.getEndDate())
-                .status(this.getStatus())
-                .role(this.getRole())
-                .mentoringCnt(this.getMentoringCnt())
-                .contents(this.getContents())
-                .createdDate(this.getCreatedDate())
-                .modifiedDate(this.getLastModifiedDate())
-                .link(this.getLink())
-                .build();
-        return dto;
+    public BoardSpecResponse toDto(MentoringTeam mentoringTeam) {
+        return BoardSpecResponse.from(this, mentoringTeam);
     }
 
-    public void updateBoard(RqBoardDto dto) {
+    public void updateBoard(BoardRequest dto) {
         this.title = dto.getTitle();
         this.role = dto.getRole();
         this.mentoringCnt = dto.getMentoringCnt();

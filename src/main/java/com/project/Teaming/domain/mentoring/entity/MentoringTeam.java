@@ -1,11 +1,13 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
-import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
+import com.project.Teaming.domain.mentoring.dto.response.TeamResponse;
+import com.project.Teaming.domain.mentoring.dto.request.TeamRequest;
 import com.project.Teaming.global.auditing.BaseEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.List;
 
 @Getter
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "mentoring_team")
 public class MentoringTeam extends BaseEntity {
 
@@ -37,22 +40,14 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "flag")
     private Status flag;
     @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
-    private List<MentoringParticipation> mentoringParticipationList;
+    private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
     @OneToMany(mappedBy = "mentoringTeam",orphanRemoval = true)
-    private List<MentoringBoard> mentoringBoardList;
+    private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
     @OneToMany(mappedBy = "mentoringTeam")
-    private List<Event> eventList;
+    private List<Event> eventList = new ArrayList<>();
     @OneToMany(mappedBy = "mentoringTeam")
-    private List<TeamCategory> categories;
+    private List<TeamCategory> categories = new ArrayList<>();
 
-    public MentoringTeam() {
-        this.mentoringParticipationList = new ArrayList<>();
-        this.mentoringBoardList = new ArrayList<>();
-        this.eventList = new ArrayList<>();
-        this.categories = new ArrayList<>();
-    }
-
-    @Builder
     public MentoringTeam(Long id, String name, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
         this.id = id;
         this.name = name;
@@ -63,31 +58,37 @@ public class MentoringTeam extends BaseEntity {
         this.status = status;
         this.link = link;
         this.flag = flag;
-        this.mentoringParticipationList = mentoringParticipationList != null ? mentoringParticipationList : new ArrayList<>();
-        this.mentoringBoardList = mentoringBoardList != null ? mentoringBoardList : new ArrayList<>();
-        this.eventList = eventList != null ? eventList : new ArrayList<>();
-        this.categories = categories != null ? categories : new ArrayList<>();
+        this.mentoringParticipationList = mentoringParticipationList;
+        this.mentoringBoardList = mentoringBoardList;
+        this.eventList = eventList;
+        this.categories = categories;
     }
 
-    public void setFlag(Status flag) {
+    public MentoringTeam(String name, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.mentoringCnt = mentoringCnt;
+        this.content = content;
+        this.status = status;
+        this.link = link;
+        this.flag = flag;
+    }
+    public static MentoringTeam from(TeamRequest dto) {
+        return new MentoringTeam(
+                dto.getName(),dto.getStartDate(),dto.getEndDate(),dto.getMentoringCnt(),dto.getContent(),
+                MentoringStatus.RECRUITING, dto.getLink(), Status.FALSE);
+    }
+
+    public void flag(Status flag) {
         this.flag = flag;
     }
 
-    public RsTeamDto toDto() {
-        RsTeamDto dto = RsTeamDto.builder()
-                .id(this.getId())
-                .name(this.getName())
-                .startDate(this.getStartDate())
-                .mentoringCnt(this.getMentoringCnt())
-                .endDate(this.getEndDate())
-                .content(this.getContent())
-                .status(this.getStatus())
-                .link(this.getLink())
-                .build();
-        return dto;
+    public TeamResponse toDto() {
+        return TeamResponse.from(this);
     }
 
-    public void mentoringTeamUpdate(RqTeamDto dto) {
+    public void mentoringTeamUpdate(TeamRequest dto) {
         this.name = dto.getName();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();

@@ -8,8 +8,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LeaderResponseDto {
+public class ForLeaderResponse {
 
-    private List<RsTeamUserDto> members;
-    private List<RsTeamParticipationDto> participations;
+    private List<TeamUserResponse> members;
+    private List<TeamParticipationResponse> participations;
 }
