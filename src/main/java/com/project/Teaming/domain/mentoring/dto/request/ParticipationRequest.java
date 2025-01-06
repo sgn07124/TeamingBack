@@ -6,13 +6,13 @@ import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import lombok.Data;
 
 @Data
-public class RqParticipationDto {
+public class ParticipationRequest {
 
     MentoringAuthority authority;
     MentoringParticipationStatus status;
     MentoringRole role;
 
-    public RqParticipationDto(MentoringAuthority authority, MentoringParticipationStatus status, MentoringRole role) {
+    public ParticipationRequest(MentoringAuthority authority, MentoringParticipationStatus status, MentoringRole role) {
         this.authority = authority;
         this.status = status;
         this.role = role;

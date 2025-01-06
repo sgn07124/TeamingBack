@@ -5,10 +5,9 @@ import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
-public class MyTeamDto {
+public class TeamInfoResponse {
 
     private Long id;
     private String name;  // 멘토링 명
@@ -18,7 +17,7 @@ public class MyTeamDto {
     private MentoringAuthority authority;  //사용자의 권한
 
 
-    public MyTeamDto(Long id, String name, LocalDate startDate, LocalDate endDate, MentoringStatus status) {
+    public TeamInfoResponse(Long id, String name, LocalDate startDate, LocalDate endDate, MentoringStatus status) {
         this.id = id;
         this.name = name;
         this.startDate = startDate;

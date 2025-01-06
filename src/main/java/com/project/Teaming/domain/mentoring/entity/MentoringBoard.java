@@ -1,8 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
-import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.mentoring.dto.request.BoardRequest;
+import com.project.Teaming.domain.mentoring.dto.response.BoardSpecResponse;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -69,8 +68,8 @@ public class MentoringBoard extends BaseTimeEntity {
         this.deadLine = LocalDate.now().minusDays(1);
     }
 
-    public RsSpecBoardDto toDto(MentoringTeam mentoringTeam) {
-        RsSpecBoardDto dto = RsSpecBoardDto.builder()
+    public BoardSpecResponse toDto(MentoringTeam mentoringTeam) {
+        BoardSpecResponse dto = BoardSpecResponse.builder()
                 .boardId(this.getId())
                 .teamId(mentoringTeam.getId())
                 .title(this.getTitle())
@@ -89,7 +88,7 @@ public class MentoringBoard extends BaseTimeEntity {
         return dto;
     }
 
-    public void updateBoard(RqBoardDto dto) {
+    public void updateBoard(BoardRequest dto) {
         this.title = dto.getTitle();
         this.role = dto.getRole();
         this.mentoringCnt = dto.getMentoringCnt();

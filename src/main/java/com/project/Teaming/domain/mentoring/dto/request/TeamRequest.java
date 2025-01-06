@@ -1,20 +1,16 @@
 package com.project.Teaming.domain.mentoring.dto.request;
 
 import com.project.Teaming.domain.mentoring.entity.MentoringRole;
-import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class RqTeamDto {
+public class TeamRequest {
 
     @NotNull(message = "멘토링 팀 이름을 작성해 주세요")
     private String name;  // 멘토링 명
@@ -33,7 +29,7 @@ public class RqTeamDto {
     private List<Long> categories;
 
     @Builder
-    public RqTeamDto(String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, String link, MentoringRole role, List<Long> categories) {
+    public TeamRequest(String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, String link, MentoringRole role, List<Long> categories) {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;

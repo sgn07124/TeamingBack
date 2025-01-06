@@ -7,14 +7,14 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class TeamResponseDto {
+public class TeamAuthorityResponse {
 
     private MentoringAuthority Authority;
-    private RsTeamDto dto;
+    private TeamResponse dto;
     @JsonInclude(JsonInclude.Include.NON_NULL) // null인 경우 직렬화하지 않음
-    private List<RsUserParticipationDto> userParticipations;
+    private List<ParticipationForUserResponse> userParticipations;
 
-    public TeamResponseDto() {
+    public TeamAuthorityResponse() {
         this.userParticipations = null; // 기본값
     }
 }

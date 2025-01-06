@@ -1,7 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamDto;
-import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
+import com.project.Teaming.domain.mentoring.dto.response.TeamResponse;
+import com.project.Teaming.domain.mentoring.dto.request.TeamRequest;
 import com.project.Teaming.global.auditing.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -73,8 +73,8 @@ public class MentoringTeam extends BaseEntity {
         this.flag = flag;
     }
 
-    public RsTeamDto toDto() {
-        RsTeamDto dto = RsTeamDto.builder()
+    public TeamResponse toDto() {
+        TeamResponse dto = TeamResponse.builder()
                 .id(this.getId())
                 .name(this.getName())
                 .startDate(this.getStartDate())
@@ -87,7 +87,7 @@ public class MentoringTeam extends BaseEntity {
         return dto;
     }
 
-    public void mentoringTeamUpdate(RqTeamDto dto) {
+    public void mentoringTeamUpdate(TeamRequest dto) {
         this.name = dto.getName();
         this.startDate = dto.getStartDate();
         this.endDate = dto.getEndDate();

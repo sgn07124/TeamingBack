@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class MentoringReviewDto {
+public class MentoringReviewRequest {
     @NotNull
     private final Long teamId;
     @NotNull

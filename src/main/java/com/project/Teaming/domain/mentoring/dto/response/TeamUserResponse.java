@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class RsTeamUserDto {
+public class TeamUserResponse {
 
     private LocalDateTime acceptedTime;
     private Long userId;
@@ -21,8 +21,8 @@ public class RsTeamUserDto {
     private Boolean isReviewed; // MentoringStatus가 COMPLETE일 때만 값 설정
 
     // 기본 생성자 (isReviewed를 null로 설정)
-    public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username,
-                         MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
+    public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username,
+                            MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted) {
         this.acceptedTime = acceptedTime;
         this.userId = userId;
         this.username = username;
@@ -33,7 +33,7 @@ public class RsTeamUserDto {
         this.isReviewed = null; // 기본값 null
     }
 
-    public RsTeamUserDto(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted, Boolean isReviewed) {
+    public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted, Boolean isReviewed) {
         this.acceptedTime = acceptedTime;
         this.userId = userId;
         this.username = username;

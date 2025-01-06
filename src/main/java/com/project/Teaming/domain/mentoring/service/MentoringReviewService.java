@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewRequest;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
@@ -32,7 +32,7 @@ public class MentoringReviewService {
     private final MentoringTeamRepository mentoringTeamRepository;
 
     @Transactional
-    public void review(MentoringReviewDto dto) {
+    public void review(MentoringReviewRequest dto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(dto.getTeamId()).orElseThrow(MentoringTeamNotFoundException::new);
         MentoringParticipation reviewingParticipation = validateReviewingParticipation(user,mentoringTeam);

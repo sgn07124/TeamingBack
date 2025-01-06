@@ -1,9 +1,9 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
+import com.project.Teaming.domain.mentoring.dto.request.BoardRequest;
+import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardSpecResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import com.project.Teaming.domain.mentoring.entity.PostStatus;
@@ -28,7 +28,7 @@ public class MentoringBoardMockController {
     @Operation(summary = "멘토링 글 등록(Mock)", description = "팀 ID 기반으로 임의의 글 ID를 반환하는 목 API입니다.")
     public ResultDetailResponse<String> savePostMock(
             @PathVariable Long team_id,
-            @RequestBody @Valid RqBoardDto dto) {
+            @RequestBody @Valid BoardRequest dto) {
 
         // 50 이하의 랜덤 값 생성
         Random random = new Random();
@@ -40,12 +40,12 @@ public class MentoringBoardMockController {
 
     @PostMapping("/post/{post_id}")
     @Operation(summary = "멘토링 글 수정(Mock)", description = "Mock 데이터로 멘토링 게시물을 수정한 결과를 반환합니다.")
-    public ResultDetailResponse<RsSpecBoardDto> updatePostMock(
+    public ResultDetailResponse<BoardSpecResponse> updatePostMock(
             @PathVariable Long post_id,
-            @RequestBody @Valid RqBoardDto dto) {
+            @RequestBody @Valid BoardRequest dto) {
 
         // Mock 데이터 생성
-        RsSpecBoardDto mockResponse = RsSpecBoardDto.builder()
+        BoardSpecResponse mockResponse = BoardSpecResponse.builder()
                 .boardId(post_id) // 요청받은 post_id를 그대로 사용
                 .teamId(7L)
                 .title(dto.getTitle()) // 수정된 제목
@@ -73,12 +73,12 @@ public class MentoringBoardMockController {
             summary = "게시글 목록 조회(Mock)",
             description = "Mock 데이터로 게시글 목록을 조회합니다. 페이징 정보를 포함합니다."
     )
-    public ResultDetailResponse<PaginatedCursorResponse<RsBoardDto>> findAllPostsMock(
+    public ResultDetailResponse<PaginatedCursorResponse<BoardResponse>> findAllPostsMock(
             @RequestParam(required = false) Long cursor, // 커서
             @RequestParam(defaultValue = "10") int size) {
 
         // Mock 게시글 리스트 생성
-        List<RsBoardDto> mockPosts = new ArrayList<>();
+        List<BoardResponse> mockPosts = new ArrayList<>();
         Random random = new Random(); // 랜덤 객체 생성
 
         // 시작점과 끝점 계산
@@ -87,7 +87,7 @@ public class MentoringBoardMockController {
 
         for (long i = start; i >= end; i--) { // 역순으로 게시글 생성
             mockPosts.add(
-                    RsBoardDto.builder()
+                    BoardResponse.builder()
                             .boardId(i) // ID 생성
                             .title("Mock 제목 " + i)
                             .mentoringTeamName("Mock 팀 이름 " + i)
@@ -104,7 +104,7 @@ public class MentoringBoardMockController {
         Long nextCursor = (end > 1) ? end - 1 : null; // 다음 커서 값, 마지막 페이지면 null
         boolean isLast = (end <= 1); // 마지막 페이지 여부
 
-        PaginatedCursorResponse<RsBoardDto> mockResponse = new PaginatedCursorResponse<>(
+        PaginatedCursorResponse<BoardResponse> mockResponse = new PaginatedCursorResponse<>(
                 mockPosts, // 게시글 리스트
                 nextCursor, // 다음 커서 값
                 size, // 페이지 크기
@@ -119,15 +119,15 @@ public class MentoringBoardMockController {
 
     @GetMapping("/{team_Id}/posts")
     @Operation(summary = "특정 멘토링 팀의 모든 글 조회(Mock)", description = "Mock 데이터로 특정 멘토링 팀의 게시글을 조회합니다.")
-    public ResultListResponse<RsBoardDto> findMyAllPostsMock(@PathVariable Long team_Id) {
+    public ResultListResponse<BoardResponse> findMyAllPostsMock(@PathVariable Long team_Id) {
 
         // Mock 게시글 리스트 생성
-        List<RsBoardDto> mockPosts = new ArrayList<>();
+        List<BoardResponse> mockPosts = new ArrayList<>();
         Random random = new Random(); // 랜덤 객체 생성
 
         for (int i = 1; i <= 5; i++) { // 5개의 게시글 생성
             mockPosts.add(
-                    RsBoardDto.builder()
+                    BoardResponse.builder()
                             .boardId((team_Id * 100) + i) // 팀 ID를 기반으로 고유한 ID 생성
                             .title("Mock 팀 게시글 제목 " + i)
                             .mentoringTeamName("Mock 팀 이름 " + team_Id)
@@ -161,12 +161,12 @@ public class MentoringBoardMockController {
 
     @PostMapping("/post/{team_id}/{post_id}/complete")
     @Operation(summary = "게시물 모집 완료 처리(Mock)", description = "Mock 데이터로 게시글 상태를 COMPLETE로 변경한 결과를 반환합니다.")
-    public ResultDetailResponse<MentoringPostStatusDto> completePostStatusMock(
+    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatusMock(
             @PathVariable Long team_id,
             @PathVariable Long post_id) {
 
         // Mock 데이터 생성
-        MentoringPostStatusDto mockStatusDto = new MentoringPostStatusDto(PostStatus.COMPLETE);
+        MentoringPostStatusResponse mockStatusDto = new MentoringPostStatusResponse(PostStatus.COMPLETE);
 
         // Mock 데이터 반환
         return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS, mockStatusDto);
@@ -174,12 +174,15 @@ public class MentoringBoardMockController {
 
     @GetMapping("/post/{post_id}")
     @Operation(summary = "멘토링 글 조회(Mock)", description = "Mock 데이터로 특정 멘토링 글의 정보를 반환합니다.")
-    public ResultDetailResponse<RsSpecBoardDto> findPostMock(@PathVariable Long post_id) {
+    public ResultDetailResponse<BoardSpecResponse> findPostMock(@PathVariable Long post_id) {
         // 랜덤 객체 생성
         Random random = new Random();
 
+        // 랜덤 권한 설정
+        MentoringAuthority randomAuthority = generateRandomAuthority(random);
+
         // Mock 데이터 생성
-        RsSpecBoardDto mockPost = RsSpecBoardDto.builder()
+        BoardSpecResponse mockPost = BoardSpecResponse.builder()
                 .boardId(post_id) // 요청받은 post_id를 그대로 사용
                 .teamId(7L)
                 .title("Mock 게시글 제목")
@@ -195,7 +198,8 @@ public class MentoringBoardMockController {
                 .modifiedDate(LocalDateTime.now()) // 현재 시간으로 수정일 설정
                 .link("http://example.com") // 고정된 링크
                 .category(List.of("1", "2")) // 고정된 카테고리
-                .authority(generateRandomAuthority(random)) // 랜덤 권한 설정
+                .authority(randomAuthority) // 랜덤 권한 설정
+                .isParticipate(randomAuthority == MentoringAuthority.NoAuth ? (random.nextBoolean() ? true : null) : null) // NoAuth일 때만 랜덤
                 .build();
         // Mock 데이터 반환
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST, mockPost);

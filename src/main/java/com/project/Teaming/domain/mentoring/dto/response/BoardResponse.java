@@ -6,12 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class RsBoardDto {
+public class BoardResponse {
 
     private Long boardId;
     private String title;
@@ -23,7 +22,7 @@ public class RsBoardDto {
     private PostStatus status;
 
     @Builder
-    public RsBoardDto(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, List<String> category, String contents, PostStatus status) {
+    public BoardResponse(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, List<String> category, String contents, PostStatus status) {
         this.boardId = boardId;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
@@ -34,7 +33,7 @@ public class RsBoardDto {
         this.status = status;
     }
 
-    public RsBoardDto(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents, PostStatus status) {
+    public BoardResponse(Long boardId, String title, String mentoringTeamName, LocalDate startDate, LocalDate endDate, String contents, PostStatus status) {
         this.boardId = boardId;
         this.title = title;
         this.mentoringTeamName = mentoringTeamName;
@@ -44,8 +43,8 @@ public class RsBoardDto {
         this.status = status;
     }
 
-    public static RsBoardDto from(MentoringBoard mentoringBoard, MentoringTeam mentoringTeam, List<String> categories) {
-        RsBoardDto dto = new RsBoardDto();
+    public static BoardResponse from(MentoringBoard mentoringBoard, MentoringTeam mentoringTeam, List<String> categories) {
+        BoardResponse dto = new BoardResponse();
         dto.setBoardId(mentoringBoard.getId());
         dto.setTitle(mentoringBoard.getTitle());
         dto.setMentoringTeamName(mentoringTeam.getName());

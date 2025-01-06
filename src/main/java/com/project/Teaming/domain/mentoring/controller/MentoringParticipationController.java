@@ -1,8 +1,8 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReportDto;
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewDto;
-import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReportRequest;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewRequest;
+import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.domain.mentoring.service.MentoringParticipationService;
@@ -32,7 +32,7 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long postId) {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
-        RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
+        ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION,
                 String.valueOf(mentoringParticipationService.saveMentoringParticipation(
                         mentoringTeam, participationDto).getId()));
@@ -72,14 +72,14 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
 
     @Override
     @PostMapping("/reports")
-    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportDto dto) {
+    public ResultDetailResponse<Void> reportUser(@RequestBody @Valid MentoringReportRequest dto) {
         mentoringReportService.reportTeamUser(dto);
         return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
 
     @Override
     @PostMapping("/reviews")
-    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewDto dto) {
+    public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewRequest dto) {
         mentoringReviewService.review(dto);
         return new ResultDetailResponse<>(ResultCode.REVIEW_TEAM_USER, null);
     }
