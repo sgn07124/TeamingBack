@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.user.controller;
 
-import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
+import com.project.Teaming.domain.mentoring.dto.response.TeamInfoResponse;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
@@ -41,8 +41,8 @@ public interface SwaggerUserController {
     public ResultDetailResponse<Void> updateUser(@Valid @RequestBody UpdateUserInfoDto updateUserInfoDto);
 
     @Operation(summary = "로그인 된 사용자의 모든 멘토링 팀 조회", description = "나의 모든 멘토링 팀을 조회할 수 있다. 마이페이지에서 사용")
-    public ResultListResponse<MyTeamDto> findMyMentoringTeams();
+    public ResultListResponse<TeamInfoResponse> findMyMentoringTeams();
 
     @Operation(summary = "유저의 모든 멘토링 팀 조회", description = "유저의 모든 멘토링 팀을 조회할 수 있다. 유저페이지에서 사용")
-    public ResultListResponse<MyTeamDto> findUserMentoringTeams(@PathVariable Long user_id);
+    public ResultListResponse<TeamInfoResponse> findUserMentoringTeams(@PathVariable Long user_id);
 }

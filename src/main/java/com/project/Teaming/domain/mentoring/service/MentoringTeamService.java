@@ -1,7 +1,7 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqParticipationDto;
-import com.project.Teaming.domain.mentoring.dto.request.RqTeamDto;
+import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
+import com.project.Teaming.domain.mentoring.dto.request.TeamRequest;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.*;
@@ -19,17 +19,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.springframework.data.util.Optionals.ifPresentOrElse;
 
 
 @Slf4j
@@ -53,7 +49,7 @@ public class MentoringTeamService {
      */
 
     @Transactional
-    public Long saveMentoringTeam(RqTeamDto dto) {
+    public Long saveMentoringTeam(TeamRequest dto) {
 
         MentoringTeam mentoringTeam = MentoringTeam.builder()
                 .name(dto.getName())
@@ -68,7 +64,7 @@ public class MentoringTeamService {
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
         //리더 생성
-        RqParticipationDto participationDto = new RqParticipationDto(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
+        ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
         MentoringParticipation leader = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
         leader.setDecisionDate(LocalDateTime.now());
 
@@ -83,7 +79,7 @@ public class MentoringTeamService {
      * @param dto
      */
     @Transactional
-    public void updateMentoringTeam(Long mentoringTeamId, RqTeamDto dto) {
+    public void updateMentoringTeam(Long mentoringTeamId, TeamRequest dto) {
         Long userId = getUser();
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
@@ -170,18 +166,18 @@ public class MentoringTeamService {
      * @return
      */
     @Transactional(readOnly = true)
-    public TeamResponseDto getMentoringTeam( MentoringTeam team) {
+    public TeamAuthorityResponse getMentoringTeam(MentoringTeam team) {
         // 로그인 여부 확인 메서드
         Long userId = getOptionalUser();
 
-        RsTeamDto dto = team.toDto();
+        TeamResponse dto = team.toDto();
         List<String> categories = team.getCategories().stream()
                 .map(o -> String.valueOf(o.getCategory().getId()))
                 .collect(Collectors.toList());
         dto.setCategories(categories);
 
         //리스폰스 dto생성
-        TeamResponseDto teamResponseDto = new TeamResponseDto();
+        TeamAuthorityResponse teamResponseDto = new TeamAuthorityResponse();
         teamResponseDto.setDto(dto);
 
         // 로그인하지 않은 사용자
@@ -210,11 +206,11 @@ public class MentoringTeamService {
      * @return
      */
     @Transactional(readOnly = true)
-    public MyTeamDto getMyTeam(MentoringTeam team) {
+    public TeamInfoResponse getMyTeam(MentoringTeam team) {
         Long userId = getUser();
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
 
-        MyTeamDto teamDto = new MyTeamDto(team.getId(),
+        TeamInfoResponse teamDto = new TeamInfoResponse(team.getId(),
                 team.getName(),
                 team.getStartDate(),
                 team.getEndDate(),
@@ -250,9 +246,9 @@ public class MentoringTeamService {
         }
     }
 
-    private void handleNoAuthUser(TeamResponseDto teamResponseDto, MentoringTeam team, User user) {
+    private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
         teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-        List<RsUserParticipationDto> forUser = mentoringParticipationRepository.findAllForUser(
+        List<ParticipationForUserResponse> forUser = mentoringParticipationRepository.findAllForUser(
                 team.getId(), MentoringAuthority.LEADER, MentoringParticipationStatus.EXPORT);
         if (user != null) {
             setLoginStatus(forUser, user.getId());
@@ -278,9 +274,9 @@ public class MentoringTeamService {
      */
     private void setLoginStatus(List<?> dtos, Long userId) {
         dtos.forEach(dto -> {
-            if (dto instanceof RsTeamUserDto teamDto && teamDto.getUserId().equals(userId)) {
+            if (dto instanceof TeamUserResponse teamDto && teamDto.getUserId().equals(userId)) {
                 teamDto.setIsLogined(true);
-            } else if (dto instanceof RsUserParticipationDto userDto && userDto.getUserId().equals(userId)) {
+            } else if (dto instanceof ParticipationForUserResponse userDto && userDto.getUserId().equals(userId)) {
                 userDto.setIsLogined(true);
             }
         });

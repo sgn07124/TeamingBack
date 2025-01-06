@@ -8,7 +8,7 @@ import lombok.Data;
 import java.time.LocalDate;
 
 @Data
-public class RqBoardDto {
+public class BoardRequest {
     @NotBlank(message = "제목을 작성해주세요")
     private String title;  // 모집글 제목
     @NotNull(message = "모집하는 역할을 작성해주세요")

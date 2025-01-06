@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParticipantsDto<T> {
+public class ParticipantsResponse<T> {
 
     private MentoringAuthority authority;
     private T details;

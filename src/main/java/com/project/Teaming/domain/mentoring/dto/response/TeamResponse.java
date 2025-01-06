@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-public class RsTeamDto {
+public class TeamResponse {
 
     private Long id;
     private String name;  // 멘토링 명
@@ -21,7 +21,7 @@ public class RsTeamDto {
     private List<String> categories;
 
     @Builder
-    public RsTeamDto(Long id, String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, MentoringStatus status, String link, List<String> categories) {
+    public TeamResponse(Long id, String name, LocalDate startDate, LocalDate endDate, int mentoringCnt, String content, MentoringStatus status, String link, List<String> categories) {
         this.id = id;
         this.name = name;
         this.startDate = startDate;

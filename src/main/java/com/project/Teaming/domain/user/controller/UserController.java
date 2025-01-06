@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.user.controller;
 
-import com.project.Teaming.domain.mentoring.dto.response.MyTeamDto;
+import com.project.Teaming.domain.mentoring.dto.response.TeamInfoResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
@@ -68,7 +68,7 @@ public class UserController implements SwaggerUserController{
     }
     @Override
     @GetMapping("/mentoring/teams")
-    public ResultListResponse<MyTeamDto> findMyMentoringTeams() {
+    public ResultListResponse<TeamInfoResponse> findMyMentoringTeams() {
         List<MentoringTeam> myMentoringTeams = mentoringTeamService.getAuthenticateTeams();
         return new ResultListResponse<>(ResultCode.GET_MY_ALL_MENTORING_TEAM,
                 myMentoringTeams.stream()
@@ -77,7 +77,7 @@ public class UserController implements SwaggerUserController{
     }
     @Override
     @GetMapping("/{userId}/mentoring/teams")
-    public ResultListResponse<MyTeamDto> findUserMentoringTeams(@PathVariable Long userId) {
+    public ResultListResponse<TeamInfoResponse> findUserMentoringTeams(@PathVariable Long userId) {
         List<MentoringTeam> myMentoringTeams = mentoringTeamService.findMyMentoringTeams(userId);
         return new ResultListResponse<>(ResultCode.GET_ALL_USER_MENTORING_TEAM,
                 myMentoringTeams.stream()

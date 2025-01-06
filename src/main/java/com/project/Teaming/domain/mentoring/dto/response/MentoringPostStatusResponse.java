@@ -4,11 +4,11 @@ import com.project.Teaming.domain.mentoring.entity.PostStatus;
 import lombok.Data;
 
 @Data
-public class MentoringPostStatusDto {
+public class MentoringPostStatusResponse {
 
     private PostStatus status;
 
-    public MentoringPostStatusDto(PostStatus status) {
+    public MentoringPostStatusResponse(PostStatus status) {
         this.status = status;
     }
 }

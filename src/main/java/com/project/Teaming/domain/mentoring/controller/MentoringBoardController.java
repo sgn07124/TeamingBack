@@ -1,9 +1,9 @@
 package com.project.Teaming.domain.mentoring.controller;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
+import com.project.Teaming.domain.mentoring.dto.request.BoardRequest;
+import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardSpecResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
 import com.project.Teaming.domain.mentoring.service.MentoringBoardService;
 import com.project.Teaming.global.result.ResultCode;
@@ -27,14 +27,14 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
     @Override
     @PostMapping("/teams/{teamId}/posts")
     public ResultDetailResponse<String> savePost(@PathVariable Long teamId,
-                                               @RequestBody @Valid RqBoardDto dto) {
+                                               @RequestBody @Valid BoardRequest dto) {
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_POST, String.valueOf(mentoringBoardService.saveMentoringPost(teamId, dto)));
     }
 
     @Override
     @PutMapping("/posts/{postId}")
-    public ResultDetailResponse<RsSpecBoardDto> updatePost(@PathVariable Long postId,
-                                                     @RequestBody @Valid RqBoardDto dto) {
+    public ResultDetailResponse<BoardSpecResponse> updatePost(@PathVariable Long postId,
+                                                              @RequestBody @Valid BoardRequest dto) {
         mentoringBoardService.updateMentoringPost(postId, dto);
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_POST, mentoringBoardService.toDto(mentoringPost));
@@ -42,24 +42,24 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
 
     @Override
     @GetMapping("/posts")
-    public ResultDetailResponse<PaginatedCursorResponse<RsBoardDto>> findAllPosts(@RequestParam(required = false) Long cursor, // 커서
-                                                                            @RequestParam(defaultValue = "10") int size ) {
+    public ResultDetailResponse<PaginatedCursorResponse<BoardResponse>> findAllPosts(@RequestParam(required = false) Long cursor, // 커서
+                                                                                     @RequestParam(defaultValue = "10") int size ) {
         return new ResultDetailResponse<>(ResultCode.GET_ALL_MENTORING_POSTS, mentoringBoardService.findAllPosts(cursor, size));
     }
 
     @Override
     @GetMapping("/teams/{teamId}/posts")
-    public ResultListResponse<RsBoardDto> findMyAllPosts(@PathVariable Long teamId) {
+    public ResultListResponse<BoardResponse> findMyAllPosts(@PathVariable Long teamId) {
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, mentoringBoardService.findAllMyMentoringPost(teamId));
     }
     @Override
     @PatchMapping("/teams/{teamId}/posts/{postId}/complete")
-    public ResultDetailResponse<MentoringPostStatusDto> completePostStatus(@PathVariable Long teamId, @PathVariable Long postId) {
+    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatus(@PathVariable Long teamId, @PathVariable Long postId) {
         return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,mentoringBoardService.updatePostStatus(teamId, postId));
     }
     @Override
     @GetMapping("/posts/{postId}")
-    public ResultDetailResponse<RsSpecBoardDto> findPost(@PathVariable Long postId) {
+    public ResultDetailResponse<BoardSpecResponse> findPost(@PathVariable Long postId) {
         return new ResultDetailResponse<>(ResultCode.GET_MENTORING_POST,
                 mentoringBoardService.toDto(mentoringBoardService.findMentoringPost(postId)));
     }

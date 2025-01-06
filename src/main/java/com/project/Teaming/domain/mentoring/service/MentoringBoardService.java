@@ -1,9 +1,9 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.RqBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsSpecBoardDto;
+import com.project.Teaming.domain.mentoring.dto.request.BoardRequest;
+import com.project.Teaming.domain.mentoring.dto.response.MentoringPostStatusResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardResponse;
+import com.project.Teaming.domain.mentoring.dto.response.BoardSpecResponse;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
@@ -17,13 +17,10 @@ import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException
 import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
-import com.project.Teaming.global.result.pagenateResponse.PaginatedResponse;
-import com.querydsl.core.Tuple;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,7 +53,7 @@ public class MentoringBoardService {
      * @param boardDto
      */
     @Transactional
-    public Long saveMentoringPost(Long teamId, RqBoardDto boardDto) {
+    public Long saveMentoringPost(Long teamId, BoardRequest boardDto) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);  //명시적 조회, 최신 데이터 반영
         Optional<MentoringParticipation> TeamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
@@ -104,24 +101,15 @@ public class MentoringBoardService {
     }
 
     @Transactional(readOnly = true)
-    public RsSpecBoardDto toDto(MentoringBoard mentoringPost) {
-        User optionalUser = getOptionalUser();
+    public BoardSpecResponse toDto(MentoringBoard mentoringPost) {
+        User currentUser = getOptionalUser();
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
-        RsSpecBoardDto dto = mentoringPost.toDto(mentoringTeam);
+        BoardSpecResponse dto = mentoringPost.toDto(mentoringTeam);
         List<String> teamCategories = findTeamCategories(mentoringTeam.getId());
         dto.setCategory(teamCategories);
         // 로그인된 사용자가 있는 경우 권한 설정
-        if (optionalUser != null) {
-            Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(
-                    mentoringPost.getMentoringTeam(),
-                    optionalUser,
-                    MentoringParticipationStatus.ACCEPTED
-            );
-            if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
-                dto.setAuthority(teamUser.get().getAuthority());
-            } else {
-                dto.setAuthority(MentoringAuthority.NoAuth);
-            }
+        if (currentUser != null) {
+            setAuthorityForUser(dto, mentoringTeam, currentUser);
         } else {
             // 로그인되지 않은 경우 기본 권한 설정
             dto.setAuthority(MentoringAuthority.NoAuth);
@@ -130,14 +118,39 @@ public class MentoringBoardService {
         return dto;
     }
 
+    private void setAuthorityForUser(BoardSpecResponse dto, MentoringTeam mentoringTeam, User user) {
+        List<MentoringParticipation> participations = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatusIn(
+                mentoringTeam,
+                user,
+                List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.PENDING)
+        );
+
+        Optional<MentoringParticipation> teamUser = participations.stream()
+                .filter(p -> p.getParticipationStatus() == MentoringParticipationStatus.ACCEPTED && !p.getIsDeleted())
+                .findFirst();
+
+        Optional<MentoringParticipation> pendingUser = participations.stream()
+                .filter(p -> p.getParticipationStatus() == MentoringParticipationStatus.PENDING)
+                .findFirst();
+
+        if (teamUser.isPresent()) {
+            dto.setAuthority(teamUser.get().getAuthority());
+        } else if (pendingUser.isPresent()) {
+            dto.setIsParticipate(true);
+            dto.setAuthority(MentoringAuthority.NoAuth);
+        } else {
+            dto.setAuthority(MentoringAuthority.NoAuth);
+        }
+    }
+
     /**
      * 특정 멘토링 팀의 삭제되지않은 모든 게시물들을 가져오는 로직
      * @param teamId
      * @return
      */
     @Transactional(readOnly = true)
-    public List<RsBoardDto> findAllMyMentoringPost(Long teamId) {
-        List<RsBoardDto> boards = mentoringBoardRepository.findAllByMentoringTeamId(teamId);
+    public List<BoardResponse> findAllMyMentoringPost(Long teamId) {
+        List<BoardResponse> boards = mentoringBoardRepository.findAllByMentoringTeamId(teamId);
         List<Object[]> categoryResults = mentoringBoardRepository.findAllCategoriesByMentoringTeamId(teamId);
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         if (mentoringTeam.getFlag() == Status.FALSE) {
@@ -161,7 +174,7 @@ public class MentoringBoardService {
      * @return
 */
     @Transactional(readOnly = true)
-    public PaginatedCursorResponse<RsBoardDto> findAllPosts(Long cursor, int size) {
+    public PaginatedCursorResponse<BoardResponse> findAllPosts(Long cursor, int size) {
         List<Long> ids = mentoringBoardRepository.findMentoringBoardIds(cursor, size + 1, Status.FALSE);
 
         // 2. 다음 페이지 여부 확인
@@ -174,14 +187,14 @@ public class MentoringBoardService {
         List<MentoringBoard> distinctBoards = boards.stream()
                 .distinct()
                 .toList();
-        List<RsBoardDto> boardDtos = distinctBoards.stream()
+        List<BoardResponse> boardDtos = distinctBoards.stream()
                 .map(board -> {
                     MentoringTeam mentoringTeam = board.getMentoringTeam();
                     List<String> categories = mentoringTeam.getCategories().stream()
                             .map(category -> String.valueOf(category.getCategory().getId()))
                             .distinct()
                             .toList();
-                    return RsBoardDto.from(board, mentoringTeam, categories);
+                    return BoardResponse.from(board, mentoringTeam, categories);
                 })
                 .toList();
 
@@ -205,7 +218,7 @@ public class MentoringBoardService {
      * @return
      */
     @Transactional
-    public void updateMentoringPost(Long postId, RqBoardDto dto) {
+    public void updateMentoringPost(Long postId, BoardRequest dto) {
         User user = getUser();
         MentoringBoard mentoringBoard = mentoringBoardRepository.findById(postId)
                 .orElseThrow(() -> new MentoringPostNotFoundException("이미 삭제되었거나 존재하지 않는 글 입니다."));
@@ -247,14 +260,14 @@ public class MentoringBoardService {
      * @return
      */
     @Transactional
-    public MentoringPostStatusDto updatePostStatus(Long teamId, Long postId) {
+    public MentoringPostStatusResponse updatePostStatus(Long teamId, Long postId) {
         User user = getUser();
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(teamId).orElseThrow(MentoringTeamNotFoundException::new);
         Optional<MentoringParticipation> teamUser = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, user, MentoringParticipationStatus.ACCEPTED);
         MentoringBoard post = mentoringBoardRepository.findById(postId).orElseThrow(MentoringPostNotFoundException::new);
         if (teamUser.isPresent() && !teamUser.get().getIsDeleted()) {
             post.updateStatus();
-            return new MentoringPostStatusDto(PostStatus.COMPLETE);
+            return new MentoringPostStatusResponse(PostStatus.COMPLETE);
         } else {
             throw new NoAuthorityException(ErrorCode.NOT_A_MEMBER);
         }

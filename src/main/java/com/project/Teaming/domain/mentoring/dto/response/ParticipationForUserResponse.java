@@ -6,20 +6,19 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class RsTeamParticipationDto   {
+public class ParticipationForUserResponse {
 
     private LocalDateTime participatedTime;
-    private String userId;
+    private Long userId;
     private String username;
-    private Integer reportingCnt;
     private MentoringParticipationStatus status;
+    private Boolean isLogined;
 
-
-    public RsTeamParticipationDto(LocalDateTime participatedTime, Long userId, String username, Integer reportingCnt, MentoringParticipationStatus status) {
+    public ParticipationForUserResponse(LocalDateTime participatedTime, Long userId, String username, MentoringParticipationStatus status) {
         this.participatedTime = participatedTime;
-        this.userId = String.valueOf(userId);
+        this.userId = userId;
         this.username = username;
-        this.reportingCnt = reportingCnt;
         this.status = status;
+        this.isLogined = false;
     }
 }

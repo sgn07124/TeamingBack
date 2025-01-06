@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.mentoring.repository;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsBoardDto;
+import com.project.Teaming.domain.mentoring.dto.response.BoardResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
 import com.project.Teaming.domain.mentoring.entity.PostStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,12 +13,12 @@ import java.util.List;
 
 public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,Long>, BoardRepositoryCustom {
 
-    @Query("SELECT new com.project.Teaming.domain.mentoring.dto.response.RsBoardDto(mb.id, mb.title,mt.name, mt.startDate, mt.endDate, mb.contents, mb.status) " +
+    @Query("SELECT new com.project.Teaming.domain.mentoring.dto.response.BoardResponse(mb.id, mb.title,mt.name, mt.startDate, mt.endDate, mb.contents, mb.status) " +
             "FROM MentoringBoard mb " +
             "JOIN mb.mentoringTeam mt " +
             "WHERE mt.id = :teamId " +
             "ORDER BY mb.createdDate desc")
-    List<RsBoardDto> findAllByMentoringTeamId(@Param("teamId") Long teamId);
+    List<BoardResponse> findAllByMentoringTeamId(@Param("teamId") Long teamId);
 
     /**
      * @param teamId

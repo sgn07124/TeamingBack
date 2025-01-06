@@ -1,8 +1,8 @@
 package com.project.Teaming.domain.mentoring.repository;
 
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto;
-import com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto;
+import com.project.Teaming.domain.mentoring.dto.response.TeamParticipationResponse;
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
+import com.project.Teaming.domain.mentoring.dto.response.ParticipationForUserResponse;
 import com.project.Teaming.domain.mentoring.entity.*;
 import com.project.Teaming.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public interface MentoringParticipationRepository extends JpaRepository<MentoringParticipation, Long> {
 
-    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamUserDto(" +
+    @Query("select new com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse(" +
             "mp.decisionDate, u.id, u.name, mp.role, mp.participationStatus, mp.isDeleted, " +
             "case when mt.status = :teamStatus then " +
             "     case when r.id is not null then true " +
@@ -28,7 +28,7 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             "and r.mentoringParticipation.id = :reviewerParticipationId " +
             "where mt = :team " +
             "and (mp.participationStatus = :status or mp.participationStatus = :status2)")
-    List<RsTeamUserDto> findAllByMemberStatus(
+    List<TeamUserResponse> findAllByMemberStatus(
             @Param("team") MentoringTeam team,
             @Param("teamStatus") MentoringStatus teamStatus,
             @Param("status") MentoringParticipationStatus status,
@@ -36,19 +36,19 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("reviewerParticipationId") Long reviewerParticipationId
     );
 
-    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsTeamParticipationDto(mp.requestDate,u.id,u.name,u.warningCount,mp.participationStatus) " +
+    @Query("select new com.project.Teaming.domain.mentoring.dto.response.TeamParticipationResponse(mp.requestDate,u.id,u.name,u.warningCount,mp.participationStatus) " +
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
             "where mt.id = :teamId and mp.authority <> :authority and mp.participationStatus <> :status")
-    List<RsTeamParticipationDto> findAllForLeader(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
+    List<TeamParticipationResponse> findAllForLeader(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
 
-    @Query("select new com.project.Teaming.domain.mentoring.dto.response.RsUserParticipationDto(mp.requestDate,u.id,u.name,mp.participationStatus) " +
+    @Query("select new com.project.Teaming.domain.mentoring.dto.response.ParticipationForUserResponse(mp.requestDate,u.id,u.name,mp.participationStatus) " +
             "from MentoringParticipation mp " +
             "join mp.user u " +
             "join mp.mentoringTeam mt " +
             "where mt.id = :teamId and mp.authority <> :authority and mp.participationStatus <> :status")
-    List<RsUserParticipationDto> findAllForUser(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
+    List<ParticipationForUserResponse> findAllForUser(@Param("teamId") Long teamId, @Param("authority") MentoringAuthority authority, @Param("status") MentoringParticipationStatus status);
 
 
     Optional<MentoringParticipation> findByMentoringTeamAndUserAndAuthority(MentoringTeam mentoringTeam, User user, MentoringAuthority authority);
@@ -83,6 +83,12 @@ public interface MentoringParticipationRepository extends JpaRepository<Mentorin
             @Param("user") User user,
             @Param("status") MentoringParticipationStatus status,
             @Param("flag") Status flag);
+
+    List<MentoringParticipation> findByMentoringTeamAndUserAndParticipationStatusIn(
+            MentoringTeam mentoringTeam,
+            User user,
+            List<MentoringParticipationStatus> statuses
+    );
 
     @Query("SELECT COUNT(mp) FROM MentoringParticipation mp " +
             "WHERE mp.mentoringTeam.id = :teamId " +

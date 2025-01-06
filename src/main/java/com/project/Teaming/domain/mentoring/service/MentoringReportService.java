@@ -1,6 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.dto.request.MentoringReportDto;
+import com.project.Teaming.domain.mentoring.dto.request.MentoringReportRequest;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
@@ -32,7 +32,7 @@ public class MentoringReportService {
     private final ReportRepository reportRepository;
 
     @Transactional
-    public void reportTeamUser(MentoringReportDto dto) {
+    public void reportTeamUser(MentoringReportRequest dto) {
         // 신고자
         User reporter = getUser();
         //관련된 팀
