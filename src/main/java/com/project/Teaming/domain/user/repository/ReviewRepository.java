@@ -16,6 +16,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     boolean existsByProjectParticipationAndReviewee(ProjectParticipation reviewer, User reviewee);
     boolean existsByMentoringParticipationAndReviewee(MentoringParticipation reviewer, User reviewee);
 
+    boolean existsByProjectParticipationAndRevieweeId(ProjectParticipation projectParticipation, Long revieweeId);
+
     @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(ru.id, ru.name, r.content, r.createdDate) " +
             "from Review r " +
             "join r.reviewee ru " +

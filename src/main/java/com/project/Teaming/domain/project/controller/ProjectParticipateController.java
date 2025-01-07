@@ -6,6 +6,7 @@ import com.project.Teaming.domain.project.dto.request.ReviewDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
+import com.project.Teaming.domain.project.service.ProjectReviewService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.result.ResultListResponse;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectParticipateController {
 
     private final ProjectParticipationService projectParticipationService;
+    private final ProjectReviewService projectReviewService;
 
     @PostMapping("/project/join")
     @Operation(summary = "프로젝트 팀에 신청", description = "팀원으로 들어가길 원하는 사용자가 팀에 신청을 하면 대기열에 등록된다.")
@@ -96,7 +98,7 @@ public class ProjectParticipateController {
     @PostMapping("/project/review")
     @Operation(summary = "프로젝트 팀 내 팀원 리뷰 작성", description = "프로젝트 내의 팀원들은 프로젝트 종료 후 팀원에 대해서 리뷰를 작성할 수 있다.")
     public ResultDetailResponse<Void> reviewUser(@RequestBody ReviewDto dto) {
-        projectParticipationService.reviewUser(dto);
+        projectReviewService.reviewUser(dto);
         return new ResultDetailResponse<>(ResultCode.REVIEW_MEMBER, null);
     }
 }

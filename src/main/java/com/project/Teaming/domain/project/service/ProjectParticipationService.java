@@ -1,18 +1,15 @@
 package com.project.Teaming.domain.project.service;
 
 import com.project.Teaming.domain.project.dto.request.JoinTeamDto;
-import com.project.Teaming.domain.project.dto.request.ReviewDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
-import com.project.Teaming.domain.project.entity.ProjectStatus;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.repository.ProjectParticipationRepository;
 import com.project.Teaming.domain.project.repository.ProjectTeamRepository;
 import com.project.Teaming.domain.user.entity.Report;
-import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
@@ -257,32 +254,6 @@ public class ProjectParticipationService {
 
             // 처리된 신고에 대해 warningProcess = true 설정
             reportRepository.updateWarningProcessedByReportedUserAndTeamId(reportedUserId, teamId);
-        }
-    }
-
-    public void reviewUser(ReviewDto dto) {
-        // 로그인 사용자 조회(리뷰 작성자)
-        User reviewer = userRepository.findById(getCurrentId()).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
-
-        // 리뷰 작성자의 참여 정보 조회
-        ProjectParticipation reviewerParticipation = projectParticipationRepository.findByProjectTeamIdAndUserId(dto.getTeamId(), reviewer.getId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_PARTICIPATION));
-
-        // 리뷰 대상의 참여 정보 조회
-        ProjectParticipation revieweeParticipation = projectParticipationRepository.findByProjectTeamIdAndUserId(
-                        reviewerParticipation.getProjectTeam().getId(), dto.getRevieweeId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
-
-        // 프로젝트가 완료된 경우에만 리뷰 가능
-        if (revieweeParticipation.getProjectTeam().getStatus().equals(ProjectStatus.COMPLETE)) {
-            // 본인에 대한 리뷰는 작성 불가
-            if (reviewer.getId().equals(revieweeParticipation.getUser().getId())) {
-                throw new BusinessException(ErrorCode.INVALID_SELF_ACTION);
-            }
-            Review review = Review.projectReview(reviewerParticipation, revieweeParticipation.getUser(), dto.getRating(), dto.getContent());
-            reviewRepository.save(review);
-        } else {
-            throw new BusinessException(ErrorCode.PROJECT_NOT_COMPLETE);
         }
     }
 }
