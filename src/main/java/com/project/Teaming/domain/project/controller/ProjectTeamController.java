@@ -65,7 +65,7 @@ public class ProjectTeamController {
 
     @PutMapping("/project/team/status")
     @Operation(summary = "팀장의 팀 상태 변경", description = "팀장은 팀의 상태(모집 중, 진행 중, 완료)를 변경할 수 있다.")
-    public ResultDetailResponse<Void> editTeamStatus(@RequestBody UpdateTeamStatusDto dto) {
+    public ResultDetailResponse<Void> editTeamStatus(@RequestBody @Valid UpdateTeamStatusDto dto) {
         projectTeamService.updateTeamStatus(dto);
         return new ResultDetailResponse<>(ResultCode.UPDATE_TEAM_STATUS, null);
     }
