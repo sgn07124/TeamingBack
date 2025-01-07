@@ -6,6 +6,7 @@ import com.project.Teaming.domain.project.dto.request.ReviewDto;
 import com.project.Teaming.domain.project.dto.response.ProjectParticipationInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectTeamMemberDto;
 import com.project.Teaming.domain.project.service.ProjectParticipationService;
+import com.project.Teaming.domain.project.service.ProjectReportService;
 import com.project.Teaming.domain.project.service.ProjectReviewService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
@@ -31,6 +32,7 @@ public class ProjectParticipateController {
 
     private final ProjectParticipationService projectParticipationService;
     private final ProjectReviewService projectReviewService;
+    private final ProjectReportService projectReportService;
 
     @PostMapping("/project/join")
     @Operation(summary = "프로젝트 팀에 신청", description = "팀원으로 들어가길 원하는 사용자가 팀에 신청을 하면 대기열에 등록된다.")
@@ -91,7 +93,7 @@ public class ProjectParticipateController {
     @PostMapping("project/report")
     @Operation(summary = "프로젝트 팀 내 팀원 신고", description = "프로젝트 내의 팀원들은 팀원에 대하여 신고를 할 수 있다.")
     public ResultDetailResponse<Void> reportUser(@RequestBody ReportDto dto) {
-        projectParticipationService.reportUser(dto.getTeamId(), dto.getReportedUserId());
+        projectReportService.reportUser(dto.getTeamId(), dto.getReportedUserId());
         return new ResultDetailResponse<>(ResultCode.REPORT_MEMBER, null);
     }
 

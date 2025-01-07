@@ -13,6 +13,8 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     boolean existsByProjectParticipationAndReportedUser(ProjectParticipation reporter, User reportedUser);
     boolean existsByMentoringParticipationAndReportedUser(MentoringParticipation reporter, User reportedUser);
 
+    boolean existsByProjectParticipationAndReportedUserId(ProjectParticipation projectParticipation, Long reportedUserId);
+
     // 처리되지 않은 신고 수 조회
     long countByReportedUserIdAndProjectParticipation_ProjectTeamIdAndWarningProcessedFalse(Long reportedUserId, Long teamId);
 
