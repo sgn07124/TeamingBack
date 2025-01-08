@@ -28,6 +28,6 @@ public class TeamUserResponse {
         this.status = status;
         this.isLogined = false;
         this.isDeleted = isDeleted;
-        this.isReviewed = (isReviewed != null) ? isReviewed : null; // 기본값 설정
+        this.isReviewed = (isReviewed != null && isReviewed) ? true : null; // false인 경우 null로 처리
     }
 }

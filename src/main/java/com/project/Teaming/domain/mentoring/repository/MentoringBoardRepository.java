@@ -20,25 +20,5 @@ public interface MentoringBoardRepository extends JpaRepository<MentoringBoard,L
             "ORDER BY mb.createdDate desc")
     List<BoardResponse> findAllByMentoringTeamId(@Param("teamId") Long teamId);
 
-    /**
-     * @param teamId
-     * @return
-     */
-    @Query("SELECT pb.id, c.id FROM MentoringBoard pb " +
-            "JOIN pb.mentoringTeam mt " +
-            "JOIN mt.categories tc " +
-            "JOIN tc.category c " +
-            "WHERE mt.id = :teamId")
-    List<Object[]> findAllCategoriesByMentoringTeamId(@Param("teamId") Long teamId);
-
-    @Modifying
-    @Query("update ProjectBoard p set p.status = :newStatus where p.status = :currentStatus and p.deadline < :now")
-    void bulkUpDateStatus(@Param("newStatus") PostStatus newStatus,
-                          @Param("currentStatus") PostStatus currentStatus,
-                          @Param("now") LocalDate now);
-
-    @Modifying
-    @Query("DELETE FROM MentoringBoard mb WHERE mb.mentoringTeam.id = :teamId")
-    void deleteByTeamId(@Param("teamId") Long teamId);
 
 }

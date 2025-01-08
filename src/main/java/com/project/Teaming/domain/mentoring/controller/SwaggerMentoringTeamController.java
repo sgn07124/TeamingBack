@@ -24,7 +24,8 @@ public interface SwaggerMentoringTeamController {
                                                                            @RequestBody @Valid TeamRequest dto);
 
     @Operation(summary = "멘토링 팀 조회", description = "특정 멘토링 팀을 조회할 수 있다. " +
-            "멘토링 팀페이지 조회용, authority가 LEADER면 팀장용페이지,CREW이면 팀원용페이지, NoAuth면 일반사용자용 페이지 띄워주세요 ")
+            "멘토링 팀페이지 조회용, authority가 LEADER면 팀장용페이지,CREW이면 팀원용페이지, NoAuth면 일반사용자용 페이지 띄워주세요 " +
+    "NoAuth사용자는 지원자현황 같이 반환되는데 ACCEPT-수락,PENDING-대기중,REJECT-거절,EXPORT-수락으로 처리해주세요.")
     public ResultDetailResponse<TeamAuthorityResponse> findMentoringTeam(@PathVariable Long team_id);
 
     @Operation(summary = "멘토링 팀 삭제", description = "특정 멘토링 팀을 삭제할 수 있다.")
