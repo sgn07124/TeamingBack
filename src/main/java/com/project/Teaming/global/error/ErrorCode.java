@@ -63,8 +63,9 @@ public enum ErrorCode {
     STATUS_IS_NOT_PENDING(404, "M008", "이미 수락 또는 거절된 지원자 입니다"),
     EXPORTED_BY_TEAM(404, "M009", "이미 강퇴된 팀 입니다."),
     NOT_A_MEMBER(404, "M010", "팀 구성원이 아닙니다."),
-    EXPORTED_MEMBER_NOT_EXISTS(404, "M011", "강퇴할 대상이 팀에 속해있지 않습니다."),
+    EXPORTED_MEMBER_NOT_EXISTS(404, "M011", "강퇴할 대상을 팀에서 찾을 수 없습니다."),
     NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
+    NOT_A_MEMBER_OF_TEAM(404, "M013", "유저가 포함되지 않은 팀입니다."),
 
     //MentoringCategory
     NO_SUCH_CATEGORY(404, "MC001", "해당하는 카테고리가 존재하지 않습니다"),

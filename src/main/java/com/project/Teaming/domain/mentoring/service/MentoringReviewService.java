@@ -22,6 +22,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MentoringReviewService {
@@ -37,7 +39,7 @@ public class MentoringReviewService {
         MentoringTeam mentoringTeam = mentoringTeamRepository.findById(dto.getTeamId()).orElseThrow(MentoringTeamNotFoundException::new);
         MentoringParticipation reviewingParticipation = validateReviewingParticipation(user,mentoringTeam);
         User reviewedUser = validateReviewedUser(dto.getReviewedUserId());
-        MentoringParticipation reviewedParticipation = validateReviewedParticipation(mentoringTeam, reviewedUser);
+        validateReviewedParticipation(mentoringTeam, reviewedUser);
 
         // 팀 상태 검증
         validateMentoringTeamStatus(mentoringTeam);
@@ -46,15 +48,13 @@ public class MentoringReviewService {
         // 자기자신에 대해서 쓰는지 검증
         validateSelfReview(reviewingParticipation.getUser(), reviewedUser);
 
-        // 리뷰 작성
-        if (validateParticipationForReview(reviewedParticipation)) {
-            Review review = Review.mentoringReview(reviewingParticipation, reviewedUser, dto.getRate(), dto.getContent());
-            reviewRepository.save(review);
-        }
+        Review review = Review.mentoringReview(reviewingParticipation, reviewedUser, dto.getRate(), dto.getContent());
+        reviewRepository.save(review);
     }
 
     private MentoringParticipation validateReviewingParticipation(User user,MentoringTeam mentoringTeam) {
-        return mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam,user,MentoringParticipationStatus.ACCEPTED)
+        return mentoringParticipationRepository.findDynamicMentoringParticipation(
+                mentoringTeam,user,null, MentoringParticipationStatus.ACCEPTED,null,false)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_A_MEMBER));
     }
 
@@ -63,8 +63,9 @@ public class MentoringReviewService {
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 
-    private MentoringParticipation validateReviewedParticipation(MentoringTeam mentoringTeam, User reviewedUser) {
-        return mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, reviewedUser)
+    private void validateReviewedParticipation(MentoringTeam mentoringTeam, User reviewedUser) {
+        mentoringParticipationRepository.findDynamicMentoringParticipation(
+                        mentoringTeam, reviewedUser, null, null, List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT), null)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
     }
 
@@ -84,11 +85,6 @@ public class MentoringReviewService {
         if (reviewer.equals(reviewee)) {
             throw new BusinessException(ErrorCode.INVALID_SELF_ACTION);
         }
-    }
-
-    private boolean validateParticipationForReview(MentoringParticipation reviewedParticipation) {
-        return reviewedParticipation.getParticipationStatus() != MentoringParticipationStatus.PENDING
-                && reviewedParticipation.getParticipationStatus() != MentoringParticipationStatus.REJECTED;
     }
     private User getUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

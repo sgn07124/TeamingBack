@@ -39,7 +39,7 @@ public interface SwaggerMentoringParticipationController {
     @Operation(summary = "멘토링팀 멤버 및 지원자 현황 조회", description = "멘토링 팀 멤버나 지원자 현황을 조회하는 API " +
             "조회하는 사람이 팀장이면 팀원과 지원자 정보 반환, 팀원이면 팀원 정보만 반환. " +
             "리더용, 팀원용 페이지에서 팀원 조회 시 isDeleted는 탈퇴 유무, isLogined는 현재 로그인 된 사용자 유무, status가 EXPORT면 강퇴된 사용자 입니다, " +
-            "리더용 페이지 지원자 현황 조회 시 PENDING은 대기중 상태, ACCEPT는 수락, REJECT는 거절, " +
+            "지원자 현황 조회 시 ACCEPT-수락,PENDING-대기중,REJECT-거절,EXPORT-수락으로 처리해주세요." +
             "Authority를 같이 반환하니 이거에 따라 다른 페이지 보여주세요. 팀구성원이 아닌 사용자는 팀페이지 조회에서 반환")
     public ResultDetailResponse<?> getParticipationAppliers(@PathVariable Long team_id);
 

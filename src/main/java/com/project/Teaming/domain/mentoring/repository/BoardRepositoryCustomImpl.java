@@ -1,12 +1,19 @@
 package com.project.Teaming.domain.mentoring.repository;
 
 import com.project.Teaming.domain.mentoring.entity.*;
+import com.project.Teaming.domain.project.entity.QProjectBoard;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import static com.project.Teaming.domain.mentoring.entity.QCategory.*;
+import static com.project.Teaming.domain.mentoring.entity.QMentoringBoard.*;
+import static com.project.Teaming.domain.mentoring.entity.QMentoringTeam.*;
+import static com.project.Teaming.domain.mentoring.entity.QTeamCategory.*;
 
 @Repository
 public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
@@ -18,8 +25,8 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
 
     @Override
     public List<Long> findMentoringBoardIds(Long lastCursor, int size, Status flag) {
-        QMentoringBoard mb = QMentoringBoard.mentoringBoard;
-        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
+        QMentoringBoard mb = mentoringBoard;
+        QMentoringTeam mt = mentoringTeam;
 
         return queryFactory
                 .select(mb.id)
@@ -40,10 +47,10 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
             return List.of();
         }
 
-        QMentoringBoard mb = QMentoringBoard.mentoringBoard;
-        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
-        QTeamCategory tc = QTeamCategory.teamCategory;
-        QCategory c = QCategory.category;
+        QMentoringBoard mb = mentoringBoard;
+        QMentoringTeam mt = mentoringTeam;
+        QTeamCategory tc = teamCategory;
+        QCategory c = category;
 
         return queryFactory
                 .selectFrom(mb)
@@ -56,9 +63,34 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
                 .fetch();
 
     }
+    @Override
+    public void deleteByTeamId(Long teamId) {
+        QMentoringBoard mb = mentoringBoard;
+
+        queryFactory
+                .delete(mb)
+                .where(mb.mentoringTeam.id.eq(teamId))
+                .execute();
+    }
+
+    @Override
+    public void bulkUpDateStatus(PostStatus newStatus, PostStatus currentStatus, LocalDate now) {
+        QMentoringBoard mb = mentoringBoard;
+
+        queryFactory
+                .update(mb)
+                .set(mb.status, newStatus)
+                .where(
+                        mb.status.eq(currentStatus)
+                                .and(mb.deadLine.lt(now))
+                )
+                .execute();
+    }
+
+
 
     private BooleanExpression lastCursorCondition(Long lastCursor) {
-        QMentoringBoard mb = QMentoringBoard.mentoringBoard;
+        QMentoringBoard mb = mentoringBoard;
         return lastCursor == null ? null : mb.id.lt(lastCursor);
     }
 }

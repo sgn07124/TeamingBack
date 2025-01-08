@@ -40,13 +40,15 @@ public class MentoringReportService {
                 .orElseThrow(MentoringTeamNotFoundException::new);
         //신고한 teamParticipation
         //신고자가 팀 구성원인지 확인
-        MentoringParticipation reportingParticipation = mentoringParticipationRepository.findByMentoringTeamAndUserAndParticipationStatus(mentoringTeam, reporter, MentoringParticipationStatus.ACCEPTED)
+        MentoringParticipation reportingParticipation = mentoringParticipationRepository.findDynamicMentoringParticipation(
+                mentoringTeam, reporter,null, MentoringParticipationStatus.ACCEPTED,null,false)
                 .orElseThrow(() ->new BusinessException(ErrorCode.NOT_A_TEAM_USER));
         //신고당한 사용자
         User reportedUser = userRepository.findById(dto.getReportedUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
         //신고당한 teamParticipation
-        MentoringParticipation reportedParticipation = mentoringParticipationRepository.findByMentoringTeamAndUser(mentoringTeam, reportedUser)
+        MentoringParticipation reportedParticipation = mentoringParticipationRepository.findDynamicMentoringParticipation(
+                mentoringTeam, reportedUser,null,null,null,null)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REPORT_TARGET));
 
         // 이미 신고한 사용자인지 확인
@@ -77,7 +79,7 @@ public class MentoringReportService {
             return; // 이미 처리된 경우 중복 처리 방지
         }
         // 팀원 수 조회
-        long totalMembers = mentoringParticipationRepository.countByMentoringTeamIdAndParticipationStatusAndIsDeleted(teamId, MentoringParticipationStatus.ACCEPTED);
+        long totalMembers = mentoringParticipationRepository.countBy(teamId, MentoringParticipationStatus.ACCEPTED);
 
         // 과반수 이상의 신고 횟수인지 확인
         if (reportedParticipation.getReportingCount() >= Math.ceil(totalMembers / 2.0)) {
