@@ -18,7 +18,7 @@ public enum ErrorCode {
     // User
     USER_NOT_EXIST(404, "U001", "member not exist"),
     USER_EMAIL_ALREADY_EXISTS(400, "U002", "user email already exists"),
-    NO_AUTHORITY(403, "U003", "no authority"),
+    NO_AUTHORITY(403, "U003", "권한이 없습니다."),
     NEED_LOGIN(401, "U004", "need login"),
     AUTHENTICATION_NOT_FOUND(400, "U005", "security context에 인증정보가 없습니다"),
     USER_ALREADY_LOGOUT(400, "U006", "member already logout"),
@@ -59,13 +59,14 @@ public enum ErrorCode {
     ALREADY_MEMBER_OF_TEAM(404, "M004", "이미 해당 팀의 구성원입니다."),
     ALREADY_PARTICIPATED(404,"M005","이미 신청한 팀 입니다."),
     REJECTED_FROM_MENTORING_TEAM(404,"M006","이미 거절된 팀 입니다."),
-    NOT_A_LEADER(404, "M007", "수락할 수 있는 권한이 없습니다."),
+    NOT_A_LEADER(404, "M007", "리더만 접근 가능합니다."),
     STATUS_IS_NOT_PENDING(404, "M008", "이미 수락 또는 거절된 지원자 입니다"),
     EXPORTED_BY_TEAM(404, "M009", "이미 강퇴된 팀 입니다."),
     NOT_A_MEMBER(404, "M010", "팀 구성원이 아닙니다."),
     EXPORTED_MEMBER_NOT_EXISTS(404, "M011", "강퇴할 대상을 팀에서 찾을 수 없습니다."),
     NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
     NOT_A_MEMBER_OF_TEAM(404, "M013", "유저가 포함되지 않은 팀입니다."),
+    NOT_A_POST_OF_TEAM(404, "M014", "해당 팀에 포함되지 않은 글입니다."),
 
     //MentoringCategory
     NO_SUCH_CATEGORY(404, "MC001", "해당하는 카테고리가 존재하지 않습니다"),

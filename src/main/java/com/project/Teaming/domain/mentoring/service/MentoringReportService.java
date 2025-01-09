@@ -4,8 +4,12 @@ import com.project.Teaming.domain.mentoring.dto.request.MentoringReportRequest;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.provider.MentoringParticipationDataProvider;
+import com.project.Teaming.domain.mentoring.provider.MentoringTeamDataProvider;
+import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
+import com.project.Teaming.domain.mentoring.service.policy.MentoringReportPolicy;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
@@ -26,40 +30,37 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class MentoringReportService {
 
-    private final UserRepository userRepository;
-    private final MentoringTeamRepository mentoringTeamRepository;
+    private final UserDataProvider userDataProvider;
+    private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final MentoringParticipationRepository mentoringParticipationRepository;
+    private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final ReportRepository reportRepository;
+    private final MentoringReportPolicy mentoringReportPolicy;
 
     @Transactional
     public void reportTeamUser(MentoringReportRequest dto) {
         // 신고자
-        User reporter = getUser();
-        //관련된 팀
-        MentoringTeam mentoringTeam = mentoringTeamRepository.findById(dto.getTeamId())
-                .orElseThrow(MentoringTeamNotFoundException::new);
-        //신고한 teamParticipation
-        //신고자가 팀 구성원인지 확인
-        MentoringParticipation reportingParticipation = mentoringParticipationRepository.findDynamicMentoringParticipation(
-                mentoringTeam, reporter,null, MentoringParticipationStatus.ACCEPTED,null,false)
-                .orElseThrow(() ->new BusinessException(ErrorCode.NOT_A_TEAM_USER));
-        //신고당한 사용자
-        User reportedUser = userRepository.findById(dto.getReportedUserId())
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        //신고당한 teamParticipation
-        MentoringParticipation reportedParticipation = mentoringParticipationRepository.findDynamicMentoringParticipation(
-                mentoringTeam, reportedUser,null,null,null,null)
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REPORT_TARGET));
+        User reporter = userDataProvider.getUser();
 
-        // 이미 신고한 사용자인지 확인
-        boolean reportExists = reportRepository.existsByMentoringParticipationAndReportedUser(reportingParticipation, reportedUser);
-        if (reportExists) {
-            throw new BusinessException(ErrorCode.ALREADY_REPORTED);
-        }
-        // 자기자신에 대해서 하는 경우 예외처리
-        if (reporter.getId().equals(dto.getReportedUserId())) {
-            throw new BusinessException(ErrorCode.INVALID_SELF_ACTION);
-        }
+        //관련된 팀
+        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(dto.getTeamId());
+
+        //신고자가 팀 구성원인지 확인
+        MentoringParticipation reportingParticipation = mentoringParticipationDataProvider.findParticipationWith(
+                mentoringTeam, reporter,null, MentoringParticipationStatus.ACCEPTED,
+                null, false, () -> new BusinessException(ErrorCode.NOT_A_TEAM_USER));
+
+        //신고당한 사용자
+        User reportedUser = userDataProvider.findUser(dto.getReportedUserId());
+
+        //신고당한 teamParticipation
+        MentoringParticipation reportedParticipation = mentoringParticipationDataProvider.findParticipationWith(
+                mentoringTeam, reportedUser,null,null,null,null,
+                () -> new BusinessException(ErrorCode.INVALID_REPORT_TARGET));
+
+        mentoringReportPolicy.validateExistingReport(reportingParticipation, reportedUser);
+        mentoringReportPolicy.validateSelfReport(reporter, reportedUser);
+
         // 신고대상이 강퇴된 사용자거나, 탈퇴한 사용자인 경우 신고진행
         if (reportedParticipation.getParticipationStatus() == MentoringParticipationStatus.EXPORT || reportedParticipation.getIsDeleted()) {
             Report report = Report.mentoringReport(reportingParticipation, reportedUser);
@@ -90,11 +91,5 @@ public class MentoringReportService {
             // 경고 처리 상태 업데이트
             reportedParticipation.setWarningProcessed();
         }
-    }
-    private User getUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
-        Long userId = securityUser.getUserId();
-        return userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }
