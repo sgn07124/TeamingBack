@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ParticipantsResponse<T> {
 
+    private Long teamId;
     private MentoringAuthority authority;
     private T details;
 }

@@ -70,42 +70,38 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
 
 
     @Override
-    public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority, MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses, Boolean isDeleted) {
+    public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
+                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses, Boolean isDeleted) {
+
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
 
         BooleanBuilder builder = new BooleanBuilder();
 
-        // MentoringTeam 조건
+
         if (mentoringTeam != null) {
             builder.and(mp.mentoringTeam.eq(mentoringTeam));
         }
 
-        // User 조건
         if (user != null) {
             builder.and(mp.user.eq(user));
         }
 
-        // MentoringAuthority 조건
         if (authority != null) {
             builder.and(mp.authority.eq(authority));
         }
 
-        // 단일 ParticipationStatus 조건
         if (status != null) {
             builder.and(mp.participationStatus.eq(status));
         }
 
-        // 리스트 ParticipationStatus 조건
         if (statuses != null && !statuses.isEmpty()) {
             builder.and(mp.participationStatus.in(statuses));
         }
 
-        // isDeleted 조건
         if (isDeleted != null) {
             builder.and(mp.isDeleted.eq(isDeleted));
         }
 
-        // 최종 쿼리 실행
         MentoringParticipation result = queryFactory
                 .selectFrom(mp)
                 .where(builder)
@@ -119,7 +115,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
         return findParticipationResponses(
                 teamId,
                 authority,
-                TeamParticipationResponse.class // 반환 DTO 타입 지정
+                TeamParticipationResponse.class
         );
     }
 
@@ -128,7 +124,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
         return findParticipationResponses(
                 teamId,
                 authority,
-                ParticipationForUserResponse.class // 반환 DTO 타입 지정
+                ParticipationForUserResponse.class
         );
     }
 
@@ -138,10 +134,10 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
         QMentoringTeam mt = QMentoringTeam.mentoringTeam;
 
         BooleanBuilder builder = new BooleanBuilder();
-        builder.and(mt.id.eq(teamId)); // 팀 ID 조건
-        builder.and(mp.authority.ne(authority)); // 권한 제외 조건
+        builder.and(mt.id.eq(teamId));
+        builder.and(mp.authority.ne(authority));
 
-        // DTO에 따라 다른 컬럼 반환
+
         if (dtoClass.equals(TeamParticipationResponse.class)) {
             return queryFactory
                     .select(Projections.constructor(

@@ -53,7 +53,8 @@ public class BoardRepositoryCustomImpl implements BoardRepositoryCustom {
         QCategory c = category;
 
         return queryFactory
-                .selectFrom(mb)
+                .selectDistinct(mb)
+                .from(mb)
                 .join(mb.mentoringTeam, mt).fetchJoin()
                 .join(mt.categories, tc).fetchJoin()
                 .join(tc.category, c).fetchJoin()
