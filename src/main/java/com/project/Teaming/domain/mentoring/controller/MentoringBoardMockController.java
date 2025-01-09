@@ -185,7 +185,7 @@ public class MentoringBoardMockController {
         // Mock 데이터 생성
         BoardSpecResponse mockPost = new BoardSpecResponse(
                 randomAuthority, // 랜덤 권한 설정
-                randomAuthority == MentoringAuthority.NoAuth ? (random.nextBoolean() ? true : null) : null, // NoAuth일 때만 랜덤
+                randomAuthority == MentoringAuthority.NoAuth ? (random.nextBoolean() ? true : false) : null, // NoAuth일 때만 랜덤
                 post_id, // 요청받은 post_id를 그대로 사용
                 7L, // 고정된 팀 ID
                 "Mock 게시글 제목", // 고정된 제목
