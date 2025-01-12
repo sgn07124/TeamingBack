@@ -118,7 +118,7 @@ public class MentoringTeamService {
     @Transactional(readOnly = true)
     public List<MentoringTeam> findMyMentoringTeams(Long userId) {
         User user = userDataProvider.findUser(userId);
-        return mentoringTeamRepository.findTeamsWithStatusAndUser(user,MentoringParticipationStatus.ACCEPTED);
+        return mentoringTeamDataProvider.getTeamsByUserAndStatus(user,MentoringParticipationStatus.ACCEPTED);
     }
 
     @Transactional(readOnly = true)
