@@ -10,6 +10,9 @@ public class PaginatedCursorResponse<T> {
     private int pageSize;      // 페이지 크기
     private boolean isLast;    // 마지막 페이지 여부
 
+    public PaginatedCursorResponse() {
+    }
+
     public PaginatedCursorResponse(List<T> content, Long nextCursor, int pageSize, boolean isLast) {
         this.content = content;
         this.nextCursor = nextCursor;
