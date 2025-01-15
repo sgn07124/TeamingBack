@@ -42,6 +42,7 @@ public class ProjectBoardService {
     private final ProjectTeamRepository projectTeamRepository;
     private final UserRepository userRepository;
     private final ProjectParticipationRepository projectParticipationRepository;
+    private final ProjectCacheService projectCacheService;
 
     /**
      * 프로젝트 팀 게시물 작성
@@ -51,6 +52,8 @@ public class ProjectBoardService {
         ProjectTeam projectTeam = getProjectTeam(teamId);
         ProjectBoard post = ProjectBoard.projectBoard(createPostDto, projectTeam);
         projectBoardRepository.save(post);
+        // 게시글 추가 후 최신 게시글 반영을 위한 캐시 무효화. (첫 페이지 캐시 삭제)
+        projectCacheService.evictCache(null, 10);
     }
 
     /**
