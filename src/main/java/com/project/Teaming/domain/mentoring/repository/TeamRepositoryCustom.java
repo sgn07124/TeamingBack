@@ -12,6 +12,4 @@ public interface TeamRepositoryCustom {
     void updateStatusToWorking(MentoringStatus workingStatus, MentoringStatus recruitingStatus);
 
     void updateStatusToComplete(MentoringStatus completeStatus, MentoringStatus workingStatus);
-
-    List<MentoringTeam> findTeamsWithStatusAndUser(User user, MentoringParticipationStatus status);
 }

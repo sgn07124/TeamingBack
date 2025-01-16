@@ -2,7 +2,6 @@ package com.project.Teaming.domain.mentoring.service.policy;
 
 import com.project.Teaming.domain.mentoring.entity.MentoringBoard;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
-import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;

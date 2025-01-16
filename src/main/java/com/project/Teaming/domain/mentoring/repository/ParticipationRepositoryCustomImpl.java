@@ -187,6 +187,25 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
         );
     }
 
+    @Override
+    public List<MentoringParticipation> findParticipationWithStatusAndUser(User user, MentoringParticipationStatus status) {
+        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
+        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
+
+        return queryFactory
+                .select(mp)
+                .from(mp)
+                .join(mp.mentoringTeam, mt).fetchJoin()
+                .where(
+                        mp.user.eq(user),
+                        mp.participationStatus.eq(status),
+                        mp.isDeleted.isFalse(),
+                        mt.flag.eq(Status.FALSE)
+                )
+                .distinct()
+                .fetch();
+    }
+
 
     @Override
     public long countBy(Long teamId, MentoringParticipationStatus status) {

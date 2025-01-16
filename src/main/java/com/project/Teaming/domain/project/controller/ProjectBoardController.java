@@ -5,6 +5,7 @@ import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
+import com.project.Teaming.domain.project.service.ProjectCacheService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.ResultListResponse;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectBoardController {
 
     private final ProjectBoardService projectBoardService;
+    private final ProjectCacheService projectCacheService;
 
     @PostMapping("/post/{team_id}")
     @Operation(summary = "프로젝트 팀 게시물 작성", description = "프로젝트 팀에 대한 모집 게시글 작성")
@@ -93,8 +95,17 @@ public class ProjectBoardController {
             @RequestParam(required = false) Long cursor, // 마지막 게시글 ID
             @RequestParam(defaultValue = "10") int pageSize) {
 
-        PaginatedCursorResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(cursor, pageSize);
-        return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
+        // 캐시에서 먼저 조회
+        PaginatedCursorResponse<ProjectPostListDto> cachePosts = projectCacheService.getCachePosts(cursor, pageSize);
+
+        if (cachePosts != null) {
+            return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, cachePosts);
+        } else {
+            // 캐시가 없으면 DB에서 조회하여 캐시에 저장
+            PaginatedCursorResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(cursor, pageSize);
+            projectCacheService.cachePosts(cursor, pageSize, posts);
+            return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
+        }
     }
 
     @GetMapping("/posts/{team_id}")
