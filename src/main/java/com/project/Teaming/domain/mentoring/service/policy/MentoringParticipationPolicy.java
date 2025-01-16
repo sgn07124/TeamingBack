@@ -28,7 +28,7 @@ public class MentoringParticipationPolicy {
                                       Boolean isDeleted,
                                       Supplier<BusinessException> exceptionSupplier) {
 
-        mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses, isDeleted)
+        mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses)
                 .orElseThrow(exceptionSupplier);
     }
 

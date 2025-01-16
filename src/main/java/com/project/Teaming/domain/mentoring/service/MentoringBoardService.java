@@ -247,7 +247,7 @@ public class MentoringBoardService {
         Optional<MentoringParticipation> participations = mentoringParticipationRepository.findDynamicMentoringParticipation(
                 mentoringTeam,
                 user,null,null,
-                List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.PENDING),false);
+                List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.PENDING));
 
         if (participations.isPresent()) {
             MentoringParticipation mp = participations.get();

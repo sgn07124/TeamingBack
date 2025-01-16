@@ -34,10 +34,12 @@ public class MentoringTeam extends BaseEntity {
     @Column(name = "content")
     private String content;
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private MentoringStatus status;
     @Column(name = "link")
     private String link;
     @Column(name = "flag")
+    @Enumerated(EnumType.STRING)
     private Status flag;
     @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
     private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();

@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 
 @Configuration
@@ -17,12 +18,12 @@ public class RedisConfig {
 
     private final RedisProperties redisProperties;
 
-    @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
+    private RedisConnectionFactory redisConnectionFactory(int databaseIndex) {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(redisProperties.getHost());
         redisStandaloneConfiguration.setPort(redisProperties.getPort());
         redisStandaloneConfiguration.setPassword(redisProperties.getPassword());
+        redisStandaloneConfiguration.setDatabase(databaseIndex);
         return new LettuceConnectionFactory(redisStandaloneConfiguration);
     }
 
@@ -35,8 +36,15 @@ public class RedisConfig {
          * setKeySerializer, setValueSerializer 설정
          * redis-cli 을 통해 직접 데이터를 조회 시 알아볼 수 없는 형태로 출력되는 것을 방지
          */
-        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setConnectionFactory(redisConnectionFactory(0));
 
         return redisTemplate;
     }
+
+    @Bean(name = "stringRedisTemplate")
+    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+        return new StringRedisTemplate(redisConnectionFactory(2));
+    }
+
+
 }

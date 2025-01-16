@@ -30,7 +30,7 @@ public class MentoringReviewPolicy {
 
     public void validateReviewedParticipation(MentoringTeam mentoringTeam, User reviewedUser) {
         mentoringParticipationRepository.findDynamicMentoringParticipation(
-                        mentoringTeam, reviewedUser, null, null, List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT), null)
+                        mentoringTeam, reviewedUser, null, null, List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT))
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
     }
 

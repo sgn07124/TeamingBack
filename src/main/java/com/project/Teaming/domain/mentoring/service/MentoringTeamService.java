@@ -179,7 +179,7 @@ public class MentoringTeamService {
         }
 
         //로그인 사용자
-        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED,null,false)
+        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED,null)
                 .ifPresentOrElse(
                         participation -> {
                             // 권한 설정
@@ -209,7 +209,7 @@ public class MentoringTeamService {
         //권한 반환하는 로직
         MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
                 team, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,false, () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
+                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
 
         teamDto.setAuthority(teamUser.getAuthority());
         return teamDto;

@@ -58,13 +58,13 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/users/{userId}/export")
+    @DeleteMapping("/teams/{teamId}/users/{userId}/export")
     public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long teamId, @PathVariable Long userId) {
         mentoringParticipationService.exportTeamUser(teamId, userId);
         return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_USER, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/quit")
+    @DeleteMapping("/teams/{teamId}/quit")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long teamId) {
         mentoringParticipationService.deleteUser(teamId);
         return new ResultDetailResponse<>(ResultCode.DELETE_PARTICIPATION, null);

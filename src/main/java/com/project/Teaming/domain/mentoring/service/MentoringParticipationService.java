@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,6 +37,7 @@ public class MentoringParticipationService {
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final UserDataProvider userDataProvider;
+    private final RedisParticipationManagementService redisParticipationManagementService;
 
     /**
      * 지원자로 등록하는 로직
@@ -46,7 +48,7 @@ public class MentoringParticipationService {
     public MentoringParticipation saveMentoringParticipation(MentoringTeam mentoringTeam, ParticipationRequest dto) {
         User user = userDataProvider.getUser();
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findDynamicMentoringParticipation(
-                mentoringTeam, user,null,null,null,false);
+                mentoringTeam, user,null,null,null);
 
         participation.ifPresent(mentoringParticipationPolicy::validateParticipationStatus);
 
@@ -66,7 +68,7 @@ public class MentoringParticipationService {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
         MentoringParticipation participation = mentoringParticipationDataProvider.findParticipationWith(
-                mentoringTeam, user,null,null,null,false,() -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
+                mentoringTeam, user,null,null,null,() -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
 
         mentoringParticipationPolicy.validateCancellation(participation);
 
@@ -139,9 +141,13 @@ public class MentoringParticipationService {
 
         MentoringParticipation export = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, exportUser,MentoringAuthority.CREW, MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS));
+                null,() -> new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS));
         // 강퇴
         export.export();
+        redisParticipationManagementService.saveParticipation(export, exportUser);
+        export.removeUser(exportUser);
+        export.removeMentoringTeam(mentoringTeam);
+        mentoringParticipationRepository.delete(export);
     }
 
     /**
@@ -156,7 +162,7 @@ public class MentoringParticipationService {
 
         MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, user,null,MentoringParticipationStatus.ACCEPTED,
-                null,false, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
         if (teamUser.getAuthority() == MentoringAuthority.LEADER) {
             //제일 일찍 들어온 팀원 조회
@@ -171,7 +177,10 @@ public class MentoringParticipationService {
             );
         }
         teamUser.setDeleted(true);
-
+        redisParticipationManagementService.saveParticipation(teamUser, user);
+        teamUser.removeMentoringTeam(mentoringTeam);
+        teamUser.removeUser(user);
+        mentoringParticipationRepository.delete(teamUser);
     }
 
     /**
@@ -187,28 +196,31 @@ public class MentoringParticipationService {
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
-        MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
+        MentoringParticipation currentUser = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
-                null, false, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
-        if (teamUser.getAuthority() == MentoringAuthority.LEADER) {  //팀의 리더인 유저
-            List<TeamUserResponse> allTeamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringStatus.COMPLETE,
-                    MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT, teamUser.getId());
-            setLoginStatus(allTeamUsers,user.getId());
-            log.info("All Team Users For Leader: {}", allTeamUsers);
+        List<TeamUserResponse> teamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringStatus.COMPLETE,
+                MentoringParticipationStatus.ACCEPTED, currentUser.getId());
+        setLoginStatus(teamUsers,user.getId());
+        List<TeamUserResponse> deletedOrExportedTeamUsers = redisParticipationManagementService.getDeletedOrExportedParticipations(teamId);
+        List<TeamUserResponse> combineUsers = TeamUserResponse.combine(teamUsers, deletedOrExportedTeamUsers);
+
+        if (currentUser.getAuthority() == MentoringAuthority.LEADER) {  //팀의 리더인 유저
+            log.info("All Team Users For Leader: {}", combineUsers);
+            //지원자현황조회
             List<TeamParticipationResponse> participations = mentoringParticipationRepository.findAllForLeader(teamId, MentoringAuthority.LEADER);
+
             ForLeaderResponse dto = new ForLeaderResponse();
-            dto.setMembers(allTeamUsers);
+            dto.setMembers(combineUsers);
             dto.setParticipations(participations);
             log.info("Participations for Leader: {}", participations);
             return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.LEADER, dto);
 
-        } else if (teamUser.getAuthority() == MentoringAuthority.CREW) {  //팀의 멤버인 유저
-            List<TeamUserResponse> members = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringStatus.COMPLETE,
-                    MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT, teamUser.getId());
-            setLoginStatus(members,user.getId());
-            log.info("Members for Crew: {}", members);
-            return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.CREW, members);
+        } else if (currentUser.getAuthority() == MentoringAuthority.CREW) {
+            //팀 유저만 반환
+            log.info("Members for Crew: {}", combineUsers);
+            return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.CREW, combineUsers);
         }
         else throw new BusinessException(ErrorCode.NOT_A_MEMBER);
 

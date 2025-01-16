@@ -31,7 +31,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             MentoringTeam team,
             MentoringStatus teamStatus,
             MentoringParticipationStatus status,
-            MentoringParticipationStatus status2,
             Long reviewerParticipationId) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
@@ -62,7 +61,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         .and(r.mentoringParticipation.id.eq(reviewerParticipationId)))
                 .where(
                         mt.eq(team),
-                        mp.participationStatus.in(status, status2)
+                        mp.participationStatus.eq(status)
                 )
                 .orderBy(mp.decisionDate.asc())
                 .fetch();
@@ -71,7 +70,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
 
     @Override
     public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
-                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses, Boolean isDeleted) {
+                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
 
@@ -97,11 +96,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
         if (statuses != null && !statuses.isEmpty()) {
             builder.and(mp.participationStatus.in(statuses));
         }
-
-        if (isDeleted != null) {
-            builder.and(mp.isDeleted.eq(isDeleted));
-        }
-
         MentoringParticipation result = queryFactory
                 .selectFrom(mp)
                 .where(builder)
@@ -203,8 +197,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .from(mp)
                 .where(
                         mp.mentoringTeam.id.eq(teamId), // teamId 조건
-                        mp.participationStatus.eq(status), // participationStatus 조건
-                        mp.isDeleted.isFalse() // isDeleted = false 조건
+                        mp.participationStatus.eq(status) // participationStatus 조건
                 )
                 .fetchOne(); // 단일 값 반환
     }

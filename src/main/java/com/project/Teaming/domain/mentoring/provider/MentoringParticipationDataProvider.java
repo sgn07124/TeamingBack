@@ -27,10 +27,9 @@ public class MentoringParticipationDataProvider {
 
     public MentoringParticipation findParticipationWith(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
                                                         MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses,
-                                                        Boolean isDeleted,
                                                         Supplier<BusinessException> exceptionSupplier) {
 
-        return mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses, isDeleted)
+        return mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses)
                 .orElseThrow(exceptionSupplier);
     }
 }

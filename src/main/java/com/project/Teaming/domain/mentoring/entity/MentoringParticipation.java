@@ -35,12 +35,8 @@ public class MentoringParticipation {
     private MentoringRole role;  // 역할
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
-    @Column(name = "reporting_count")
-    private int reportingCount;
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
-    @Column(name = "warning_processed", nullable = false)
-    private Boolean warningProcessed = false; // 경고 처리 여부
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -57,26 +53,22 @@ public class MentoringParticipation {
         this.decisionDate = decisionDate;
         this.role = role;
         this.authority = authority;
-        this.reportingCount = reportingCount;
         this.isDeleted = false;
-        this.warningProcessed = false;
         this.user = user;
         this.mentoringTeam = mentoringTeam;
     }
 
-    public MentoringParticipation(MentoringParticipationStatus participationStatus, LocalDateTime requestDate, MentoringRole role, MentoringAuthority authority, int reportingCount) {
+    public MentoringParticipation(MentoringParticipationStatus participationStatus, LocalDateTime requestDate, MentoringRole role, MentoringAuthority authority) {
         this.participationStatus = participationStatus;
         this.requestDate = requestDate;
         this.role = role;
         this.authority = authority;
-        this.reportingCount = reportingCount;
         this.isDeleted = false;
-        this.warningProcessed = false;
     }
 
     public static MentoringParticipation from(ParticipationRequest request) {
         return new MentoringParticipation(request.getStatus(),LocalDateTime.now(),
-                request.getRole(),request.getAuthority(),0);
+                request.getRole(),request.getAuthority());
     }
 
     public void accept() {
@@ -104,14 +96,6 @@ public class MentoringParticipation {
 
     public void setDeleted(Boolean deleted) {
         isDeleted = deleted;
-    }
-
-    public void addReportingCount() {
-        this.reportingCount = this.reportingCount + 1;
-    }
-
-    public void setWarningProcessed() {
-        this.warningProcessed = true;
     }
 
     /**
