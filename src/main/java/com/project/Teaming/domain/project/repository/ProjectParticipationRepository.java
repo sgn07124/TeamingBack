@@ -21,6 +21,9 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
     // 팀에 지원 여부
     boolean existsByProjectTeamIdAndUserIdAndDecisionDateIsNull(Long projectTeamId, Long userId);
 
+    // 팀의 팀장 여부
+    boolean existsByProjectTeamIdAndUserIdAndRole(Long projectTeamId, Long userId, ProjectRole role);
+
     Optional<ProjectParticipation> findByProjectTeamIdAndRole(Long projectId, ProjectRole role);
 
     List<ProjectParticipation> findByUserIdAndParticipationStatus(Long userId, ParticipationStatus status);
