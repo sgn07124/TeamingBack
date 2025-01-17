@@ -53,7 +53,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers("/token/**").permitAll() // 토큰 발급 경로 허용
                         .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/login",
-                                "/project/team/{team_id}", "/project/team/{team_id}/participations", "/project/post/{post_id}",
+                                "/project/team/{team_id}/participations", "/project/post/{post_id}",
                                 "/project/posts","/mentoring/posts","/mentoring/teams/{teamId}","/mentoring/posts/{postId}","/mock/**").permitAll() // 특정 경로 허용
                         .anyRequest().authenticated() // 그 외 모든 요청 인증 필요
                 );
