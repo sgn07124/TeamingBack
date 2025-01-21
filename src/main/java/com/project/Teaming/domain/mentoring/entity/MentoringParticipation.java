@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
@@ -73,29 +74,29 @@ public class MentoringParticipation {
 
     public void accept() {
         this.participationStatus = MentoringParticipationStatus.ACCEPTED;
+        this.authority = MentoringAuthority.CREW;
+        this.decisionDate = LocalDateTime.now();
     }
     public void reject() {
         this.participationStatus = MentoringParticipationStatus.REJECTED;
     }
 
-    public void export() {
+    public TeamUserResponse export() {
         this.participationStatus = MentoringParticipationStatus.EXPORT;
+        return TeamUserResponse.toDto(this,this.getUser());
     }
 
     public void setLeader() {
         this.authority = MentoringAuthority.LEADER;
     }
 
-    public void setCrew() {
-        this.authority = MentoringAuthority.CREW;
-    }
-
     public void setDecisionDate(LocalDateTime decisionDate) {
         this.decisionDate = decisionDate;
     }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
+    public TeamUserResponse deleteParticipant() {
+        isDeleted = true;
+        return TeamUserResponse.toDto(this,this.getUser());
     }
 
     /**

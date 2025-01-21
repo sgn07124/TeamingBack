@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Set;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 
@@ -23,4 +24,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "join r.reviewee ru " +
             "where ru = :user")
     List<ReviewDto> findAllByUser(@Param("user") User user);
+
+    @Query("SELECT r.reviewee.id " +
+            "FROM Review r " +
+            "WHERE r.mentoringParticipation.id = :currentParticipationId " +
+            "AND r.reviewee.id IN :userIds")
+    Set<Long> findReviewedUserIds(@Param("currentParticipationId") Long currentParticipationId,
+                                  @Param("userIds") Set<Long> userIds);
 }

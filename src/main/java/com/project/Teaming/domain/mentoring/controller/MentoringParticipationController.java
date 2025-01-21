@@ -33,9 +33,8 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
         MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION,
-                String.valueOf(mentoringParticipationService.saveMentoringParticipation(
-                        mentoringTeam, participationDto).getId()));
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(mentoringParticipationService.saveMentoringParticipation(
+                mentoringTeam.getId(), participationDto).getId()));
     }
 
     @Override
@@ -52,7 +51,7 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
         return new ResultDetailResponse<>(ResultCode.ACCEPT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/participants/{participantId}/reject")
+    @DeleteMapping("/teams/{teamId}/participants/{participantId}/reject")
     public ResultDetailResponse<Void> rejectParticipant(@PathVariable Long teamId, @PathVariable Long participantId) {
         mentoringParticipationService.rejectMentoringParticipation(teamId, participantId);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);

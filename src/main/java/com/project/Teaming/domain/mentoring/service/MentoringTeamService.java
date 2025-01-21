@@ -65,11 +65,8 @@ public class MentoringTeamService {
         MentoringTeam mentoringTeam = MentoringTeam.from(dto);
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
-        //리더 생성
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
-        MentoringParticipation leader = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
-        leader.setDecisionDate(LocalDateTime.now());
-
+        mentoringParticipationService.saveMentoringParticipation(mentoringTeam.getId(), participationDto);
         //카테고리 생성
         teamCategoryService.saveTeamCategories(saved,dto.getCategories());
         return saved.getId();
@@ -88,7 +85,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null,false, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
 
@@ -139,7 +136,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                null,() -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
         mentoringTeam.flag(Status.TRUE);

@@ -9,7 +9,6 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -60,9 +59,15 @@ public class RedisConfig {
 
         return template;
     }
+    // 강퇴, 탈퇴한 팀원 및 지원자 db(2번) 용 RedisTemplate
+    @Bean
+    public RedisTemplate<String, Object> participationRedisTemplate() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory(2));
+        // JSON 직렬화 설정
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 
-    @Bean(name = "stringRedisTemplate")
-    public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory connectionFactory) {
-        return new StringRedisTemplate(redisConnectionFactory(2));
+        return template;
     }
 }
