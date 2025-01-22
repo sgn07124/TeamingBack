@@ -203,7 +203,7 @@ public class MentoringParticipationService {
                 mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
                 null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
-        // 리뷰여부 검증 포함
+        // 리뷰여부 검증 포함, 강퇴나 탈퇴되지않은 사용자들이기때문에 신고여부는 검증할 필요 없음
         List<TeamUserResponse> teamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringStatus.COMPLETE,
                 MentoringParticipationStatus.ACCEPTED, currentParticipation.getId());
         setLoginStatus(teamUsers,user.getId());

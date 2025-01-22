@@ -9,7 +9,6 @@ import com.project.Teaming.domain.mentoring.provider.MentoringParticipationDataP
 import com.project.Teaming.domain.mentoring.provider.MentoringTeamDataProvider;
 import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
-import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.mentoring.service.policy.MentoringReportPolicy;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
@@ -17,23 +16,23 @@ import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
-import com.project.Teaming.global.error.exception.MentoringTeamNotFoundException;
-import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Map;
 
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MentoringReportService {
 
     private final UserDataProvider userDataProvider;
+    private final UserRepository userRepository;
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
@@ -43,6 +42,7 @@ public class MentoringReportService {
 
     @Transactional
     public void reportTeamUser(MentoringReportRequest dto) {
+        log.info("Starting report process for teamId: {}, reportedUserId: {}", dto.getTeamId(), dto.getReportedUserId());
         // 신고자
         User reporter = userDataProvider.getUser();
 
@@ -60,35 +60,79 @@ public class MentoringReportService {
         //신고당한 teamParticipation
         TeamUserResponse reportedParticipation = redisParticipationManagementService.getUser(mentoringTeam.getId(), reportedUser.getId());
 
+        // 검증
+        mentoringReportPolicy.validateParticipationExists(reportedParticipation);
         mentoringReportPolicy.validateExistingReport(reportingParticipation, reportedUser);
         mentoringReportPolicy.validateSelfReport(reporter, reportedUser);
 
-        // 신고대상이 강퇴된 사용자거나, 탈퇴한 사용자인 경우 신고진행
-        if (MentoringParticipationStatus.EXPORT.equals(reportedParticipation.getStatus()) || reportedParticipation.getIsDeleted()) {
-            Report report = Report.mentoringReport(reportingParticipation, reportedUser);
-            reportRepository.save(report);
-            redisParticipationManagementService.incrementField(mentoringTeam.getId(), reportedUser.getId());
-            updateReportedWarningCount(mentoringTeam.getId(), reportedUser);
-        }
-        else throw new BusinessException(ErrorCode.STILL_TEAM_USER);
+        //신고
+        Report report = Report.mentoringReport(reportingParticipation, reportedUser);
+        reportRepository.save(report);
+        redisParticipationManagementService.incrementField(mentoringTeam.getId(), reportedUser.getId());
+        updateReportedWarningCount(mentoringTeam.getId(), reportedUser);
+
     }
 
     @Transactional
     public void updateReportedWarningCount(Long mentoringTeamId, User reportedUser) {
+
+        log.info("Updating warning count for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId());
+
         // Redis Hash 데이터 가져오기
         Map<String, String> reportedFields = redisParticipationManagementService.getReportFields(mentoringTeamId, reportedUser.getId());
+
         // 경고 처리 여부 확인
         if (Boolean.parseBoolean(reportedFields.getOrDefault("warningProcessed", "false"))) {
-            return; // 이미 처리된 경우 중복 처리 방지
+            return;
         }
+
         // 팀원 수 조회
         long totalMembers = mentoringParticipationRepository.countBy(mentoringTeamId, MentoringParticipationStatus.ACCEPTED);
 
+        if (totalMembers == 0) {
+            log.warn("No members in the team. Skipping warning update for teamId: {}", mentoringTeamId);
+            return; // 팀원이 없는 경우 처리 중단
+        }
+
+        // 신고 횟수 확인
+        int reportedCount = parseIntOrDefault(reportedFields.get("reportedCount"), 0);
+        log.info("Reported count for user {}: {}", reportedUser.getId(), reportedCount);
+
         // 과반수 이상의 신고 횟수인지 확인
-        if (totalMembers > 0 && Integer.parseInt(reportedFields.getOrDefault("reportedCount", "0")) >= Math.ceil(totalMembers / 2.0)) {
+        if (reportedCount >= (totalMembers + 1) / 2) {
+
             reportedUser.incrementWarningCnt();
+            userRepository.save(reportedUser);
+            log.info("Warning count updated in DB for userId: {}", reportedUser.getId());
             // 경고 처리 상태 업데이트
-            redisParticipationManagementService.updateWarningProcessed(mentoringTeamId, reportedUser.getId());
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        redisParticipationManagementService.updateWarningProcessed(mentoringTeamId, reportedUser.getId());
+                        log.info("Redis warningProcessed updated for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId());
+                    } catch (Exception e) {
+                        log.error("Failed to update Redis for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId(), e);
+                    }
+                }
+
+                @Override
+                public void afterCompletion(int status) {
+                    if (status != STATUS_COMMITTED) {
+                        log.error("Transaction failed. Redis update aborted for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId());
+                    }
+                }
+            });
+        } else {
+            log.debug("Reported count is less than majority for userId: {}", reportedUser.getId());
+        }
+    }
+
+    private int parseIntOrDefault(String value, int defaultValue) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
         }
     }
 }

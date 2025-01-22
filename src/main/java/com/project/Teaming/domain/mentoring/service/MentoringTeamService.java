@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,6 +55,7 @@ public class MentoringTeamService {
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringBoardRepository mentoringBoardRepository;
+    private final TeamParticipationCacheService cacheService;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -215,8 +218,16 @@ public class MentoringTeamService {
 
     private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
         teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-        List<ParticipationForUserResponse> forUser = mentoringParticipationRepository.findAllForUser(
-                team.getId(), MentoringAuthority.LEADER);
+        // 캐싱된 데이터 조회
+        Map<String, TeamParticipationResponse> cachedParticipations = cacheService.get(team.getId());
+
+        // 캐시 데이터에서 참여자 리스트 추출 및 변환
+        List<ParticipationForUserResponse> forUser = cachedParticipations != null
+                ? cachedParticipations.values().stream()
+                .map(ParticipationForUserResponse::forNoAuthUser) // DTO 변환
+                .toList()
+                : new ArrayList<>();
+
         if (user != null) {
             setLoginStatus(forUser, user.getId());
         }

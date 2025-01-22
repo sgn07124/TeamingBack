@@ -105,69 +105,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
     }
 
     @Override
-    public List<TeamParticipationResponse> findAllForLeader(Long teamId, MentoringAuthority authority) {
-        return findParticipationResponses(
-                teamId,
-                authority,
-                TeamParticipationResponse.class
-        );
-    }
-
-    @Override
-    public List<ParticipationForUserResponse> findAllForUser(Long teamId, MentoringAuthority authority) {
-        return findParticipationResponses(
-                teamId,
-                authority,
-                ParticipationForUserResponse.class
-        );
-    }
-
-    private <T> List<T> findParticipationResponses(Long teamId, MentoringAuthority authority, Class<T> dtoClass) {
-        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
-        QUser u = QUser.user;
-        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
-
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(mt.id.eq(teamId));
-        builder.and(mp.authority.ne(authority));
-
-
-        if (dtoClass.equals(TeamParticipationResponse.class)) {
-            return queryFactory
-                    .select(Projections.constructor(
-                            dtoClass,
-                            mp.requestDate,
-                            u.id,
-                            u.name,
-                            u.warningCount,
-                            mp.participationStatus
-                    ))
-                    .from(mp)
-                    .join(mp.user, u)
-                    .join(mp.mentoringTeam, mt)
-                    .where(builder)
-                    .orderBy(mp.requestDate.asc())
-                    .fetch();
-        }
-        else {
-            return queryFactory
-                    .select(Projections.constructor(
-                            dtoClass,
-                            mp.requestDate,
-                            u.id,
-                            u.name,
-                            mp.participationStatus
-                    ))
-                    .from(mp)
-                    .join(mp.user, u)
-                    .join(mp.mentoringTeam, mt)
-                    .where(builder)
-                    .orderBy(mp.requestDate.asc())
-                    .fetch();
-        }
-    }
-
-    @Override
     public Optional<MentoringParticipation> findFirstUser(Long teamId, MentoringParticipationStatus participationStatus, MentoringAuthority authority) {
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
         QMentoringTeam mt = QMentoringTeam.mentoringTeam;

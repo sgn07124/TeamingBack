@@ -27,21 +27,25 @@ public class MentoringReviewPolicy {
     public void validateToReview(MentoringTeam mentoringTeam, User reviewedUser, MentoringParticipation reviewingParticipation) {
         validateDuplicateReview(reviewingParticipation,reviewedUser);
         validateSelfReview(reviewingParticipation.getUser(), reviewedUser);
-        validateReviewedParticipation(mentoringTeam, reviewedUser);
-        validateTeamAndUser(mentoringTeam,reviewedUser);
+        validateReviewEligibility(mentoringTeam, reviewedUser);
     }
 
-    public void validateReviewedParticipation(MentoringTeam mentoringTeam, User reviewedUser) {
-        mentoringParticipationRepository.findDynamicMentoringParticipation(
-                        mentoringTeam, reviewedUser, null, null, List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.EXPORT))
-                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
-    }
+    public void validateReviewEligibility(MentoringTeam mentoringTeam, User reviewedUser) {
+        // Redis에서 사용자 조회
+        TeamUserResponse user = redisService.getUser(mentoringTeam.getId(), reviewedUser.getId());
 
-    public void validateTeamAndUser(MentoringTeam mentoringTeam,User reviewdUser) {
-        TeamUserResponse user = redisService.getUser(mentoringTeam.getId(), reviewdUser.getId());
-        // Redis 데이터가 없고 팀 상태가 COMPLETE이 아니면 예외 처리
-        if (user == null && mentoringTeam.getStatus() != MentoringStatus.COMPLETE) {
-            throw new BusinessException(ErrorCode.CANNOT_REVIEW);
+        if (user != null) {
+            return;
+        } else {
+            // Redis에 없는 경우 (DB에서 조회한 일반 팀원)
+            mentoringParticipationRepository.findDynamicMentoringParticipation(
+                            mentoringTeam, reviewedUser, null, MentoringParticipationStatus.ACCEPTED, null)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
+
+            // 팀 상태 검증
+            if (mentoringTeam.getStatus() != MentoringStatus.COMPLETE) {
+                throw new BusinessException(ErrorCode.CANNOT_REVIEW);
+            }
         }
     }
 

@@ -1,12 +1,15 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.ehcache.org/v3"
         xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd">
+
     <cache alias="mentoringTeamParticipationCache">
-        <key-type>java.lang.Long</key-type> <!-- 키: ID -->
-        <value-type>com.project.Teaming.domain.mentoring.dto.response.TeamParticipationResponse</value-type>
+        <key-type>java.lang.Long</key-type>
+        <value-type>java.util.Map</value-type>
         <expiry>
-            <ttl unit="minutes">60</ttl> <!-- 캐시 TTL: 60분 -->
+            <ttl unit="days">10</ttl> <!-- TTL: 10일 -->
         </expiry>
-        <heap unit="entries">1000</heap> <!-- 최대 1000개 엔트리 -->
+        <resources>
+            <heap unit="entries">1000</heap> <!-- 최대 1000개의 엔트리 -->
+        </resources>
     </cache>
 </config>

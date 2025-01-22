@@ -1,8 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
