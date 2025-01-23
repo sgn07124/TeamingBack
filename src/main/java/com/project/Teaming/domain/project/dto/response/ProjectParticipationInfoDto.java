@@ -4,8 +4,10 @@ import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ProjectParticipationInfoDto {
 
     private Long participationId;  // pk

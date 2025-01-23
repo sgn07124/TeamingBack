@@ -4,10 +4,12 @@ import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Data
+@NoArgsConstructor
 public class BoardRequest {
     @NotBlank(message = "제목을 작성해주세요")
     private String title;  // 모집글 제목

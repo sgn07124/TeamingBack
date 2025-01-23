@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class TeamUserResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime acceptedTime;
     private Long userId;
     private String username;
@@ -38,7 +40,7 @@ public class TeamUserResponse {
         this.status = status;
         this.isLogined = false;
         this.isDeleted = isDeleted;
-        this.isReviewed = isReviewed; // false인 경우 null로 처리
+        this.isReviewed = (isReviewed != null && isReviewed) ? isReviewed : null;
     }
 
     public static TeamUserResponse toDto(MentoringParticipation mentoringParticipation, User user) {
@@ -51,6 +53,7 @@ public class TeamUserResponse {
         teamUserResponse.setIsLogined(false);
         teamUserResponse.setIsDeleted(mentoringParticipation.getIsDeleted());
         teamUserResponse.setIsReported(false);
+        teamUserResponse.setIsReviewed(false);
         return teamUserResponse;
     }
     public static List<TeamUserResponse> combine(List<TeamUserResponse> teamUsers, List<TeamUserResponse> deletedUsers) {

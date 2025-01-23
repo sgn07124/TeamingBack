@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ParticipationForUserResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime participatedTime;
     private Long userId;
     private String username;
@@ -31,6 +33,7 @@ public class ParticipationForUserResponse {
         participationForUserResponse.setParticipatedTime(participant.getParticipatedTime());
         participationForUserResponse.setUsername(participant.getUsername());
         participationForUserResponse.setStatus(participant.getStatus());
+        participationForUserResponse.setIsLogined(false);
         return participationForUserResponse;
     }
 }

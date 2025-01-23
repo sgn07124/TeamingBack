@@ -4,8 +4,10 @@ import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringRole;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ParticipationRequest {
 
     MentoringAuthority authority;

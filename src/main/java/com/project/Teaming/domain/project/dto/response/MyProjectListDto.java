@@ -8,8 +8,10 @@ import com.project.Teaming.domain.project.entity.ProjectTeam;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class MyProjectListDto {
 
     private String teamName;

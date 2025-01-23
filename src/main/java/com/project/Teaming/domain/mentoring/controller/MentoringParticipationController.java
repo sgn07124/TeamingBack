@@ -88,5 +88,4 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     public ResultDetailResponse<?> getParticipationAppliers(@PathVariable Long teamId) {
         return new ResultDetailResponse<>(ResultCode.GET_MEMBER_INFO, mentoringParticipationService.getParticipantsInfo(teamId));
     }
-
 }

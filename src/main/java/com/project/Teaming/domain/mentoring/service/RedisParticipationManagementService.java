@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.Cursor;
@@ -13,6 +14,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class RedisParticipationManagementService {
 
@@ -29,13 +31,21 @@ public class RedisParticipationManagementService {
         return "mentoringTeam:" + teamId + ":user:" + userId;
     }
 
+    private String generateTeamSetKey(Long teamId) {
+        return "mentoringTeam:" + teamId + ":users";
+    }
+
     // 사용자 전체 객체 저장
     public void saveParticipation(Long teamId, Long userId, TeamUserResponse response) {
         String redisKey = generateRedisKey(teamId, userId);
         redisTemplate.opsForValue().set(redisKey, response, Duration.ofSeconds(TTL_SECONDS));
+
+        // 팀별 사용자 ID를 Redis Set에 추가
+        String teamSetKey = generateTeamSetKey(teamId);
+        redisTemplate.opsForSet().add(teamSetKey, userId.toString());
     }
 
-    // 사용자 전체 객체 조회 (Hash 데이터 병합)
+    // 사용자 전체 객체 조회
     public TeamUserResponse getUser(Long teamId, Long userId) {
         String redisKey = generateRedisKey(teamId, userId);
         return (TeamUserResponse) redisTemplate.opsForValue().get(redisKey);
@@ -43,23 +53,26 @@ public class RedisParticipationManagementService {
 
     // 특정 팀의 모든 사용자 조회
     public List<TeamUserResponse> getDeletedOrExportedParticipations(Long teamId) {
-        String pattern = "mentoringTeam:" + teamId + ":user:*";
+        String teamSetKey = generateTeamSetKey(teamId);
+        Set<Object> userIds = redisTemplate.opsForSet().members(teamSetKey);
+
+        if (userIds == null || userIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<TeamUserResponse> participations = new ArrayList<>();
-
-        RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
-        Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions().match(pattern).build());
-
-        while (cursor.hasNext()) {
-            String redisKey = new String(cursor.next(), StandardCharsets.UTF_8);
+        for (Object userId : userIds) {
+            String redisKey = generateRedisKey(teamId, Long.valueOf(userId.toString()));
             TeamUserResponse response = (TeamUserResponse) redisTemplate.opsForValue().get(redisKey);
             if (response != null) {
                 participations.add(response);
+            } else {
+                // Redis에 저장된 키가 존재하지 않을 경우 로그 추가
+                log.warn("Missing user data for teamId: {}, userId: {}", teamId, userId);
             }
         }
         return participations;
     }
-
-
 
     // 특정 필드 업데이트 (예: 신고 횟수 증가)
     public void incrementField(Long teamId, Long userId) {
@@ -76,6 +89,11 @@ public class RedisParticipationManagementService {
     public Map<String, String> getReportFields(Long teamId, Long userId) {
         String redisKey = generateRedisKey(teamId, userId);
         Map<Object, Object> hashData = redisTemplate.opsForHash().entries(redisKey);
+
+        if (hashData == null || hashData.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         return hashData.entrySet().stream()
                 .collect(Collectors.toMap(
                         entry -> String.valueOf(entry.getKey()),
