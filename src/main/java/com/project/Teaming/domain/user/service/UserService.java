@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.user.service;
 
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
@@ -18,6 +19,9 @@ import com.project.Teaming.domain.user.repository.UserStackRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -141,7 +145,18 @@ public class UserService {
 
     public List<ReviewDto> getReviews(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
-        return reviewRepository.findAllByUser(user);
+
+        List<ReviewDto> projectReviewsByUser = reviewRepository.findProjectReviewsByUser(user);
+        List<ReviewDto> mentoringReviewsByUser = reviewRepository.findMentoringReviewsByUser(user);
+
+        List<ReviewDto> allReviews = new ArrayList<>();
+        allReviews.addAll(projectReviewsByUser);
+        allReviews.addAll(mentoringReviewsByUser);
+
+        allReviews = allReviews.stream()
+                .sorted(Comparator.comparing(ReviewDto::getCreatedDate))
+                .collect(Collectors.toList());
+        return allReviews;
     }
 
     public UserReportCnt getWarningCnt() {

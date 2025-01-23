@@ -10,7 +10,7 @@ public class MentoringReviewRequest {
     @NotNull
     private Long teamId;
     @NotNull
-    private Long ReviewedUserId;
+    private Long reviewedUserId;
     @NotNull
     private int rate;
     @NotNull
