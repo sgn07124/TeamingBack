@@ -35,10 +35,19 @@ public class RedisParticipationManagementService {
         return "mentoringTeam:" + teamId + ":users";
     }
 
-    // 사용자 전체 객체 저장
+    // 사용자 전체 객체 저장 (Hash 구조로 저장)
     public void saveParticipation(Long teamId, Long userId, TeamUserResponse response) {
         String redisKey = generateRedisKey(teamId, userId);
-        redisTemplate.opsForValue().set(redisKey, response, Duration.ofSeconds(TTL_SECONDS));
+
+        // Redis Hash 데이터로 저장
+        Map<String, Object> hashData = new HashMap<>();
+        hashData.put("response", response); // 사용자 데이터
+        hashData.put("reportedCount", 0);  // 신고 횟수 초기화
+        hashData.put("warningProcessed", "false"); // 초기값 설정
+        redisTemplate.opsForHash().putAll(redisKey, hashData);
+
+        // TTL 설정
+        redisTemplate.expire(redisKey, Duration.ofSeconds(TTL_SECONDS));
 
         // 팀별 사용자 ID를 Redis Set에 추가
         String teamSetKey = generateTeamSetKey(teamId);
@@ -48,7 +57,9 @@ public class RedisParticipationManagementService {
     // 사용자 전체 객체 조회
     public TeamUserResponse getUser(Long teamId, Long userId) {
         String redisKey = generateRedisKey(teamId, userId);
-        return (TeamUserResponse) redisTemplate.opsForValue().get(redisKey);
+
+        // Redis에서 Hash의 "response" 필드만 가져오기
+        return (TeamUserResponse) redisTemplate.opsForHash().get(redisKey, "response");
     }
 
     // 특정 팀의 모든 사용자 조회
@@ -63,18 +74,19 @@ public class RedisParticipationManagementService {
         List<TeamUserResponse> participations = new ArrayList<>();
         for (Object userId : userIds) {
             String redisKey = generateRedisKey(teamId, Long.valueOf(userId.toString()));
-            TeamUserResponse response = (TeamUserResponse) redisTemplate.opsForValue().get(redisKey);
+
+            // Hash에서 "response" 필드만 조회
+            TeamUserResponse response = (TeamUserResponse) redisTemplate.opsForHash().get(redisKey, "response");
             if (response != null) {
                 participations.add(response);
             } else {
-                // Redis에 저장된 키가 존재하지 않을 경우 로그 추가
                 log.warn("Missing user data for teamId: {}, userId: {}", teamId, userId);
             }
         }
         return participations;
     }
 
-    // 특정 필드 업데이트 (예: 신고 횟수 증가)
+
     public void incrementField(Long teamId, Long userId) {
         String redisKey = generateRedisKey(teamId, userId);
         redisTemplate.opsForHash().increment(redisKey, "reportedCount", 1);
@@ -85,7 +97,7 @@ public class RedisParticipationManagementService {
         redisTemplate.opsForHash().put(redisKey, "warningProcessed", "true");
     }
 
-    // 신고 필드 조회 (Hash 기반)
+    // 신고 필드 조회
     public Map<String, String> getReportFields(Long teamId, Long userId) {
         String redisKey = generateRedisKey(teamId, userId);
         Map<Object, Object> hashData = redisTemplate.opsForHash().entries(redisKey);

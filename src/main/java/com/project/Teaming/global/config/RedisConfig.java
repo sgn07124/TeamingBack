@@ -72,8 +72,11 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(redisConnectionFactory(2));
         // JSON 직렬화 설정
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new GenericJackson2JsonRedisSerializer((redisObjectMapper())));
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(redisObjectMapper());
+        template.setKeySerializer(new StringRedisSerializer()); // 키 직렬화
+        template.setValueSerializer(serializer);               // 값 직렬화
+        template.setHashKeySerializer(new StringRedisSerializer()); // 해시 키 직렬화
+        template.setHashValueSerializer(serializer);                // 해시 값 직렬화
 
         return template;
     }
