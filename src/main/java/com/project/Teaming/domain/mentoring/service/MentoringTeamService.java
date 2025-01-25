@@ -55,7 +55,7 @@ public class MentoringTeamService {
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringBoardRepository mentoringBoardRepository;
-    private final TeamParticipationCacheService cacheService;
+    private final RedisApplicantManagementService redisApplicantManagementService;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -69,7 +69,7 @@ public class MentoringTeamService {
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
-        mentoringParticipationService.saveMentoringParticipation(mentoringTeam.getId(), participationDto);
+        mentoringParticipationService.saveLeader(mentoringTeam.getId(), participationDto);
         //카테고리 생성
         teamCategoryService.saveTeamCategories(saved,dto.getCategories());
         return saved.getId();
@@ -218,15 +218,10 @@ public class MentoringTeamService {
 
     private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
         teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-        // 캐싱된 데이터 조회
-        Map<String, TeamParticipationResponse> cachedParticipations = cacheService.get(team.getId());
-
-        // 캐시 데이터에서 참여자 리스트 추출 및 변환
-        List<ParticipationForUserResponse> forUser = cachedParticipations != null
-                ? cachedParticipations.values().stream()
-                .map(ParticipationForUserResponse::forNoAuthUser) // DTO 변환
-                .toList()
-                : new ArrayList<>();
+        // 캐싱된 데이터 조회, dto 일반 사용자용으로 변환
+        List<ParticipationForUserResponse> forUser = redisApplicantManagementService.getApplicants(team.getId()).stream()
+                .map(ParticipationForUserResponse::forNoAuthUser)
+                .toList();
 
         if (user != null) {
             setLoginStatus(forUser, user.getId());

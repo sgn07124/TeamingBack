@@ -16,10 +16,10 @@ import com.project.Teaming.global.error.exception.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -28,14 +28,13 @@ import java.util.*;
 @RequiredArgsConstructor
 public class MentoringParticipationService {
 
-    private final CacheManager cacheManager;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final UserDataProvider userDataProvider;
-    private final RedisParticipationManagementService redisParticipationManagementService;
-    private final TeamParticipationCacheService cacheService;
+    private final RedisTeamUserManagementService redisParticipationManagementService;
+    private final RedisApplicantManagementService redisApplicantManagementService;
     private final ReviewService reviewService;
     private final ReportService reportService;
 
@@ -44,8 +43,9 @@ public class MentoringParticipationService {
      * @param dto
      * @return
      */
+
     @Transactional
-    public MentoringParticipation saveMentoringParticipation(Long teamId, ParticipationRequest dto) {
+    public MentoringParticipation saveLeader(Long teamId, ParticipationRequest dto) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findDynamicMentoringParticipation(
@@ -53,14 +53,29 @@ public class MentoringParticipationService {
 
         participation.ifPresent(mentoringParticipationPolicy::validateParticipationStatus);
         MentoringParticipation mentoringParticipation = MentoringParticipation.from(dto);
+        mentoringParticipation.setDecisionDate(LocalDateTime.now());
 
-        if (dto.getAuthority() == MentoringAuthority.LEADER) {
-            mentoringParticipation.setDecisionDate(LocalDateTime.now());
-        }
         mentoringParticipation.setUser(user);
         mentoringParticipation.addMentoringTeam(mentoringTeam);
         MentoringParticipation savedParticipation = mentoringParticipationRepository.save(mentoringParticipation);
 
+        return savedParticipation;
+    }
+
+    @Transactional
+    public MentoringParticipation saveMentoringParticipation(MentoringBoard post, ParticipationRequest dto) {
+        User user = userDataProvider.getUser();
+        MentoringTeam mentoringTeam = post.getMentoringTeam();
+        Optional<MentoringParticipation> participation = mentoringParticipationRepository.findDynamicMentoringParticipation(
+                mentoringTeam, user,null,null,null);
+
+        participation.ifPresent(mentoringParticipationPolicy::validateParticipationStatus);
+        MentoringParticipation mentoringParticipation = MentoringParticipation.from(dto);
+        mentoringParticipation.setUser(user);
+        mentoringParticipation.addMentoringTeam(mentoringTeam);
+        MentoringParticipation savedParticipation = mentoringParticipationRepository.save(mentoringParticipation);
+        TeamParticipationResponse participationDto = TeamParticipationResponse.toParticipationDto(savedParticipation);
+        redisApplicantManagementService.saveApplicantWithTTL(mentoringTeam.getId(),participationDto,post.getDeadLine());
         return savedParticipation;
     }
 
@@ -69,7 +84,7 @@ public class MentoringParticipationService {
      * @param mentoringTeamId
      */
     @Transactional
-    public TeamParticipationResponse cancelMentoringParticipation(Long teamId) {
+    public void cancelMentoringParticipation(Long teamId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -77,9 +92,8 @@ public class MentoringParticipationService {
                 mentoringTeam, user,null,null,null,() -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
 
         mentoringParticipationPolicy.validateCancellation(participation);
-        TeamParticipationResponse participationDto = TeamParticipationResponse.toParticipationDto(participation);
+        redisApplicantManagementService.removeApplicant(teamId,String.valueOf(user.getId()));
         removeParticipant(participation,user,mentoringTeam);
-        return participationDto;
     }
 
     /**
@@ -88,7 +102,7 @@ public class MentoringParticipationService {
      * @param participant_id
      */
     @Transactional
-    public TeamParticipationResponse acceptMentoringParticipation(Long teamId, Long participantId) {
+    public void acceptMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -101,8 +115,7 @@ public class MentoringParticipationService {
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(mentoringParticipation);
         //수락 처리
         mentoringParticipation.accept();
-
-        return TeamParticipationResponse.toParticipationDto(mentoringParticipation);
+        redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(mentoringParticipation.getUser().getId()),MentoringParticipationStatus.ACCEPTED);
     }
 
     /**
@@ -111,7 +124,7 @@ public class MentoringParticipationService {
      * @param participant_id
      */
     @Transactional
-    public TeamParticipationResponse rejectMentoringParticipation(Long teamId, Long participantId) {
+    public void rejectMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -123,11 +136,9 @@ public class MentoringParticipationService {
 
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(rejectParticipation);
         //거절처리
-        rejectParticipation.reject();
-        TeamParticipationResponse reject = TeamParticipationResponse.toParticipationDto(rejectParticipation);
+        redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(rejectParticipation.getUser().getId()),MentoringParticipationStatus.REJECTED);
         // DB에서 지원자 데이터 삭제
         removeParticipant(rejectParticipation, rejectParticipation.getUser(), mentoringTeam);
-        return reject;
     }
 
     /**
@@ -225,16 +236,12 @@ public class MentoringParticipationService {
         if (currentParticipation.getAuthority() == MentoringAuthority.LEADER) {  //팀의 리더인 유저
             log.info("All Team Users For Leader: {}", combineUsers);
             // 지원자 현황 캐싱된 데이터 조회
-            Map<String, TeamParticipationResponse> cachedParticipations = cacheService.get(teamId);
-            // 캐시 데이터에서 지원자 리스트 추출
-            List<TeamParticipationResponse> participations = cachedParticipations != null
-                    ? new ArrayList<>(cachedParticipations.values())
-                    : new ArrayList<>();
+            List<TeamParticipationResponse> applicants = redisApplicantManagementService.getApplicants(teamId);
 
             ForLeaderResponse dto = new ForLeaderResponse();
             dto.setMembers(combineUsers);
-            dto.setParticipations(participations);
-            log.info("Participations for Leader: {}", participations);
+            dto.setParticipations(applicants);
+            log.info("Participations for Leader: {}", applicants);
             return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.LEADER, dto);
 
         } else if (currentParticipation.getAuthority() == MentoringAuthority.CREW) {

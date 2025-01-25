@@ -31,10 +31,9 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     @PostMapping("/posts/{postId}/participants")
     public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long postId) {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
-        MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
         return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(mentoringParticipationService.saveMentoringParticipation(
-                mentoringTeam.getId(), participationDto).getId()));
+                mentoringPost, participationDto).getId()));
     }
 
     @Override

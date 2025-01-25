@@ -38,7 +38,7 @@ public class MentoringReportService {
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final ReportRepository reportRepository;
     private final MentoringReportPolicy mentoringReportPolicy;
-    private final RedisParticipationManagementService redisParticipationManagementService;
+    private final RedisTeamUserManagementService redisParticipationManagementService;
 
     @Transactional
     public void reportTeamUser(MentoringReportRequest dto) {

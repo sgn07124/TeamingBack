@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
@@ -57,13 +58,8 @@ public class TeamUserResponse {
         return teamUserResponse;
     }
     public static List<TeamUserResponse> combine(List<TeamUserResponse> teamUsers, List<TeamUserResponse> deletedUsers) {
-        List<TeamUserResponse> allTeamUsers = new ArrayList<>();
-        allTeamUsers.addAll(teamUsers);
-        allTeamUsers.addAll(deletedUsers);
-
-        allTeamUsers = allTeamUsers.stream()
+        return Stream.concat(teamUsers.stream(), deletedUsers.stream())
                 .sorted(Comparator.comparing(TeamUserResponse::getAcceptedTime))
                 .collect(Collectors.toList());
-        return allTeamUsers;
     }
 }

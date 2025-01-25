@@ -6,7 +6,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
-import com.project.Teaming.domain.mentoring.service.RedisParticipationManagementService;
+import com.project.Teaming.domain.mentoring.service.RedisTeamUserManagementService;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.global.error.ErrorCode;
@@ -14,15 +14,13 @@ import com.project.Teaming.global.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class MentoringReviewPolicy {
 
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final ReviewRepository reviewRepository;
-    private final RedisParticipationManagementService redisService;
+    private final RedisTeamUserManagementService redisService;
 
     public void validateToReview(MentoringTeam mentoringTeam, User reviewedUser, MentoringParticipation reviewingParticipation) {
         validateDuplicateReview(reviewingParticipation,reviewedUser);

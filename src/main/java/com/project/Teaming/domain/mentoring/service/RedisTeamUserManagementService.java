@@ -3,24 +3,20 @@ package com.project.Teaming.domain.mentoring.service;
 import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class RedisParticipationManagementService {
+public class RedisTeamUserManagementService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    public RedisParticipationManagementService(@Qualifier("participationRedisTemplate") RedisTemplate<String, Object> redisTemplate) {
+    public RedisTeamUserManagementService(@Qualifier("participationRedisTemplate") RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
@@ -65,26 +61,24 @@ public class RedisParticipationManagementService {
     // 특정 팀의 모든 사용자 조회
     public List<TeamUserResponse> getDeletedOrExportedParticipations(Long teamId) {
         String teamSetKey = generateTeamSetKey(teamId);
-        Set<Object> userIds = redisTemplate.opsForSet().members(teamSetKey);
 
+        // 팀별 사용자 ID Set 조회
+        Set<Object> userIds = redisTemplate.opsForSet().members(teamSetKey);
         if (userIds == null || userIds.isEmpty()) {
             return Collections.emptyList();
         }
 
-        List<TeamUserResponse> participations = new ArrayList<>();
-        for (Object userId : userIds) {
-            String redisKey = generateRedisKey(teamId, Long.valueOf(userId.toString()));
+        // Redis에서 Hash 데이터를 한 번에 가져오기
+        String redisKeyPrefix = "mentoringTeam:" + teamId + ":user:";
+        List<TeamUserResponse> participations = userIds.stream()
+                .map(userId -> redisTemplate.opsForHash().get(redisKeyPrefix + userId, "response"))
+                .filter(Objects::nonNull)
+                .map(obj -> (TeamUserResponse) obj)
+                .collect(Collectors.toList());
 
-            // Hash에서 "response" 필드만 조회
-            TeamUserResponse response = (TeamUserResponse) redisTemplate.opsForHash().get(redisKey, "response");
-            if (response != null) {
-                participations.add(response);
-            } else {
-                log.warn("Missing user data for teamId: {}, userId: {}", teamId, userId);
-            }
-        }
         return participations;
     }
+
 
 
     public void incrementField(Long teamId, Long userId) {
