@@ -50,6 +50,7 @@ public class MentoringTeamService {
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final MentoringTeamPolicy mentoringTeamPolicy;
     private final TeamCategoryService teamCategoryService;
+    private final CategoryRepository categoryRepository;
     private final MentoringParticipationService mentoringParticipationService;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
@@ -161,16 +162,13 @@ public class MentoringTeamService {
     public TeamAuthorityResponse getMentoringTeam(MentoringTeam team) {
         // 로그인 여부 확인 메서드
         User user = userDataProvider.getOptionalUser();
-
         TeamResponse dto = team.toDto();
-        List<String> categories = team.getCategories().stream()
-                .map(o -> String.valueOf(o.getCategory().getId()))
-                .collect(Collectors.toList());
-        dto.setCategories(categories);
-
         //리스폰스 dto생성
         TeamAuthorityResponse teamResponseDto = new TeamAuthorityResponse();
         teamResponseDto.setDto(dto);
+
+        List<String> categories = categoryRepository.findCategoryIdsByTeamId(team.getId());
+        dto.setCategories(categories);
 
         // 로그인하지 않은 사용자
         if (user == null) {
