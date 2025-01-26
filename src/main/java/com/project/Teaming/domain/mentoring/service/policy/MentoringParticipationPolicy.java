@@ -25,10 +25,9 @@ public class MentoringParticipationPolicy {
 
     public void validateParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
                                       MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses,
-                                      Boolean isDeleted,
                                       Supplier<BusinessException> exceptionSupplier) {
 
-        mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses, isDeleted)
+        mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses)
                 .orElseThrow(exceptionSupplier);
     }
 

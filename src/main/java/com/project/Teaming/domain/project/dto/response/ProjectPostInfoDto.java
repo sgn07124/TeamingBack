@@ -5,8 +5,10 @@ import com.project.Teaming.domain.project.entity.ProjectBoard;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import java.util.List;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ProjectPostInfoDto {
 
     private String title;

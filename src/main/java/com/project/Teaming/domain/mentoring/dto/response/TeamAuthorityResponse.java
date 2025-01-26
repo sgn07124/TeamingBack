@@ -3,6 +3,7 @@ package com.project.Teaming.domain.mentoring.dto.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 

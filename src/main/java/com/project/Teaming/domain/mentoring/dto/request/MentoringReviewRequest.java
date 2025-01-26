@@ -2,13 +2,15 @@ package com.project.Teaming.domain.mentoring.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class MentoringReviewRequest {
     @NotNull
-    private final Long teamId;
+    private Long teamId;
     @NotNull
-    private final Long ReviewedUserId;
+    private Long reviewedUserId;
     @NotNull
     private int rate;
     @NotNull

@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -48,11 +50,13 @@ public class MentoringTeamService {
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final MentoringTeamPolicy mentoringTeamPolicy;
     private final TeamCategoryService teamCategoryService;
+    private final CategoryRepository categoryRepository;
     private final MentoringParticipationService mentoringParticipationService;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringBoardRepository mentoringBoardRepository;
+    private final RedisApplicantManagementService redisApplicantManagementService;
 
     /**
      * 멘토링팀 생성, 저장 로직
@@ -65,11 +69,8 @@ public class MentoringTeamService {
         MentoringTeam mentoringTeam = MentoringTeam.from(dto);
 
         MentoringTeam saved = mentoringTeamRepository.save(mentoringTeam);
-        //리더 생성
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED, dto.getRole());
-        MentoringParticipation leader = mentoringParticipationService.saveMentoringParticipation(mentoringTeam, participationDto);
-        leader.setDecisionDate(LocalDateTime.now());
-
+        mentoringParticipationService.saveLeader(mentoringTeam.getId(), participationDto);
         //카테고리 생성
         teamCategoryService.saveTeamCategories(saved,dto.getCategories());
         return saved.getId();
@@ -88,7 +89,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null,false, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
 
@@ -139,7 +140,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                null,() -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
         mentoringTeam.flag(Status.TRUE);
@@ -161,16 +162,13 @@ public class MentoringTeamService {
     public TeamAuthorityResponse getMentoringTeam(MentoringTeam team) {
         // 로그인 여부 확인 메서드
         User user = userDataProvider.getOptionalUser();
-
         TeamResponse dto = team.toDto();
-        List<String> categories = team.getCategories().stream()
-                .map(o -> String.valueOf(o.getCategory().getId()))
-                .collect(Collectors.toList());
-        dto.setCategories(categories);
-
         //리스폰스 dto생성
         TeamAuthorityResponse teamResponseDto = new TeamAuthorityResponse();
         teamResponseDto.setDto(dto);
+
+        List<String> categories = categoryRepository.findCategoryIdsByTeamId(team.getId());
+        dto.setCategories(categories);
 
         // 로그인하지 않은 사용자
         if (user == null) {
@@ -179,7 +177,7 @@ public class MentoringTeamService {
         }
 
         //로그인 사용자
-        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED,null,false)
+        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED,null)
                 .ifPresentOrElse(
                         participation -> {
                             // 권한 설정
@@ -209,7 +207,7 @@ public class MentoringTeamService {
         //권한 반환하는 로직
         MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
                 team, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,false, () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
+                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
 
         teamDto.setAuthority(teamUser.getAuthority());
         return teamDto;
@@ -218,8 +216,11 @@ public class MentoringTeamService {
 
     private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
         teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
-        List<ParticipationForUserResponse> forUser = mentoringParticipationRepository.findAllForUser(
-                team.getId(), MentoringAuthority.LEADER);
+        // 캐싱된 데이터 조회, dto 일반 사용자용으로 변환
+        List<ParticipationForUserResponse> forUser = redisApplicantManagementService.getApplicants(team.getId()).stream()
+                .map(ParticipationForUserResponse::forNoAuthUser)
+                .toList();
+
         if (user != null) {
             setLoginStatus(forUser, user.getId());
         }

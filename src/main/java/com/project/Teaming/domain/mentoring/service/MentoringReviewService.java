@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.service;
 
 import com.project.Teaming.domain.mentoring.dto.request.MentoringReviewRequest;
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
@@ -45,10 +46,10 @@ public class MentoringReviewService {
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(dto.getTeamId());
 
         MentoringParticipation reviewingParticipation = mentoringParticipationDataProvider.findParticipationWith(mentoringTeam,user,null,
-                MentoringParticipationStatus.ACCEPTED,null,false,() -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                MentoringParticipationStatus.ACCEPTED,null,() -> new BusinessException(ErrorCode.NOT_A_MEMBER));
         User reviewedUser = userDataProvider.findUser(dto.getReviewedUserId());
 
-       mentoringReviewPolicy.validateToReview(mentoringTeam,reviewedUser,reviewingParticipation);
+        mentoringReviewPolicy.validateToReview(mentoringTeam,reviewedUser,reviewingParticipation);
 
         Review review = Review.mentoringReview(reviewingParticipation, reviewedUser, dto.getRate(), dto.getContent());
         reviewRepository.save(review);

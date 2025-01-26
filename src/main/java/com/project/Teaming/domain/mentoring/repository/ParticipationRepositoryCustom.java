@@ -15,7 +15,6 @@ public interface ParticipationRepositoryCustom {
             MentoringTeam team,
             MentoringStatus teamStatus,
             MentoringParticipationStatus status,
-            MentoringParticipationStatus status2,
             Long reviewerParticipationId);
 
     Optional<MentoringParticipation> findDynamicMentoringParticipation(
@@ -23,13 +22,10 @@ public interface ParticipationRepositoryCustom {
             User user,
             MentoringAuthority authority,
             MentoringParticipationStatus status,
-            List<MentoringParticipationStatus> statuses,
-            Boolean isDeleted
+            List<MentoringParticipationStatus> statuses
     );
 
-    List<TeamParticipationResponse> findAllForLeader(Long teamId, MentoringAuthority authority);
 
-    List<ParticipationForUserResponse> findAllForUser(Long teamId, MentoringAuthority authority);
     Optional<MentoringParticipation> findFirstUser(Long teamId, MentoringParticipationStatus participationStatus, MentoringAuthority authority);
     List<MentoringParticipation> findParticipationWithStatusAndUser(User user, MentoringParticipationStatus status);
     long countBy(Long teamId, MentoringParticipationStatus status);
