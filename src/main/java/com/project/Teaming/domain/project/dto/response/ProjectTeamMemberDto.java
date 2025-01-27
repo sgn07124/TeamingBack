@@ -3,6 +3,8 @@ package com.project.Teaming.domain.project.dto.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.util.Formatter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,8 @@ public class ProjectTeamMemberDto {
     private Long participationId;  // pk
     private Long userId;
     private Long projectTeamId;
+    private String userName;
+    private String joinDate;
     private String participationStatus;
     private Boolean isDeleted;
     private Boolean isExport;
@@ -31,6 +35,7 @@ public class ProjectTeamMemberDto {
         this.participationId = participation.getId();
         this.userId = participation.getUser().getId();
         this.projectTeamId = participation.getProjectTeam().getId();
+        this.userName = participation.getUser().getName();
         this.participationStatus = participation.getParticipationStatus().toString();
         this.isDeleted = participation.getIsDeleted();
         this.isExport = participation.getIsExport();
