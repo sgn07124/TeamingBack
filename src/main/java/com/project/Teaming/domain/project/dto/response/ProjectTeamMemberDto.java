@@ -16,7 +16,6 @@ public class ProjectTeamMemberDto {
     private Long userId;
     private Long projectTeamId;
     private String userName;
-    private String joinDate;
     private String participationStatus;
     private Boolean isDeleted;
     private Boolean isExport;
