@@ -204,6 +204,21 @@ public class ProjectTeamService {
         return projectLists;
     }
 
+    public List<MyProjectListDto> getSpecificProjectList(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        List<ProjectParticipation> participations = projectParticipationRepository.findByUserIdAndParticipationStatus(userId,
+                ParticipationStatus.ACCEPTED);
+
+        List<MyProjectListDto> projectLists = participations.stream()
+                .map(participation -> {
+                    ProjectTeam projectTeam = projectTeamRepository.findById(participation.getProjectTeam().getId())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+                    return MyProjectListDto.from(projectTeam, participation);
+                })
+                .collect(Collectors.toList());
+        return projectLists;
+    }
+
     private ProjectTeam findProjectTeamById(Long teamId) {
         return projectTeamRepository.findById(teamId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));

@@ -76,4 +76,11 @@ public class ProjectTeamController {
         List<MyProjectListDto> teams = projectTeamService.getProjectList();
         return new ResultListResponse<>(ResultCode.GET_MY_PROJECT, teams);
     }
+
+    @GetMapping("/users/{userId}/project")
+    @Operation(summary = "특정 유저의 참여 프로젝트 목록 조회", description = "특정 유저의 프로필에서 프로젝트 참여 정보를 조회할 수 있다.")
+    public ResultListResponse<MyProjectListDto> getSpecificProjectTeamList(@PathVariable Long userId) {
+        List<MyProjectListDto> teams = projectTeamService.getSpecificProjectList(userId);
+        return new ResultListResponse<>(ResultCode.GET_MY_PROJECT, teams);
+    }
 }
