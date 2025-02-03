@@ -4,6 +4,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +13,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.Set;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
-    boolean existsByProjectParticipationAndReportedUser(ProjectParticipation reporter, User reportedUser);
+    @Query("select r.reportedUser.id from Report r where r.projectParticipation = :projectParticipation and r.reportedUser.id in :userIds")
+    Set<Long> findAllByProjectParticipationAndReportedUserIn(@Param("projectParticipation") ProjectParticipation projectParticipation,
+                                                             @Param("userIds")List<Long> userIds);
     boolean existsByMentoringParticipationAndReportedUser(MentoringParticipation reporter, User reportedUser);
 
     boolean existsByProjectParticipationAndReportedUserId(ProjectParticipation projectParticipation, Long reportedUserId);

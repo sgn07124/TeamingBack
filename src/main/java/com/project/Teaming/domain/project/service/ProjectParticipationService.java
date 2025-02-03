@@ -18,6 +18,7 @@ import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -183,26 +184,32 @@ public class ProjectParticipationService {
         // 현재 팀원 목록 조회
         List<ProjectParticipation> teamMembers = projectParticipationRepository.findByProjectTeamIdAndParticipationStatus(teamId, ParticipationStatus.ACCEPTED);
 
-        // 팀의 멤버인지 판별
-        boolean isMember = projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(teamId, user.getId(),
-                ParticipationStatus.ACCEPTED, false);
-        if (!isMember) {
+        // 로그인 사용자의 참여 정보 찾기
+        ProjectParticipation loginUserParticipation = teamMembers.stream()
+                .filter(member -> member.getUser().getId().equals(user.getId()))
+                .findFirst()
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM));
+
+        // 로그인한 사용자가 탈퇴 또는 강퇴된 경우 예외 처리 >> 해당 유저 입장에서는 팀원이 아님
+        if (loginUserParticipation.getIsDeleted()) {
             throw new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM);
         }
 
-        // 로그인 사용자가 팀원인지 판별
-        ProjectParticipation loginUserParticipation = projectParticipationRepository
-                .findByProjectTeamIdAndUserIdAndParticipationStatus(teamId, user.getId(), ParticipationStatus.ACCEPTED)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_PART_OF_TEAM));
+        // 팀원 ID 목록
+        List<Long> teamMemberIds = teamMembers.stream()
+                .map(member -> member.getUser().getId())
+                .toList();
+
+        // 신고 정보와 리뷰 정보를 한 번의 쿼리로 가져옴
+        Set<Long> reportedUserIds = reportRepository.findAllByProjectParticipationAndReportedUserIn(loginUserParticipation, teamMemberIds);
+        Set<Long> reviewedUserIds = reviewRepository.findAllByProjectParticipationAndRevieweeIn(loginUserParticipation, teamMemberIds);
 
         return teamMembers.stream()
                 .map(member -> {
                     ProjectTeamMemberDto dto = new ProjectTeamMemberDto(member);
-                    dto.setLoginUser(member.getUser().getId().equals(user.getId()));  // 로그인 한 유저인지
-                    boolean isReported = reportRepository.existsByProjectParticipationAndReportedUser(loginUserParticipation, member.getUser());
-                    dto.setReported(isReported);
-                    boolean isReviewed = reviewRepository.existsByProjectParticipationAndReviewee(loginUserParticipation, member.getUser());
-                    dto.setReviewed(isReviewed);
+                    dto.setLoginUser(member.getUser().getId().equals(user.getId()));
+                    dto.setReported(reportedUserIds.contains(member.getUser().getId()));
+                    dto.setReviewed(reviewedUserIds.contains(member.getUser().getId()));
                     return dto;
                 })
                 .collect(Collectors.toList());

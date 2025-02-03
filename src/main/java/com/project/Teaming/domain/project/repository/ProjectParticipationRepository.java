@@ -15,7 +15,13 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
 
     List<ProjectParticipation> findByProjectTeamId(Long teamId);
 
-    // 팀의 멤버 여부
+    /**
+     * 팀의 멤버 여부 판별 (현재 로그인 한 유저에 대하여)
+     * @param projectTeamId 팀 id
+     * @param userID 유저 id
+     * @param status 팀에 수락된 상태
+     * @param isDeleted 삭제되지 않음 >> 강퇴, 탈퇴 당하지 않음
+     */
     boolean existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(Long projectTeamId, Long userID, ParticipationStatus status, boolean isDeleted);
 
     // 팀에 지원 여부
@@ -28,9 +34,12 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
 
     List<ProjectParticipation> findByUserIdAndParticipationStatus(Long userId, ParticipationStatus status);
 
+    /**
+     * 현재 팀원 목록 조회
+     * @param projectTeamId 팀 id
+     * @param status 팀에 수락된 상태
+     */
     List<ProjectParticipation> findByProjectTeamIdAndParticipationStatus(Long projectTeamId, ParticipationStatus status);
-
-    Optional<ProjectParticipation> findByProjectTeamIdAndUserIdAndParticipationStatus(Long projectId, Long userId, ParticipationStatus status);
 
     long countByProjectTeamIdAndParticipationStatusAndIsDeleted(Long teamId, ParticipationStatus status, boolean delete);
 
