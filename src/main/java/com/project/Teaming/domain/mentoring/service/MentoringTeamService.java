@@ -214,6 +214,26 @@ public class MentoringTeamService {
 
     }
 
+    @Transactional(readOnly = true)
+    public TeamInfoResponse getTeamInfoWithAuthority(MentoringTeam team, User targetUser) {
+        TeamInfoResponse teamDto = new TeamInfoResponse(
+                team.getId(),
+                team.getName(),
+                team.getStartDate(),
+                team.getEndDate(),
+                team.getStatus()
+        );
+
+        // 특정 사용자의 권한을 조회
+        MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
+                team, targetUser, null, MentoringParticipationStatus.ACCEPTED,
+                () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM)
+        );
+
+        teamDto.setAuthority(teamUser.getAuthority());
+        return teamDto;
+    }
+
     private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
         teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
         // 캐싱된 데이터 조회, dto 일반 사용자용으로 변환
