@@ -21,8 +21,7 @@ public interface ParticipationRepositoryCustom {
             MentoringTeam mentoringTeam,
             User user,
             MentoringAuthority authority,
-            MentoringParticipationStatus status,
-            List<MentoringParticipationStatus> statuses
+            MentoringParticipationStatus status
     );
 
 

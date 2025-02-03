@@ -89,7 +89,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
 
@@ -140,7 +140,7 @@ public class MentoringTeamService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
         mentoringTeam.flag(Status.TRUE);
@@ -177,7 +177,7 @@ public class MentoringTeamService {
         }
 
         //로그인 사용자
-        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED,null)
+        mentoringParticipationRepository.findDynamicMentoringParticipation(team, user,null,MentoringParticipationStatus.ACCEPTED)
                 .ifPresentOrElse(
                         participation -> {
                             // 권한 설정
@@ -207,7 +207,7 @@ public class MentoringTeamService {
         //권한 반환하는 로직
         MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
                 team, user,null, MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
+                () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
 
         teamDto.setAuthority(teamUser.getAuthority());
         return teamDto;

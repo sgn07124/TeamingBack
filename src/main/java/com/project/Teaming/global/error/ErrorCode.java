@@ -67,6 +67,7 @@ public enum ErrorCode {
     NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
     NOT_A_MEMBER_OF_TEAM(404, "M013", "유저가 포함되지 않은 팀입니다."),
     NOT_A_POST_OF_TEAM(404, "M014", "해당 팀에 포함되지 않은 글입니다."),
+    ASYNC_OPERATION_FAILED(404, "M015", "비동기 작업 중 오류 발생"),
 
     //MentoringCategory
     NO_SUCH_CATEGORY(404, "MC001", "해당하는 카테고리가 존재하지 않습니다"),

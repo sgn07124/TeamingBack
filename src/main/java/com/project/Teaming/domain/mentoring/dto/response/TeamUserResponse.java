@@ -33,14 +33,14 @@ public class TeamUserResponse {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isReviewed;
 
-    public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isDeleted, Boolean isReviewed) {
+    public TeamUserResponse(LocalDateTime acceptedTime, Long userId, String username, MentoringRole role, MentoringParticipationStatus status, Boolean isReviewed) {
         this.acceptedTime = acceptedTime;
         this.userId = userId;
         this.username = username;
         this.role = role;
         this.status = status;
         this.isLogined = false;
-        this.isDeleted = isDeleted;
+        this.isDeleted = false;
         this.isReviewed = (isReviewed != null && isReviewed) ? isReviewed : null;
     }
 
@@ -52,7 +52,7 @@ public class TeamUserResponse {
         teamUserResponse.setRole(mentoringParticipation.getRole());
         teamUserResponse.setStatus(mentoringParticipation.getParticipationStatus());
         teamUserResponse.setIsLogined(false);
-        teamUserResponse.setIsDeleted(mentoringParticipation.getIsDeleted());
+        teamUserResponse.setIsDeleted(true);
         teamUserResponse.setIsReported(false);
         teamUserResponse.setIsReviewed(false);
         return teamUserResponse;

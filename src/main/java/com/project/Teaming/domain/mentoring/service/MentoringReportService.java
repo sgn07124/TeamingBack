@@ -52,7 +52,7 @@ public class MentoringReportService {
         //신고자가 팀 구성원인지 확인
         MentoringParticipation reportingParticipation = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, reporter,null, MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_TEAM_USER));
+                () -> new BusinessException(ErrorCode.NOT_A_TEAM_USER));
 
         //신고당한 사용자
         User reportedUser = userDataProvider.findUser(dto.getReportedUserId());

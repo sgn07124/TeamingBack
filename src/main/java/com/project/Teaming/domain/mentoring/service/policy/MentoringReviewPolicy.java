@@ -37,7 +37,7 @@ public class MentoringReviewPolicy {
         } else {
             // Redis에 없는 경우 (DB에서 조회한 일반 팀원)
             mentoringParticipationRepository.findDynamicMentoringParticipation(
-                            mentoringTeam, reviewedUser, null, MentoringParticipationStatus.ACCEPTED, null)
+                            mentoringTeam, reviewedUser, null, MentoringParticipationStatus.ACCEPTED)
                     .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_REVIEW_TARGET));
 
             // 팀 상태 검증

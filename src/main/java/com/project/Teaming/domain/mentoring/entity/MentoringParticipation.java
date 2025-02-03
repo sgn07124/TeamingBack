@@ -36,8 +36,6 @@ public class MentoringParticipation {
     private MentoringRole role;  // 역할
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
-    @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -54,7 +52,6 @@ public class MentoringParticipation {
         this.decisionDate = decisionDate;
         this.role = role;
         this.authority = authority;
-        this.isDeleted = false;
         this.user = user;
         this.mentoringTeam = mentoringTeam;
     }
@@ -64,7 +61,6 @@ public class MentoringParticipation {
         this.requestDate = requestDate;
         this.role = role;
         this.authority = authority;
-        this.isDeleted = false;
     }
 
     public static MentoringParticipation from(ParticipationRequest request) {
@@ -95,7 +91,6 @@ public class MentoringParticipation {
     }
 
     public TeamUserResponse deleteParticipant() {
-        isDeleted = true;
         return TeamUserResponse.toDto(this,this.getUser());
     }
 

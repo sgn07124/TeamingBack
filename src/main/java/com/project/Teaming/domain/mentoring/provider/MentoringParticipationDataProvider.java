@@ -26,10 +26,10 @@ public class MentoringParticipationDataProvider {
     }
 
     public MentoringParticipation findParticipationWith(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
-                                                        MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses,
+                                                        MentoringParticipationStatus status,
                                                         Supplier<BusinessException> exceptionSupplier) {
 
-        return mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status, statuses)
+        return mentoringParticipationRepository.findDynamicMentoringParticipation(mentoringTeam, user, authority, status)
                 .orElseThrow(exceptionSupplier);
     }
 }

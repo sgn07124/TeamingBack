@@ -10,12 +10,14 @@ public class ReviewDto {
     private Long reviewerId;
     private String reviewerName;
     private String content;
+    private int rate;
     private LocalDateTime createdDate;
 
-    public ReviewDto(Long reviewerId, String reviewerName, String content, LocalDateTime createdDate) {
+    public ReviewDto(Long reviewerId, String reviewerName, String content, LocalDateTime createdDate,int rate) {
         this.reviewerId = reviewerId;
         this.reviewerName = reviewerName;
         this.content = content;
         this.createdDate = createdDate;
+        this.rate = rate;
     }
 }

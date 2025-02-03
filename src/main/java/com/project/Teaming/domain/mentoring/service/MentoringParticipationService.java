@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Service
@@ -33,7 +35,7 @@ public class MentoringParticipationService {
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final UserDataProvider userDataProvider;
-    private final RedisTeamUserManagementService redisParticipationManagementService;
+    private final RedisTeamUserManagementService redisTeamUserManagementService;
     private final RedisApplicantManagementService redisApplicantManagementService;
     private final ReviewService reviewService;
     private final ReportService reportService;
@@ -49,7 +51,7 @@ public class MentoringParticipationService {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findDynamicMentoringParticipation(
-                mentoringTeam, user,null,null,null);
+                mentoringTeam, user,null,null);
 
         participation.ifPresent(mentoringParticipationPolicy::validateParticipationStatus);
         MentoringParticipation mentoringParticipation = MentoringParticipation.from(dto);
@@ -67,7 +69,7 @@ public class MentoringParticipationService {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = post.getMentoringTeam();
         Optional<MentoringParticipation> participation = mentoringParticipationRepository.findDynamicMentoringParticipation(
-                mentoringTeam, user,null,null,null);
+                mentoringTeam, user,null,null);
 
         participation.ifPresent(mentoringParticipationPolicy::validateParticipationStatus);
         MentoringParticipation mentoringParticipation = MentoringParticipation.from(dto);
@@ -89,7 +91,7 @@ public class MentoringParticipationService {
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
         MentoringParticipation participation = mentoringParticipationDataProvider.findParticipationWith(
-                mentoringTeam, user,null,null,null,() -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
+                mentoringTeam, user,null,null,() -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
 
         mentoringParticipationPolicy.validateCancellation(participation);
         redisApplicantManagementService.removeApplicant(teamId,String.valueOf(user.getId()));
@@ -108,7 +110,7 @@ public class MentoringParticipationService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER ,MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                 () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         MentoringParticipation mentoringParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
         //검증
@@ -130,7 +132,7 @@ public class MentoringParticipationService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                 () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         MentoringParticipation rejectParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
 
@@ -155,14 +157,14 @@ public class MentoringParticipationService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user, MentoringAuthority.LEADER,MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_LEADER));
+                 () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         MentoringParticipation export = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, exportUser,MentoringAuthority.CREW, MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS));
+                () -> new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS));
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
-        redisParticipationManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
+        redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
         removeParticipant(export,exportUser,mentoringTeam);
     }
 
@@ -178,7 +180,7 @@ public class MentoringParticipationService {
 
         MentoringParticipation teamUser = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, user,null,MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                 () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
         if (teamUser.getAuthority() == MentoringAuthority.LEADER) {
             //제일 일찍 들어온 팀원 조회
@@ -193,7 +195,7 @@ public class MentoringParticipationService {
             );
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
-        redisParticipationManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
+        redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
         removeParticipant(teamUser,user,mentoringTeam);
     }
 
@@ -212,52 +214,34 @@ public class MentoringParticipationService {
 
         MentoringParticipation currentParticipation = mentoringParticipationDataProvider.findParticipationWith(
                 mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
-                null, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
-        // 리뷰여부 검증 포함, 강퇴나 탈퇴되지않은 사용자들이기때문에 신고여부는 검증할 필요 없음
-        List<TeamUserResponse> teamUsers = mentoringParticipationRepository.findAllByMemberStatus(mentoringTeam, MentoringStatus.COMPLETE,
-                MentoringParticipationStatus.ACCEPTED, currentParticipation.getId());
-        setLoginStatus(teamUsers,user.getId());
+        List<TeamUserResponse> teamUsers = mentoringParticipationRepository.findAllByMemberStatus(
+                mentoringTeam, MentoringStatus.COMPLETE, MentoringParticipationStatus.ACCEPTED, currentParticipation.getId());
+        setLoginStatus(teamUsers, user.getId()); // 로그인 상태 설정
 
-        List<TeamUserResponse> deletedOrExportedTeamUsers = redisParticipationManagementService.getDeletedOrExportedParticipations(teamId);
 
-        // 리스트가 비어 있지 않은 경우에만 검증 수행
-        if (deletedOrExportedTeamUsers != null && !deletedOrExportedTeamUsers.isEmpty()) {
-            // 로그인 한 사용자의 리뷰여부 검증
-            reviewService.setReviewInfo(deletedOrExportedTeamUsers, currentParticipation.getId());
-            // 로그인 한 사용자의 신고여부 검증
-            reportService.setReportInfo(deletedOrExportedTeamUsers, currentParticipation.getId());
+        List<TeamUserResponse> deletedOrExportedUsers = redisTeamUserManagementService.getDeletedOrExportedParticipations(teamId);
+        if (deletedOrExportedUsers != null && !deletedOrExportedUsers.isEmpty()) {
+            reviewService.setReviewInfo(deletedOrExportedUsers, currentParticipation.getId()); // 리뷰 여부 검증
+            reportService.setReportInfo(deletedOrExportedUsers, currentParticipation.getId()); // 신고 여부 검증
         }
+        List<TeamUserResponse> combineUsers = TeamUserResponse.combine(teamUsers, deletedOrExportedUsers);
 
-        //decisionDate기준 정렬
-        List<TeamUserResponse> combineUsers = TeamUserResponse.combine(teamUsers, deletedOrExportedTeamUsers);
+        switch (currentParticipation.getAuthority()) {
+            case LEADER:
+                List<TeamParticipationResponse> applicants = redisApplicantManagementService.getApplicants(teamId);
+                return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.LEADER, new ForLeaderResponse(combineUsers, applicants));
 
-        //권한에 따라 dto 반환
-        if (currentParticipation.getAuthority() == MentoringAuthority.LEADER) {  //팀의 리더인 유저
-            log.info("All Team Users For Leader: {}", combineUsers);
-            // 지원자 현황 캐싱된 데이터 조회
-            List<TeamParticipationResponse> applicants = redisApplicantManagementService.getApplicants(teamId);
+            case CREW:
+                return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.CREW, combineUsers);
 
-            ForLeaderResponse dto = new ForLeaderResponse();
-            dto.setMembers(combineUsers);
-            dto.setParticipations(applicants);
-            log.info("Participations for Leader: {}", applicants);
-            return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.LEADER, dto);
-
-        } else if (currentParticipation.getAuthority() == MentoringAuthority.CREW) {
-            //팀 유저만 반환
-            log.info("Members for Crew: {}", combineUsers);
-            return new ParticipantsResponse<>(mentoringTeam.getId(),MentoringAuthority.CREW, combineUsers);
+            default:
+                throw new BusinessException(ErrorCode.NOT_A_MEMBER);
         }
-        else throw new BusinessException(ErrorCode.NOT_A_MEMBER);
-
     }
 
-    /**
-     * 로그인 한 사용자 있는지 확인하는 로직
-     * @param dtos
-     * @param userId
-     */
+
     private void setLoginStatus(List<?> dtos, Long userId) {
         dtos.forEach(dto -> {
             if (dto instanceof TeamUserResponse teamDto && teamDto.getUserId().equals(userId)) {

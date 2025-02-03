@@ -26,11 +26,11 @@ public class UserMockController {
     @GetMapping("/reviews")
     public ResultListResponse<ReviewDto> getReviews() {
         List<ReviewDto> dtos = Arrays.asList(
-                new ReviewDto(1L, "John Doe", "Great experience!", LocalDateTime.now().minusDays(1)),
-                new ReviewDto(2L, "Jane Smith", "Very helpful and professional.", LocalDateTime.now().minusDays(2)),
-                new ReviewDto(3L, "Chris Johnson", "Would recommend to others.", LocalDateTime.now().minusDays(3)),
-                new ReviewDto(4L, "Patricia Lee", "Excellent service!", LocalDateTime.now().minusDays(4)),
-                new ReviewDto(5L, "Michael Brown", "Quick and efficient.", LocalDateTime.now().minusDays(5))
+                new ReviewDto(1L, "John Doe", "Great experience!", LocalDateTime.now().minusDays(1),5),
+                new ReviewDto(2L, "Jane Smith", "Very helpful and professional.", LocalDateTime.now().minusDays(2),3),
+                new ReviewDto(3L, "Chris Johnson", "Would recommend to others.", LocalDateTime.now().minusDays(3),2),
+                new ReviewDto(4L, "Patricia Lee", "Excellent service!", LocalDateTime.now().minusDays(4),4),
+                new ReviewDto(5L, "Michael Brown", "Quick and efficient.", LocalDateTime.now().minusDays(5),2)
         );
         return new ResultListResponse<>(ResultCode.GET_USER_REVIEWS, dtos);
     }
@@ -44,7 +44,8 @@ public class UserMockController {
                     (long) i, // reviewerId는 각기 다른 값으로 설정
                     "Reviewer" + i, // 각 리뷰어의 이름
                     "Review content " + i + " for User " + userId, // 리뷰 내용
-                    LocalDateTime.now().minusDays(i) // 생성 날짜
+                    LocalDateTime.now().minusDays(i), // 생성 날짜
+                    1
             ));
         }
         return new ResultListResponse<>(ResultCode.GET_USER_REVIEWS, userReviews);

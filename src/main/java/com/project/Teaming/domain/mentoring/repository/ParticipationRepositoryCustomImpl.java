@@ -46,7 +46,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         u.name,
                         mp.role,
                         mp.participationStatus,
-                        mp.isDeleted,
                         new CaseBuilder()
                                 .when(mt.status.eq(teamStatus)
                                         .and(r.id.isNotNull()))
@@ -70,7 +69,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
 
     @Override
     public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
-                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses) {
+                                                                              MentoringParticipationStatus status) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
 
@@ -93,9 +92,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             builder.and(mp.participationStatus.eq(status));
         }
 
-        if (statuses != null && !statuses.isEmpty()) {
-            builder.and(mp.participationStatus.in(statuses));
-        }
         MentoringParticipation result = queryFactory
                 .selectFrom(mp)
                 .where(builder)
@@ -115,7 +111,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         .join(mp.mentoringTeam, mt).fetchJoin()
                         .where(
                                 mt.id.eq(teamId),
-                                mp.isDeleted.isFalse(),
                                 mp.participationStatus.eq(participationStatus),
                                 mp.authority.eq(authority)
                         )
@@ -136,7 +131,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .where(
                         mp.user.eq(user),
                         mp.participationStatus.eq(status),
-                        mp.isDeleted.isFalse(),
                         mt.flag.eq(Status.FALSE)
                 )
                 .distinct()

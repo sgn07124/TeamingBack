@@ -46,7 +46,7 @@ public class MentoringReviewService {
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(dto.getTeamId());
 
         MentoringParticipation reviewingParticipation = mentoringParticipationDataProvider.findParticipationWith(mentoringTeam,user,null,
-                MentoringParticipationStatus.ACCEPTED,null,() -> new BusinessException(ErrorCode.NOT_A_MEMBER));
+                MentoringParticipationStatus.ACCEPTED, () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
         User reviewedUser = userDataProvider.findUser(dto.getReviewedUserId());
 
         mentoringReviewPolicy.validateToReview(mentoringTeam,reviewedUser,reviewingParticipation);
