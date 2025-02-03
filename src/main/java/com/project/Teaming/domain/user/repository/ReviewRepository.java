@@ -19,7 +19,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByProjectParticipationAndRevieweeId(ProjectParticipation projectParticipation, Long revieweeId);
 
-    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(mu.id, mu.name, r.content, r.createdDate) " +
+    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(mu.id, mu.name, r.content, r.createdDate,r.rating) " +
             "from Review r " +
             "join r.reviewee ru " +
             "join r.mentoringParticipation mp " +
@@ -27,7 +27,7 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "where ru = :user")
     List<ReviewDto> findMentoringReviewsByUser(@Param("user") User user);
 
-    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(pu.id, pu.name, r.content, r.createdDate) " +
+    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(pu.id, pu.name, r.content, r.createdDate,r.rating) " +
             "from Review r " +
             "join r.reviewee ru " +
             "join r.projectParticipation pp " +

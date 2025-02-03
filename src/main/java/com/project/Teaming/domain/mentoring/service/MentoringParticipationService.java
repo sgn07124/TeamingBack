@@ -35,9 +35,10 @@ public class MentoringParticipationService {
     private final MentoringParticipationPolicy mentoringParticipationPolicy;
     private final MentoringTeamDataProvider mentoringTeamDataProvider;
     private final UserDataProvider userDataProvider;
-    private final RedisTeamUserManagementService redisParticipationManagementService;
+    private final RedisTeamUserManagementService redisTeamUserManagementService;
     private final RedisApplicantManagementService redisApplicantManagementService;
-    private final AsyncParticipationService asyncParticipationService;
+    private final ReviewService reviewService;
+    private final ReportService reportService;
 
     /**
      * 지원자로 등록하는 로직
@@ -163,7 +164,7 @@ public class MentoringParticipationService {
                 () -> new BusinessException(ErrorCode.EXPORTED_MEMBER_NOT_EXISTS));
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
-        redisParticipationManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
+        redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
         removeParticipant(export,exportUser,mentoringTeam);
     }
 
@@ -194,7 +195,7 @@ public class MentoringParticipationService {
             );
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
-        redisParticipationManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
+        redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
         removeParticipant(teamUser,user,mentoringTeam);
     }
 
@@ -215,41 +216,41 @@ public class MentoringParticipationService {
                 mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
                 () -> new BusinessException(ErrorCode.NOT_A_MEMBER));
 
-        // 비동기로 팀원 가져오기
-        CompletableFuture<List<TeamUserResponse>> teamUsersFuture  = asyncParticipationService.fetchAndSetTeamUsers(mentoringTeam, user.getId(), currentParticipation.getId());
-        //비동기로 강퇴,탈퇴한 팀원 가져오기
-        CompletableFuture<List<TeamUserResponse>> deletedOrExportedUsersFuture  = asyncParticipationService.fetchAndValidateDeletedOrExportedUsers(teamId, currentParticipation.getId());
+        List<TeamUserResponse> teamUsers = mentoringParticipationRepository.findAllByMemberStatus(
+                mentoringTeam, MentoringStatus.COMPLETE, MentoringParticipationStatus.ACCEPTED, currentParticipation.getId());
+        setLoginStatus(teamUsers, user.getId()); // 로그인 상태 설정
 
-        CompletableFuture<List<TeamParticipationResponse>> applicantsFuture =
-                (currentParticipation.getAuthority() == MentoringAuthority.LEADER) ? asyncParticipationService.fetchApplicantsAsync(teamId)
-                        : CompletableFuture.completedFuture(Collections.emptyList());
 
-        CompletableFuture.allOf(teamUsersFuture, deletedOrExportedUsersFuture, applicantsFuture).join();
+        List<TeamUserResponse> deletedOrExportedUsers = redisTeamUserManagementService.getDeletedOrExportedParticipations(teamId);
+        if (deletedOrExportedUsers != null && !deletedOrExportedUsers.isEmpty()) {
+            reviewService.setReviewInfo(deletedOrExportedUsers, currentParticipation.getId()); // 리뷰 여부 검증
+            reportService.setReportInfo(deletedOrExportedUsers, currentParticipation.getId()); // 신고 여부 검증
+        }
+        List<TeamUserResponse> combineUsers = TeamUserResponse.combine(teamUsers, deletedOrExportedUsers);
 
-        try {
-            // 모든 비동기 작업 병렬 실행 후 필요한 시점에서 결과 가져오기
-            List<TeamUserResponse> teamUsers = teamUsersFuture.get();
-            List<TeamUserResponse> deletedOrExportedUsers = deletedOrExportedUsersFuture.get();
-            List<TeamUserResponse> combineUsers = TeamUserResponse.combine(teamUsers, deletedOrExportedUsers);
+        switch (currentParticipation.getAuthority()) {
+            case LEADER:
+                List<TeamParticipationResponse> applicants = redisApplicantManagementService.getApplicants(teamId);
+                return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.LEADER, new ForLeaderResponse(combineUsers, applicants));
 
-            // 권한별 응답 처리
-            switch (currentParticipation.getAuthority()) {
-                case LEADER:
-                    List<TeamParticipationResponse> applicants = applicantsFuture.get();
-                    return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.LEADER, new ForLeaderResponse(combineUsers, applicants));
+            case CREW:
+                return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.CREW, combineUsers);
 
-                case CREW:
-                    return new ParticipantsResponse<>(mentoringTeam.getId(), MentoringAuthority.CREW, combineUsers);
-
-                default:
-                    throw new BusinessException(ErrorCode.NOT_A_MEMBER);
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            throw new BusinessException(ErrorCode.ASYNC_OPERATION_FAILED);
+            default:
+                throw new BusinessException(ErrorCode.NOT_A_MEMBER);
         }
     }
 
 
+    private void setLoginStatus(List<?> dtos, Long userId) {
+        dtos.forEach(dto -> {
+            if (dto instanceof TeamUserResponse teamDto && teamDto.getUserId().equals(userId)) {
+                teamDto.setIsLogined(true);
+            } else if (dto instanceof ParticipationForUserResponse userDto && userDto.getUserId().equals(userId)) {
+                userDto.setIsLogined(true);
+            }
+        });
+    }
 
     private void removeParticipant(MentoringParticipation mentoringParticipation,User user, MentoringTeam mentoringTeam) {
         mentoringParticipation.removeMentoringTeam(mentoringTeam);
