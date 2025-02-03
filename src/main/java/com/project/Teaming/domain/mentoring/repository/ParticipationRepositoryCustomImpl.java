@@ -70,7 +70,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
 
     @Override
     public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
-                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses) {
+                                                                              MentoringParticipationStatus status) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
 
@@ -93,9 +93,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             builder.and(mp.participationStatus.eq(status));
         }
 
-        if (statuses != null && !statuses.isEmpty()) {
-            builder.and(mp.participationStatus.in(statuses));
-        }
         MentoringParticipation result = queryFactory
                 .selectFrom(mp)
                 .where(builder)

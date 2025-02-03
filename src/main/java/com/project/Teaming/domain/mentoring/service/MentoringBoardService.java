@@ -70,7 +70,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         MentoringBoard mentoringBoard = MentoringBoard.from(boardDto);
         mentoringBoard.link(Optional.ofNullable(boardDto.getLink())
@@ -187,7 +187,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         mentoringBoard.updateBoard(dto);
     }
@@ -203,7 +203,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringBoard.getMentoringTeam(), user, null,MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         mentoringBoardRepository.delete(mentoringBoard);
 
@@ -222,7 +222,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         MentoringBoard post = mentoringBoardDataProvider.findBoard(postId);
         mentoringBoardPolicy.validatePostWithTeam(post,mentoringTeam);
@@ -242,8 +242,7 @@ public class MentoringBoardService {
     private void setAuthorityForUser(BoardSpecResponse dto, MentoringTeam mentoringTeam, User user) {
         Optional<MentoringParticipation> participations = mentoringParticipationRepository.findDynamicMentoringParticipation(
                 mentoringTeam,
-                user,null,null,
-                List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.PENDING));
+                user,null,null);
 
         if (participations.isPresent()) {
             MentoringParticipation mp = participations.get();
