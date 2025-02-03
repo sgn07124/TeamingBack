@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-
-    boolean existsByProjectParticipationAndReviewee(ProjectParticipation reviewer, User reviewee);
+    @Query("select r.reviewee.id from Review r where r.projectParticipation = :projectParticipation and r.reviewee.id in :userIds")
+    Set<Long> findAllByProjectParticipationAndRevieweeIn(@Param("projectParticipation") ProjectParticipation projectParticipation,
+                                                             @Param("userIds")List<Long> userIds);
     boolean existsByMentoringParticipationAndReviewee(MentoringParticipation reviewer, User reviewee);
 
     boolean existsByProjectParticipationAndRevieweeId(ProjectParticipation projectParticipation, Long revieweeId);
