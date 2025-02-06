@@ -84,12 +84,12 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             builder.and(mp.user.eq(user));
         }
 
-        if (authority != null) {
-            builder.and(mp.authority.eq(authority));
-        }
-
         if (status != null) {
             builder.and(mp.participationStatus.eq(status));
+        }
+
+        if (authority != null) {
+            builder.and(mp.authority.eq(authority));
         }
 
         MentoringParticipation result = queryFactory

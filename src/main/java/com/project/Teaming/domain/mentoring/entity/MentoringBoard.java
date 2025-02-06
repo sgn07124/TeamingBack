@@ -19,24 +19,35 @@ public class MentoringBoard extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "mentoring_board_id")
     private Long id;  // 멘토링 모집글 ID
-    @Column(name = "title", nullable = false, length = 100)
+
+    @Column(nullable = false, length = 100)
     private String title;  // 모집글 제목
-    @Column(name = "contents", columnDefinition = "TEXT")
+
+    @Column(columnDefinition = "TEXT")
     private String contents;  // 모집글 내용
+
     @Enumerated(EnumType.STRING)
     private MentoringRole role;  // 모집하는 역할, 팀과 컬럼의 역할이 다름
+
     @Column(name = "mentoring_dead_line")
     private LocalDate deadLine;
+
     @Enumerated(EnumType.STRING)
     private PostStatus status;
+
     @Column
     private Integer mentoringCnt;  //수정할 수 있도록 팀과 칼럼중복
+
     @Column(name = "link", length = 1000)
     private String link;  // 연락 방법
+
     // 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mentoring_team_id")
     private MentoringTeam mentoringTeam;  // 멘토링 팀 ID (주인)
+
+    @Version
+    private Integer version;
 
 
     public MentoringBoard(Long id, String title, String contents, MentoringRole role, LocalDate deadLine, PostStatus status, Integer mentoringCnt, String link, MentoringTeam mentoringTeam) {
