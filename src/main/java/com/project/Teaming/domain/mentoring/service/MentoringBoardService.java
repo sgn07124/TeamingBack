@@ -23,6 +23,7 @@ import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -181,15 +182,20 @@ public class MentoringBoardService {
      */
     @Transactional
     public void updateMentoringPost(Long postId, BoardRequest dto) {
-        User user = userDataProvider.getUser();
-        MentoringBoard mentoringBoard = mentoringBoardDataProvider.findBoard(postId);
-        MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
+        try {
+            User user = userDataProvider.getUser();
+            MentoringBoard mentoringBoard = mentoringBoardDataProvider.findBoard(postId);
 
-        mentoringParticipationPolicy.validateParticipation(
-                mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
+            MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
+            mentoringParticipationPolicy.validateParticipation(
+                    mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
+                    () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
-        mentoringBoard.updateBoard(dto);
+            mentoringBoard.updateBoard(dto);
+
+        } catch (OptimisticLockException e) {
+            throw new BusinessException(ErrorCode.CONFLICT);
+        }
     }
 
     /**

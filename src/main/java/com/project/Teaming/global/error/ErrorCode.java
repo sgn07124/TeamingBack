@@ -68,6 +68,7 @@ public enum ErrorCode {
     NOT_A_MEMBER_OF_TEAM(404, "M013", "유저가 포함되지 않은 팀입니다."),
     NOT_A_POST_OF_TEAM(404, "M014", "해당 팀에 포함되지 않은 글입니다."),
     ASYNC_OPERATION_FAILED(404, "M015", "비동기 작업 중 오류 발생"),
+    CONFLICT(404, "M016", "수정하는 동안 게시글이 삭제되었거나, 업데이트 되었습니다. 다시 확인해주세요."),
 
     //MentoringCategory
     NO_SUCH_CATEGORY(404, "MC001", "해당하는 카테고리가 존재하지 않습니다"),
