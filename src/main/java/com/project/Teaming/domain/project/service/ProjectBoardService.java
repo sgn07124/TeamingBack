@@ -17,6 +17,9 @@ import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,7 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ProjectBoardService {
 
     private final ProjectBoardRepository projectBoardRepository;
@@ -44,9 +47,13 @@ public class ProjectBoardService {
     private final ProjectParticipationRepository projectParticipationRepository;
     private final ProjectCacheService projectCacheService;
 
+    @PersistenceContext
+    EntityManager entityManager;
+
     /**
      * 프로젝트 팀 게시물 작성
      */
+    @Transactional
     public void createPost(Long teamId, CreatePostDto createPostDto) {
         validateTeamMember(teamId);
         ProjectTeam projectTeam = getProjectTeam(teamId);
@@ -59,6 +66,7 @@ public class ProjectBoardService {
     /**
      * 프로젝트 팀 게시물 상세 조회
      */
+    @Transactional
     public ProjectPostInfoDto getPostInfo(Long postId) {
         ProjectBoard projectBoard = getProjectBoard(postId);
         ProjectTeam projectTeam = getProjectTeam(projectBoard.getProjectTeam().getId());
@@ -125,17 +133,22 @@ public class ProjectBoardService {
     /**
      * 프로젝트 팀 게시물 수정
      */
+    @Transactional
     public void updatePost(Long teamId, Long postId, CreatePostDto dto) {
-        validateTeamMember(teamId);
-        ProjectTeam projectTeam = getProjectTeam(teamId);
-        ProjectBoard projectBoard = getProjectBoard(postId);
-
-        projectBoard.updateProjectBoard(dto, projectTeam);
+        try {
+            validateTeamMember(teamId);
+            ProjectTeam projectTeam = getProjectTeam(teamId);
+            ProjectBoard projectBoard = getProjectBoard(postId);
+            projectBoard.updateProjectBoard(dto, projectTeam);
+        } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
+            throw new BusinessException(ErrorCode.CONFLICT);
+        }
     }
 
     /**
      * 프로젝트 팀 게시물 삭제
      */
+    @Transactional
     public void deletePost(Long teamId, Long postId) {
         validateTeamMember(teamId);
         ProjectBoard projectBoard = getProjectBoard(postId);
@@ -145,6 +158,7 @@ public class ProjectBoardService {
     /**
      * 게시글 목록 조회
      */
+    @Transactional
     public PaginatedCursorResponse<ProjectPostListDto> getProjectPosts(Long lastCursor, int pageSize) {
         // Cursor 기준 게시글 가져오기
         Pageable pageable = PageRequest.of(0, pageSize + 1, Sort.by(Direction.DESC, "createdDate"));  // pageSize+1은 다음 페이지의 첫 값을 nextCursor로 설정하기 위해
@@ -171,6 +185,7 @@ public class ProjectBoardService {
     /**
      * 프로젝트 팀의 게시글 조회
      */
+    @Transactional
     public List<ProjectPostListDto> getTeamProjectPosts(Long teamId) {
         List<ProjectBoard> projectBoards = projectBoardRepository.findAllByProjectTeamId(teamId);
         return projectBoards.stream()
@@ -181,6 +196,7 @@ public class ProjectBoardService {
     /**
      * 게시글 상태 완료 처리
      */
+    @Transactional
     public ProjectPostStatusDto completePostStatus(Long teamId, Long postId) {
         validateTeamMember(teamId);
 
@@ -190,6 +206,7 @@ public class ProjectBoardService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")  // 매일 자정에 실행
+    @Transactional
     public void updateCheckCompleteStatus() {
         List<ProjectBoard> posts = projectBoardRepository.findAllByStatus(PostStatus.RECRUITING);
         for (ProjectBoard post : posts) {
