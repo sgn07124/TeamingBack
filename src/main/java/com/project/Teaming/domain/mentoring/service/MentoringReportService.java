@@ -39,6 +39,7 @@ public class MentoringReportService {
     private final ReportRepository reportRepository;
     private final MentoringReportPolicy mentoringReportPolicy;
     private final RedisTeamUserManagementService redisParticipationManagementService;
+    private final MentoringNotificationService mentoringNotificationService;
 
     @Transactional
     public void reportTeamUser(MentoringReportRequest dto) {
@@ -104,6 +105,9 @@ public class MentoringReportService {
             reportedUser.incrementWarningCnt();
             userRepository.save(reportedUser);
             log.info("Warning count updated in DB for userId: {}", reportedUser.getId());
+
+            mentoringNotificationService.warning(reportedUser.getId());
+
             // 경고 처리 상태 업데이트
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
                 @Override

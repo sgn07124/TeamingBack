@@ -136,6 +136,26 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .distinct()
                 .fetch();
     }
+    @Override
+    public List<User> findMemberUser(
+            Long teamId,
+            MentoringParticipationStatus status) {
+
+        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
+        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
+        QUser u = QUser.user;
+
+        return queryFactory
+                .select(u)
+                .from(mp)
+                .join(mp.user, u).fetchJoin()
+                .where(
+                        mp.participationStatus.eq(status),
+                        mp.mentoringTeam.id.eq(teamId),
+                        mt.flag.eq(Status.FALSE)
+                )
+                .fetch();
+    }
 
 
     @Override

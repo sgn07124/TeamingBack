@@ -52,13 +52,6 @@ public class RedisApplicantManagementService {
         }
     }
 
-    // 특정 지원자 조회
-    public TeamParticipationResponse getApplicant(Long teamId, String userId) {
-        String redisKey = generateApplicantKey(teamId);
-
-        // Redis Hash에서 특정 지원자 데이터 조회
-        return (TeamParticipationResponse) redisTemplate.opsForHash().get(redisKey, userId);
-    }
 
     // 특정 팀의 모든 지원자 조회
     public List<TeamParticipationResponse> getApplicants(Long teamId) {

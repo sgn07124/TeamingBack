@@ -13,6 +13,8 @@ import com.project.Teaming.domain.user.service.ReportService;
 import com.project.Teaming.domain.user.service.ReviewService;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.*;
+import com.project.Teaming.global.sse.service.NotificationService;
+import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -39,6 +41,7 @@ public class MentoringParticipationService {
     private final RedisApplicantManagementService redisApplicantManagementService;
     private final ReviewService reviewService;
     private final ReportService reportService;
+    private final MentoringNotificationService mentoringNotificationService;
 
     /**
      * 지원자로 등록하는 로직
@@ -78,6 +81,8 @@ public class MentoringParticipationService {
         MentoringParticipation savedParticipation = mentoringParticipationRepository.save(mentoringParticipation);
         TeamParticipationResponse participationDto = TeamParticipationResponse.toParticipationDto(savedParticipation);
         redisApplicantManagementService.saveApplicantWithTTL(mentoringTeam.getId(),participationDto,post.getDeadLine());
+        // 알림
+        mentoringNotificationService.participate(user.getId(),mentoringTeam.getId());
         return savedParticipation;
     }
 
@@ -115,9 +120,11 @@ public class MentoringParticipationService {
         MentoringParticipation mentoringParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
         //검증
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(mentoringParticipation);
+        Long acceptParticipationId = mentoringParticipation.getUser().getId();
         //수락 처리
         mentoringParticipation.accept();
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(mentoringParticipation.getUser().getId()),MentoringParticipationStatus.ACCEPTED);
+        mentoringNotificationService.accept(acceptParticipationId, teamId);
     }
 
     /**
@@ -135,10 +142,12 @@ public class MentoringParticipationService {
                  () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         MentoringParticipation rejectParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
+        Long rejectedUserId = rejectParticipation.getUser().getId();
 
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(rejectParticipation);
         //거절처리
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(rejectParticipation.getUser().getId()),MentoringParticipationStatus.REJECTED);
+        mentoringNotificationService.reject(rejectedUserId,teamId);
         // DB에서 지원자 데이터 삭제
         removeParticipant(rejectParticipation, rejectParticipation.getUser(), mentoringTeam);
     }
@@ -165,6 +174,7 @@ public class MentoringParticipationService {
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
+        mentoringNotificationService.export(userId,teamId);
         removeParticipant(export,exportUser,mentoringTeam);
     }
 
@@ -196,6 +206,7 @@ public class MentoringParticipationService {
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
+        mentoringNotificationService.delete(user.getId(),teamId);
         removeParticipant(teamUser,user,mentoringTeam);
     }
 

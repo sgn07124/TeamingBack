@@ -33,5 +33,13 @@ public class Notification {
     private String type;  // 알림 유형
 
     private boolean isRead; // 읽음 여부
+
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    public Notification(User user, String message, String type) {
+        this.user = user;
+        this.message = message;
+        this.type = type;
+        this.isRead = false;
+    }
 }

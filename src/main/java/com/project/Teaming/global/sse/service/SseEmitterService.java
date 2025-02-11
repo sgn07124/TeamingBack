@@ -48,7 +48,7 @@ public class SseEmitterService {
     /**
      * 이벤트가 구독되어 있는 클라이언트에게 데이터를 전송
      */
-    @Async
+    //@Async
     public void send(Long userId, EventPayload eventPayload) {
         sendToClient(userId, eventPayload);
     }
