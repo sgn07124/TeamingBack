@@ -10,6 +10,7 @@ import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.service.policy.MentoringParticipationPolicy;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.service.ReportService;
 import com.project.Teaming.domain.user.service.ReviewService;
 import com.project.Teaming.global.error.ErrorCode;
@@ -178,7 +179,7 @@ public class MentoringParticipationService {
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
-        removeParticipant(export,exportUser,mentoringTeam);
+        removeTeamUser(export,exportUser,mentoringTeam);
         return mentoringNotificationService.export(userId,teamId);
     }
 
@@ -211,7 +212,7 @@ public class MentoringParticipationService {
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
-        removeParticipant(teamUser,user,mentoringTeam);
+        removeTeamUser(teamUser,user,mentoringTeam);
         return mentoringNotificationService.delete(user.getId(),teamId);
     }
 
@@ -271,6 +272,13 @@ public class MentoringParticipationService {
     private void removeParticipant(MentoringParticipation mentoringParticipation,User user, MentoringTeam mentoringTeam) {
         mentoringParticipation.removeMentoringTeam(mentoringTeam);
         mentoringParticipation.removeUser(user);
+        mentoringParticipationRepository.delete(mentoringParticipation);
+    }
+
+    private void removeTeamUser(MentoringParticipation mentoringParticipation,User user, MentoringTeam mentoringTeam) {
+        mentoringParticipation.removeMentoringTeam(mentoringTeam);
+        mentoringParticipation.removeUser(user);
+        reportService.deleteAllReportsForMentoringParticipation(mentoringParticipation);
         mentoringParticipationRepository.delete(mentoringParticipation);
     }
 

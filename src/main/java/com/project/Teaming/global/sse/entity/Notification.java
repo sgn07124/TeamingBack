@@ -42,6 +42,7 @@ public class Notification {
         this.user = user;
         this.message = message;
         this.type = type;
+        this.teamId = null;
         this.isRead = false;
     }
 

@@ -65,4 +65,5 @@ public class Report extends BaseTimeEntity {
         report.status = ReportStatus.REPORTED;
         return report;
     }
+
 }

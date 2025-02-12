@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -117,7 +118,12 @@ public class MentoringReportService {
                         log.error("Failed to update Redis for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId(), e);
                     }
 
-                    mentoringNotificationService.warning(reportedUser.getId());
+                    try {
+                        List<Long> notificationIds = mentoringNotificationService.warning(reportedUser.getId());
+                        log.info("✅ Notifications sent: {}", notificationIds);
+                    } catch (Exception e) {
+                        log.error("❌ Failed to send notification for userId: {}", reportedUser.getId(), e);
+                    }
                 }
 
                 @Override

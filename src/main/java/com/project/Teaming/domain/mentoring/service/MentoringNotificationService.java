@@ -48,7 +48,7 @@ public class MentoringNotificationService {
                 mentoringTeam, null, MentoringAuthority.LEADER, MentoringParticipationStatus.ACCEPTED,
                 () -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
 
-        String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에 참가 신청을 했습니다.";
+        String message = user.getName() + " 님이 " + mentoringTeam.getName() + " 팀에 참가 신청을 했습니다.";
         return sendSingleNotification(leader.getUser().getId(), mentoringTeamId, message, NotificationType.MENTORING_TEAM_JOIN_REQUEST);
     }
 
@@ -56,7 +56,7 @@ public class MentoringNotificationService {
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        String message = mentoringTeam.getName() + "\"팀의 신청이 수락되었습니다.";
+        String message = mentoringTeam.getName() + " 팀의 신청이 수락되었습니다.";
         return sendSingleNotification(userId, mentoringTeamId, message, NotificationType.MENTORING_TEAM_ACCEPT);
     }
 
@@ -64,17 +64,15 @@ public class MentoringNotificationService {
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        String message = mentoringTeam.getName() + "\"팀의 신청이 거절되었습니다.";
+        String message = mentoringTeam.getName() + " 팀의 신청이 거절되었습니다.";
         return sendSingleNotification(userId, mentoringTeamId, message, NotificationType.MENTORING_TEAM_REJECT);
     }
 
     @NotifyAfterTransaction
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public List<Long> warning(Long userId) {
-
-        User user = userDataProvider.findUser(userId);
-
         String message = "경고 횟수가 증가하였습니다.";
+        log.info("MentoringNotification Service Warning 메서드");
         return sendSingleNotification(userId, null, message, NotificationType.WARNING_COUNT_INCREMENT);
     }
 
@@ -84,8 +82,8 @@ public class MentoringNotificationService {
         User user = userDataProvider.findUser(userId);
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), MentoringParticipationStatus.ACCEPTED);
-        String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에서 강퇴 되었습니다. 신고는 7일 이내에 가능합니다.";
+        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId());
+        String message = user.getName() + " 님이 " + mentoringTeam.getName() + " 팀에서 강퇴 되었습니다. 신고는 7일 이내에 가능합니다.";
 
         return sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_EXPORT);
     }
@@ -96,8 +94,8 @@ public class MentoringNotificationService {
         User user = userDataProvider.findUser(userId);
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), MentoringParticipationStatus.ACCEPTED);
-        String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에서 탈퇴 하였습니다. 신고는 7일 이내에 가능합니다.";
+        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId());
+        String message = user.getName() + " 님이 " + mentoringTeam.getName() + " 팀에서 탈퇴 하였습니다. 신고는 7일 이내에 가능합니다.";
 
         return sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_DELETE);
     }
@@ -106,7 +104,7 @@ public class MentoringNotificationService {
         Notification notification = (teamId == null)
                 ? notificationService.saveNotification(userId, message, type.getTitle())
                 : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle());
-
+        log.info("MentoringNotification Service sendSingleNotification 메서드 notification : {}", notification);
         return List.of(notification.getId());
     }
 

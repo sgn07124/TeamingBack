@@ -43,6 +43,7 @@ public class NotificationService {
         notification.setUser(user);
         notification.setMessage(message);
         notification.setType(type);
+        notification.setTeamId(null);
         notification.setRead(false);
         return notificationRepository.save(notification);
     }
