@@ -6,6 +6,7 @@ import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.sse.dto.EventPayload;
+import com.project.Teaming.global.sse.dto.EventWithTeamPayload;
 import com.project.Teaming.global.sse.repository.EmitterRepository;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +49,14 @@ public class SseEmitterService {
     /**
      * 이벤트가 구독되어 있는 클라이언트에게 데이터를 전송
      */
-    //@Async
+    @Async
     public void send(Long userId, EventPayload eventPayload) {
         sendToClient(userId, eventPayload);
+    }
+
+    @Async
+    public void sendWithTeamId(Long userId, EventWithTeamPayload eventWithTeamPayload) {
+        sendToClient(userId, eventWithTeamPayload);
     }
 
     private void sendToClient(Long userId, Object data) {

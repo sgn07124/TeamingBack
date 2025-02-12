@@ -6,6 +6,7 @@ import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.sse.dto.NotificationResponseDto;
+import com.project.Teaming.global.sse.dto.NotificationWithTeamResponse;
 import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import java.util.List;
@@ -47,10 +48,29 @@ public class NotificationService {
     }
 
     @Transactional
+    public Notification saveNotificationWithTeamId(Long userId, Long teamId, String message, String type) {
+        Notification notification = new Notification();
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        notification.setUser(user);
+        notification.setMessage(message);
+        notification.setTeamId(teamId);
+        notification.setType(type);
+        notification.setRead(false);
+        return notificationRepository.save(notification);
+    }
+
+    @Transactional
     public List<NotificationResponseDto> getNotifications() {
         List<Notification> notifications =  notificationRepository.findByUserId(getCurrentId());
         return notifications.stream()
                 .map(NotificationResponseDto::from).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<NotificationWithTeamResponse> getNotificationsWithTeam() {
+        List<Notification> notifications =  notificationRepository.findByUserId(getCurrentId());
+        return notifications.stream()
+                .map(NotificationWithTeamResponse::from).collect(Collectors.toList());
     }
 
     private Long getCurrentId() {

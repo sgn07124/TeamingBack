@@ -30,6 +30,8 @@ public class Notification {
 
     private String message;
 
+    private Long teamId;
+
     private String type;  // 알림 유형
 
     private boolean isRead; // 읽음 여부
@@ -39,6 +41,14 @@ public class Notification {
     public Notification(User user, String message, String type) {
         this.user = user;
         this.message = message;
+        this.type = type;
+        this.isRead = false;
+    }
+
+    public Notification(User user, String message, Long teamId, String type) {
+        this.user = user;
+        this.message = message;
+        this.teamId = teamId;
         this.type = type;
         this.isRead = false;
     }

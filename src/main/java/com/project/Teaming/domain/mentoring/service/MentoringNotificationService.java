@@ -12,6 +12,7 @@ import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.sse.dto.EventPayload;
+import com.project.Teaming.global.sse.dto.EventWithTeamPayload;
 import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.entity.NotificationType;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
@@ -22,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -49,21 +50,7 @@ public class MentoringNotificationService {
                 () -> new BusinessException(ErrorCode.MENTORING_PARTICIPATION_NOT_EXIST));
 
         String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에 참가 신청을 했습니다.";
-
-        Notification notification = notificationService.saveNotification(leader.getUser().getId(), message, NotificationType.MENTORING_TEAM_JOIN_REQUEST.getTitle());
-
-        try {
-            sseEmitterService.send(leader.getUser().getId(),
-                    EventPayload.builder()
-                            .userId(notification.getUser().getId())
-                            .type(notification.getType())
-                            .createdAt(notification.getCreatedAt().toString())
-                            .message(message)
-                            .isRead(notification.isRead())
-                            .build());
-        } catch (Exception e) {
-            System.out.println("❌ SSE 알림 전송 중 오류 발생: " + e.getMessage());
-        }
+        sendSingleNotification(leader.getUser().getId(), mentoringTeamId, message, NotificationType.MENTORING_TEAM_JOIN_REQUEST);
     }
 
     @Transactional
@@ -72,8 +59,7 @@ public class MentoringNotificationService {
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
         String message = mentoringTeam.getName() + "\"팀의 신청이 수락되었습니다.";
-        Notification notification = notificationService.saveNotification(userId, message, NotificationType.MENTORING_TEAM_ACCEPT.getTitle());
-        sendNotification(notification);
+        sendSingleNotification(userId, mentoringTeamId, message, NotificationType.MENTORING_TEAM_ACCEPT);
     }
 
     @Transactional
@@ -82,9 +68,7 @@ public class MentoringNotificationService {
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
         String message = mentoringTeam.getName() + "\"팀의 신청이 거절되었습니다.";
-        Notification notification = notificationService.saveNotification(userId, message, NotificationType.MENTORING_TEAM_REJECT.getTitle());
-
-        sendNotification(notification);
+        sendSingleNotification(userId, mentoringTeamId, message, NotificationType.MENTORING_TEAM_REJECT);
     }
 
     @Transactional
@@ -93,8 +77,7 @@ public class MentoringNotificationService {
         User user = userDataProvider.findUser(userId);
 
         String message = "경고 횟수가 증가하였습니다.";
-        Notification notification = notificationService.saveNotification(userId, message, NotificationType.WARNING_COUNT_INCREMENT.getTitle());
-        sendNotification(notification);
+        sendSingleNotification(userId, null, message, NotificationType.WARNING_COUNT_INCREMENT);
     }
 
 
@@ -107,14 +90,7 @@ public class MentoringNotificationService {
         List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), MentoringParticipationStatus.ACCEPTED);
         String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에서 강퇴 되었습니다. 신고는 7일 이내에 가능합니다.";
 
-        List<Notification> notifications = new ArrayList<>();
-
-        for (User u : users) {
-            notifications.add(new Notification(u, message, NotificationType.MENTORING_EXPORT.getTitle()));
-        }
-        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
-
-        savedNotifications.forEach(this::sendNotification);
+        sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_EXPORT);
     }
 
     @Transactional
@@ -126,30 +102,53 @@ public class MentoringNotificationService {
         List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), MentoringParticipationStatus.ACCEPTED);
         String message = user.getName() + " 님이 \"" + mentoringTeam.getName() + "\"팀에서 탈퇴 하였습니다. 신고는 7일 이내에 가능합니다.";
 
-        List<Notification> notifications = new ArrayList<>();
-
-        for (User u : users) {
-            notifications.add(new Notification(u, message, NotificationType.MENTORING_DELETE.getTitle()));
-        }
-        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
-
-        savedNotifications.forEach(this::sendNotification);
+        sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_DELETE);
     }
 
-    private void sendNotification(Notification notification) {
+    @Transactional
+    public void sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
+        Notification notification = (teamId == null)
+                ? notificationService.saveNotification(userId, message, type.getTitle())
+                : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle());
+
+        sendToClient(notification);
+    }
+
+    @Transactional
+    public void sendBulkNotification(List<User> users, Long teamId, String message, NotificationType type) {
+        List<Notification> notifications = users.stream()
+                .map(user -> new Notification(user, message, teamId, type.getTitle()))
+                .collect(Collectors.toList());
+
+        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
+        savedNotifications.forEach(this::sendToClient);
+    }
+
+
+    private void sendToClient(Notification notification) {
         try {
-            sseEmitterService.send(notification.getUser().getId(),
-                    EventPayload.builder()
-                            .userId(notification.getUser().getId())
-                            .type(notification.getType())
-                            .createdAt(notification.getCreatedAt().toString())
-                            .message(notification.getMessage())
-                            .isRead(notification.isRead())
-                            .build());
+            if (notification.getTeamId() != null) {
+                sseEmitterService.sendWithTeamId(notification.getUser().getId(),
+                        EventWithTeamPayload.builder()
+                                .userId(notification.getUser().getId())
+                                .type(notification.getType())
+                                .teamId(notification.getTeamId())
+                                .createdAt(notification.getCreatedAt().toString())
+                                .message(notification.getMessage())
+                                .isRead(notification.isRead())
+                                .build());
+            } else {
+                sseEmitterService.send(notification.getUser().getId(),
+                        EventPayload.builder()
+                                .userId(notification.getUser().getId())
+                                .type(notification.getType())
+                                .createdAt(notification.getCreatedAt().toString())
+                                .message(notification.getMessage())
+                                .isRead(notification.isRead())
+                                .build());
+            }
         } catch (Exception e) {
             log.error("❌ SSE 알림 전송 중 오류 발생: {}", e.getMessage(), e);
         }
     }
-
-
 }
