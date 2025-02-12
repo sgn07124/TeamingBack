@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
+import com.project.Teaming.domain.mentoring.annotation.NotifyAfterTransaction;
 import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
@@ -108,8 +109,9 @@ public class MentoringParticipationService {
      * @param team_Id
      * @param participant_id
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void acceptMentoringParticipation(Long teamId, Long participantId) {
+    public List<Long> acceptMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -124,7 +126,7 @@ public class MentoringParticipationService {
         //수락 처리
         mentoringParticipation.accept();
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(mentoringParticipation.getUser().getId()),MentoringParticipationStatus.ACCEPTED);
-        mentoringNotificationService.accept(acceptParticipationId, teamId);
+        return mentoringNotificationService.accept(acceptParticipationId, teamId);
     }
 
     /**
@@ -132,8 +134,9 @@ public class MentoringParticipationService {
      * @param teamId
      * @param participant_id
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void rejectMentoringParticipation(Long teamId, Long participantId) {
+    public List<Long> rejectMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -147,9 +150,9 @@ public class MentoringParticipationService {
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(rejectParticipation);
         //거절처리
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(rejectParticipation.getUser().getId()),MentoringParticipationStatus.REJECTED);
-        mentoringNotificationService.reject(rejectedUserId,teamId);
         // DB에서 지원자 데이터 삭제
         removeParticipant(rejectParticipation, rejectParticipation.getUser(), mentoringTeam);
+        return mentoringNotificationService.reject(rejectedUserId,teamId);
     }
 
     /**
@@ -158,8 +161,9 @@ public class MentoringParticipationService {
      * @param userId
      */
 
+    @NotifyAfterTransaction
     @Transactional
-    public void exportTeamUser(Long teamId, Long userId) {
+    public List<Long> exportTeamUser(Long teamId, Long userId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
         User exportUser = userDataProvider.findUser(userId);
@@ -174,16 +178,17 @@ public class MentoringParticipationService {
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
-        mentoringNotificationService.export(userId,teamId);
         removeParticipant(export,exportUser,mentoringTeam);
+        return mentoringNotificationService.export(userId,teamId);
     }
 
     /**
      * 탈퇴하는 로직
      * @param teamId
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void deleteUser(Long teamId) {
+    public List<Long> deleteUser(Long teamId) {
         User user = userDataProvider.getUser();
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
@@ -206,8 +211,8 @@ public class MentoringParticipationService {
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
-        mentoringNotificationService.delete(user.getId(),teamId);
         removeParticipant(teamUser,user,mentoringTeam);
+        return mentoringNotificationService.delete(user.getId(),teamId);
     }
 
     /**
