@@ -24,6 +24,8 @@ public interface ParticipationRepositoryCustom {
             MentoringParticipationStatus status
     );
 
+    List<User> findMemberUser(
+            Long teamId);
 
     Optional<MentoringParticipation> findFirstUser(Long teamId, MentoringParticipationStatus participationStatus, MentoringAuthority authority);
     List<MentoringParticipation> findParticipationWithStatusAndUser(User user, MentoringParticipationStatus status);

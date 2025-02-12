@@ -34,4 +34,9 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
             "AND r.reportedUser.id IN :userIds")
     Set<Long> findReportedUserIds(@Param("currentParticipationId") Long currentParticipationId,
                                   @Param("userIds") Set<Long> userIds);
+
+    @Modifying
+    @Query("DELETE FROM Report r WHERE r.mentoringParticipation = :mentoringParticipation")
+    void deleteAllByMentoringParticipation(@Param("mentoringParticipation") MentoringParticipation mentoringParticipation);
+
 }

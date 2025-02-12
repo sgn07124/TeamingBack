@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.service;
 
+import com.project.Teaming.domain.mentoring.annotation.NotifyAfterTransaction;
 import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
 import com.project.Teaming.domain.mentoring.dto.response.*;
 import com.project.Teaming.domain.mentoring.entity.*;
@@ -9,10 +10,13 @@ import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.mentoring.service.policy.MentoringParticipationPolicy;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.service.ReportService;
 import com.project.Teaming.domain.user.service.ReviewService;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.*;
+import com.project.Teaming.global.sse.service.NotificationService;
+import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -39,6 +43,7 @@ public class MentoringParticipationService {
     private final RedisApplicantManagementService redisApplicantManagementService;
     private final ReviewService reviewService;
     private final ReportService reportService;
+    private final MentoringNotificationService mentoringNotificationService;
 
     /**
      * 지원자로 등록하는 로직
@@ -78,6 +83,8 @@ public class MentoringParticipationService {
         MentoringParticipation savedParticipation = mentoringParticipationRepository.save(mentoringParticipation);
         TeamParticipationResponse participationDto = TeamParticipationResponse.toParticipationDto(savedParticipation);
         redisApplicantManagementService.saveApplicantWithTTL(mentoringTeam.getId(),participationDto,post.getDeadLine());
+        // 알림
+        mentoringNotificationService.participate(user.getId(),mentoringTeam.getId());
         return savedParticipation;
     }
 
@@ -103,8 +110,9 @@ public class MentoringParticipationService {
      * @param team_Id
      * @param participant_id
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void acceptMentoringParticipation(Long teamId, Long participantId) {
+    public List<Long> acceptMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -115,9 +123,11 @@ public class MentoringParticipationService {
         MentoringParticipation mentoringParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
         //검증
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(mentoringParticipation);
+        Long acceptParticipationId = mentoringParticipation.getUser().getId();
         //수락 처리
         mentoringParticipation.accept();
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(mentoringParticipation.getUser().getId()),MentoringParticipationStatus.ACCEPTED);
+        return mentoringNotificationService.accept(acceptParticipationId, teamId);
     }
 
     /**
@@ -125,8 +135,9 @@ public class MentoringParticipationService {
      * @param teamId
      * @param participant_id
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void rejectMentoringParticipation(Long teamId, Long participantId) {
+    public List<Long> rejectMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -135,12 +146,14 @@ public class MentoringParticipationService {
                  () -> new BusinessException(ErrorCode.NOT_A_LEADER));
 
         MentoringParticipation rejectParticipation = mentoringParticipationDataProvider.findParticipation(participantId);
+        Long rejectedUserId = rejectParticipation.getUser().getId();
 
         mentoringParticipationPolicy.validateParticipationStatusForAcceptance(rejectParticipation);
         //거절처리
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(rejectParticipation.getUser().getId()),MentoringParticipationStatus.REJECTED);
         // DB에서 지원자 데이터 삭제
         removeParticipant(rejectParticipation, rejectParticipation.getUser(), mentoringTeam);
+        return mentoringNotificationService.reject(rejectedUserId,teamId);
     }
 
     /**
@@ -149,8 +162,9 @@ public class MentoringParticipationService {
      * @param userId
      */
 
+    @NotifyAfterTransaction
     @Transactional
-    public void exportTeamUser(Long teamId, Long userId) {
+    public List<Long> exportTeamUser(Long teamId, Long userId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
         User exportUser = userDataProvider.findUser(userId);
@@ -165,15 +179,17 @@ public class MentoringParticipationService {
         // 강퇴
         TeamUserResponse exportedParticipation = export.export();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
-        removeParticipant(export,exportUser,mentoringTeam);
+        removeTeamUser(export,exportUser,mentoringTeam);
+        return mentoringNotificationService.export(userId,teamId);
     }
 
     /**
      * 탈퇴하는 로직
      * @param teamId
      */
+    @NotifyAfterTransaction
     @Transactional
-    public void deleteUser(Long teamId) {
+    public List<Long> deleteUser(Long teamId) {
         User user = userDataProvider.getUser();
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
@@ -196,7 +212,8 @@ public class MentoringParticipationService {
         }
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
-        removeParticipant(teamUser,user,mentoringTeam);
+        removeTeamUser(teamUser,user,mentoringTeam);
+        return mentoringNotificationService.delete(user.getId(),teamId);
     }
 
     /**
@@ -255,6 +272,13 @@ public class MentoringParticipationService {
     private void removeParticipant(MentoringParticipation mentoringParticipation,User user, MentoringTeam mentoringTeam) {
         mentoringParticipation.removeMentoringTeam(mentoringTeam);
         mentoringParticipation.removeUser(user);
+        mentoringParticipationRepository.delete(mentoringParticipation);
+    }
+
+    private void removeTeamUser(MentoringParticipation mentoringParticipation,User user, MentoringTeam mentoringTeam) {
+        mentoringParticipation.removeMentoringTeam(mentoringTeam);
+        mentoringParticipation.removeUser(user);
+        reportService.deleteAllReportsForMentoringParticipation(mentoringParticipation);
         mentoringParticipationRepository.delete(mentoringParticipation);
     }
 
