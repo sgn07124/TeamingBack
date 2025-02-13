@@ -59,6 +59,10 @@ public class SseEmitterService {
         sendToClient(userId, eventWithTeamPayload);
     }
 
+    public void sendWithTeamIdWithOutAsync(Long userId, EventWithTeamPayload eventWithTeamPayload) {
+        sendToClient(userId, eventWithTeamPayload);
+    }
+
     private void sendToClient(Long userId, Object data) {
         SseEmitter sseEmitter = emitterRepository.findById(userId);
 
