@@ -180,6 +180,7 @@ public class MentoringParticipationService {
         TeamUserResponse exportedParticipation = export.export();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
         removeTeamUser(export,exportUser,mentoringTeam);
+        mentoringNotificationService.notifyExportedUser(userId,teamId);
         return mentoringNotificationService.export(userId,teamId);
     }
 
