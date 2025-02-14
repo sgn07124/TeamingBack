@@ -137,20 +137,24 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .fetch();
     }
     @Override
-    public List<User> findMemberUser(Long teamId) {
+    public List<User> findMemberUser(Long teamId, MentoringAuthority mentoringAuthority) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
         QUser u = QUser.user;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(mp.mentoringTeam.id.eq(teamId));
+        builder.and(mp.participationStatus.eq(MentoringParticipationStatus.ACCEPTED));
+
+        if (mentoringAuthority != null) {
+            builder.and(mp.authority.eq(mentoringAuthority));
+        }
 
         return queryFactory
                 .select(u)
                 .from(mp)
                 .join(mp.user, u)
-                .where(
-                        mp.participationStatus.eq(MentoringParticipationStatus.ACCEPTED),
-                        mp.authority.eq(MentoringAuthority.CREW),
-                        mp.mentoringTeam.id.eq(teamId)
-                )
+                .where(builder)
                 .fetch();
     }
 

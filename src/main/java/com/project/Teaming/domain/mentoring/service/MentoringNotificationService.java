@@ -12,10 +12,12 @@ import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRep
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import com.project.Teaming.global.sse.dto.EventPayload;
 import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.entity.NotificationType;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import com.project.Teaming.global.sse.service.NotificationService;
+import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +38,7 @@ public class MentoringNotificationService {
     private final MentoringParticipationDataProvider mentoringParticipationDataProvider;
     private final MentoringParticipationRepository mentoringParticipationRepository;
     private final NotificationRepository notificationRepository;
+    private final SseEmitterService sseEmitterService;
 
     @NotifyAfterTransaction
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -76,15 +79,39 @@ public class MentoringNotificationService {
         return sendSingleNotification(userId, null, message, NotificationType.WARNING_COUNT_INCREMENT);
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void notifyExportedUser(Long userId, Long mentoringTeamId) {
+
+        User user = userDataProvider.findUser(userId);
+        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
+
+        String message =mentoringTeam.getName() + " 팀에서 강퇴되었습니다.";
+
+        Notification notification = new Notification(user, message, mentoringTeam.getId(), NotificationType.MENTORING_EXPORT2.getTitle());
+        notificationRepository.save(notification);
+
+        try {
+            sseEmitterService.send(user.getId(),
+                    EventPayload.builder()
+                            .userId(notification.getUser().getId())
+                            .type(notification.getType())
+                            .createdAt(notification.getCreatedAt().toString())
+                            .message(message)
+                            .isRead(false)
+                            .build());
+        } catch (Exception e) {
+            log.error("❌ 강퇴된 사용자 SSE 알림 전송 실패: {}", e.getMessage(), e);
+        }
+    }
+
 
     public List<Long> export(Long userId, Long mentoringTeamId) {
 
         User user = userDataProvider.findUser(userId);
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId());
+        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), MentoringAuthority.CREW);
         String message = user.getName() + " 님이 " + mentoringTeam.getName() + " 팀에서 강퇴 되었습니다. 신고는 7일 이내에 가능합니다.";
-
         return sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_EXPORT);
     }
 
@@ -94,7 +121,7 @@ public class MentoringNotificationService {
         User user = userDataProvider.findUser(userId);
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
 
-        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId());
+        List<User> users = mentoringParticipationRepository.findMemberUser(mentoringTeam.getId(), null);
         String message = user.getName() + " 님이 " + mentoringTeam.getName() + " 팀에서 탈퇴 하였습니다. 신고는 7일 이내에 가능합니다.";
 
         return sendBulkNotification(users, mentoringTeamId, message, NotificationType.MENTORING_DELETE);
