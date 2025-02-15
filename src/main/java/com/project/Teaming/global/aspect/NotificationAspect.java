@@ -54,7 +54,8 @@ public class NotificationAspect {
      */
     private boolean shouldProcessMultiThreading(Notification notification) {
         return
-                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle())  || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle()));
+                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle())  || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle())
+                        || notification.getType().equals(NotificationType.WELCOME_USER.getTitle()));
     }
 
     private void sendWithMultiThreading(Notification notification) {

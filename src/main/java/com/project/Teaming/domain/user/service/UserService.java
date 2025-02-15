@@ -1,7 +1,5 @@
 package com.project.Teaming.domain.user.service;
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
-import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
@@ -20,6 +18,7 @@ import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 
+import com.project.Teaming.global.sse.repository.NotificationRepository;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,7 +36,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -45,6 +43,7 @@ public class UserService {
     private final StackRepository stackRepository;
     private final UserStackRepository userStackRepository;
     private final ReviewRepository reviewRepository;
+    private final UserNotificationService userNotificationService;
 
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
@@ -60,7 +59,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-
+    @Transactional
     public void saveUserInfo(RegisterDto dto) {
         log.info("email : " + getSecurityUserDto().getEmail());
         User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
@@ -77,6 +76,7 @@ public class UserService {
 
         portfolioRepository.save(portfolio);
         userRepository.save(user);
+        userNotificationService.join(user);
     }
 
     private void saveUserStacks(RegisterDto dto, Portfolio portfolio) {
