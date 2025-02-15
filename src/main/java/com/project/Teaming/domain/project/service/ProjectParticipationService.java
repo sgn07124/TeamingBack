@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ProjectParticipationService {
 
     private final ProjectParticipationRepository projectParticipationRepository;
@@ -40,6 +39,7 @@ public class ProjectParticipationService {
     private final ReviewRepository reviewRepository;
     private final ProjectNotificationService projectNotificationService;
 
+    @Transactional
     public void createParticipation(ProjectTeam projectTeam) {
         User user = getLoginUser();
         ProjectParticipation projectParticipation = ProjectParticipation.create(user, projectTeam);
@@ -57,6 +57,7 @@ public class ProjectParticipationService {
         return securityUser.getUserId();
     }
 
+    @Transactional
     public void joinTeam(JoinTeamDto dto) {
         ProjectTeam projectTeam = projectTeamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
@@ -84,8 +85,7 @@ public class ProjectParticipationService {
         projectNotificationService.participateTeam(projectTeam, user);
     }
 
-
-
+    @Transactional
     public void cancelTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -100,6 +100,7 @@ public class ProjectParticipationService {
         }
     }
 
+    @Transactional
     public void quitTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -128,6 +129,7 @@ public class ProjectParticipationService {
         }
     }
 
+    @Transactional
     public void acceptedMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -143,6 +145,7 @@ public class ProjectParticipationService {
         }
     }
 
+    @Transactional
     public void rejectedMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -158,12 +161,14 @@ public class ProjectParticipationService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectParticipationInfoDto> getAllParticipationDtos(Long teamId) {
         return projectParticipationRepository.findByProjectTeamId(teamId).stream()
                 .map(ProjectParticipationInfoDto::new)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public void exportMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -183,6 +188,7 @@ public class ProjectParticipationService {
         return user.getId().equals(teamOwner.getUser().getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectTeamMemberDto> getAllMembers(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
