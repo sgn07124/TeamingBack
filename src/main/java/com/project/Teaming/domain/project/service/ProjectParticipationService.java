@@ -16,15 +16,9 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
-import com.project.Teaming.global.sse.dto.EventPayload;
-import com.project.Teaming.global.sse.entity.Notification;
-import com.project.Teaming.global.sse.service.NotificationService;
-import com.project.Teaming.global.sse.entity.NotificationType;
-import com.project.Teaming.global.sse.service.SseEmitterService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +38,7 @@ public class ProjectParticipationService {
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final ReviewRepository reviewRepository;
-    private final SseEmitterService sseEmitterService;
-    private final NotificationService notificationService;
+    private final ProjectNotificationService projectNotificationService;
 
     public void createParticipation(ProjectTeam projectTeam) {
         User user = getLoginUser();
@@ -87,28 +80,11 @@ public class ProjectParticipationService {
         newParticipation.joinTeamMember(user, projectTeam, dto.getRecruitCategory());
         projectParticipationRepository.save(newParticipation);
 
-        ProjectParticipation teamLeader = projectParticipationRepository.findByProjectTeamIdAndRole(projectTeam.getId(), ProjectRole.OWNER)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
-        String message = user.getName() + " 님이 \"" + projectTeam.getName() + "\"팀에 참가 신청을 했습니다.";
-        System.out.println(message);
-        Notification notification = notificationService.saveNotification(teamLeader.getUser().getId(), message, NotificationType.TEAM_JOIN_REQUEST.getTitle());  // db에 저장
-        // 실시간 전송 (연결 설정된 경우에만 전송 가능)
-        CompletableFuture.runAsync(() -> {
-            try {
-                sseEmitterService.send(teamLeader.getUser().getId(),
-                        EventPayload.builder()
-                                .userId(notification.getUser().getId())
-                                .type(notification.getType())
-                                .createdAt(notification.getCreatedAt().toString())
-                                .message(message)
-                                .isRead(notification.isRead())
-                                .build());
-            } catch (Exception e) {
-                System.out.println("❌ SSE 알림 전송 중 오류 발생: " + e.getMessage());
-            }
-        });
-
+        // 알림
+        projectNotificationService.participateTeam(projectTeam, user);
     }
+
+
 
     public void cancelTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
