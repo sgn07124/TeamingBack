@@ -1,6 +1,5 @@
 package com.project.Teaming.domain.mentoring.service;
 
-import com.project.Teaming.domain.mentoring.annotation.NotifyAfterTransaction;
 import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
@@ -10,6 +9,7 @@ import com.project.Teaming.domain.mentoring.provider.MentoringTeamDataProvider;
 import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
 import com.project.Teaming.domain.user.entity.User;
+import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.sse.dto.EventPayload;
