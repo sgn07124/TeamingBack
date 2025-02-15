@@ -1,4 +1,4 @@
-package com.project.Teaming.domain.mentoring.annotation;
+package com.project.Teaming.global.annotation;
 
 
 import java.lang.annotation.ElementType;
