@@ -1,4 +1,4 @@
-package com.project.Teaming.domain.mentoring.aspect;
+package com.project.Teaming.global.aspect;
 
 import com.project.Teaming.global.sse.dto.EventPayload;
 import com.project.Teaming.global.sse.dto.EventWithTeamPayload;
@@ -8,12 +8,10 @@ import com.project.Teaming.global.sse.repository.NotificationRepository;
 import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
-
-
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
