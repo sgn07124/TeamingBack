@@ -32,7 +32,7 @@ public class NotificationAspect {
      * @param joinPoint - 실행된 메서드 정보
      * @param notificationIds - 트랜잭션에서 저장된 알림 ID 리스트
      */
-    @AfterReturning(value = "@annotation(com.project.Teaming.domain.mentoring.annotation.NotifyAfterTransaction)", returning = "notificationIds")
+    @AfterReturning(value = "@annotation(com.project.Teaming.global.annotation.NotifyAfterTransaction)", returning = "notificationIds")
     public void sendNotificationsAfterTransaction(JoinPoint joinPoint, List<Long> notificationIds) {
         log.info("✅ 트랜잭션 종료 후 알림 전송 시작: {}", notificationIds);
 
@@ -54,7 +54,8 @@ public class NotificationAspect {
      */
     private boolean shouldProcessMultiThreading(Notification notification) {
         return
-                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle())  || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle()));
+                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle())  || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle())
+                        || notification.getType().equals(NotificationType.WELCOME_USER.getTitle()));
     }
 
     private void sendWithMultiThreading(Notification notification) {

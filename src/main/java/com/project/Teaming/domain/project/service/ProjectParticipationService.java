@@ -13,18 +13,13 @@ import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
+import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
-import com.project.Teaming.global.sse.dto.EventPayload;
-import com.project.Teaming.global.sse.entity.Notification;
-import com.project.Teaming.global.sse.service.NotificationService;
-import com.project.Teaming.global.sse.entity.NotificationType;
-import com.project.Teaming.global.sse.service.SseEmitterService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class ProjectParticipationService {
 
     private final ProjectParticipationRepository projectParticipationRepository;
@@ -44,9 +38,9 @@ public class ProjectParticipationService {
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
     private final ReviewRepository reviewRepository;
-    private final SseEmitterService sseEmitterService;
-    private final NotificationService notificationService;
+    private final ProjectNotificationService projectNotificationService;
 
+    @Transactional
     public void createParticipation(ProjectTeam projectTeam) {
         User user = getLoginUser();
         ProjectParticipation projectParticipation = ProjectParticipation.create(user, projectTeam);
@@ -64,6 +58,7 @@ public class ProjectParticipationService {
         return securityUser.getUserId();
     }
 
+    @Transactional
     public void joinTeam(JoinTeamDto dto) {
         ProjectTeam projectTeam = projectTeamRepository.findById(dto.getTeamId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
@@ -87,29 +82,11 @@ public class ProjectParticipationService {
         newParticipation.joinTeamMember(user, projectTeam, dto.getRecruitCategory());
         projectParticipationRepository.save(newParticipation);
 
-        ProjectParticipation teamLeader = projectParticipationRepository.findByProjectTeamIdAndRole(projectTeam.getId(), ProjectRole.OWNER)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
-        String message = user.getName() + " 님이 \"" + projectTeam.getName() + "\"팀에 참가 신청을 했습니다.";
-        System.out.println(message);
-        Notification notification = notificationService.saveNotification(teamLeader.getUser().getId(), message, NotificationType.TEAM_JOIN_REQUEST.getTitle());  // db에 저장
-        // 실시간 전송 (연결 설정된 경우에만 전송 가능)
-        CompletableFuture.runAsync(() -> {
-            try {
-                sseEmitterService.send(teamLeader.getUser().getId(),
-                        EventPayload.builder()
-                                .userId(notification.getUser().getId())
-                                .type(notification.getType())
-                                .createdAt(notification.getCreatedAt().toString())
-                                .message(message)
-                                .isRead(notification.isRead())
-                                .build());
-            } catch (Exception e) {
-                System.out.println("❌ SSE 알림 전송 중 오류 발생: " + e.getMessage());
-            }
-        });
-
+        // 알림
+        projectNotificationService.participateTeam(projectTeam, user);
     }
 
+    @Transactional
     public void cancelTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -124,7 +101,9 @@ public class ProjectParticipationService {
         }
     }
 
-    public void quitTeam(Long teamId) {
+    @Transactional
+    @NotifyAfterTransaction
+    public List<Long> quitTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
@@ -147,11 +126,13 @@ public class ProjectParticipationService {
                 projectParticipation.updateOwnerRole();
             }
             projectParticipation.quitTeam();
+            return projectNotificationService.quit(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
         }
     }
 
+    @Transactional
     public void acceptedMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -162,11 +143,13 @@ public class ProjectParticipationService {
 
         if (joinMember.canAccept() && isTeamOwner(user, teamOwner)) {
             joinMember.acceptTeam();
+            projectNotificationService.accept(joinMember);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_ACCEPT_MEMBER);
         }
     }
 
+    @Transactional
     public void rejectedMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
@@ -177,18 +160,22 @@ public class ProjectParticipationService {
 
         if (joinMember.canReject() && isTeamOwner(user, teamOwner)) {
             joinMember.rejectTeam();
+            projectNotificationService.reject(joinMember);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_REJECT_MEMBER);
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectParticipationInfoDto> getAllParticipationDtos(Long teamId) {
         return projectParticipationRepository.findByProjectTeamId(teamId).stream()
                 .map(ProjectParticipationInfoDto::new)
                 .collect(Collectors.toList());
     }
 
-    public void exportMember(Long teamId, Long userId) {
+    @Transactional
+    @NotifyAfterTransaction
+    public List<Long> exportMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
         ProjectParticipation exportMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
@@ -198,6 +185,7 @@ public class ProjectParticipationService {
 
         if (isTeamOwner(user, teamOwner)) {
             exportMember.exportTeam();
+            return projectNotificationService.export(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
         }
@@ -207,6 +195,7 @@ public class ProjectParticipationService {
         return user.getId().equals(teamOwner.getUser().getId());
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectTeamMemberDto> getAllMembers(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));

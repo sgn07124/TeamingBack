@@ -26,6 +26,7 @@ public class ProjectReportService {
     private final ProjectParticipationRepository projectParticipationRepository;
     private final UserRepository userRepository;
     private final ReportRepository reportRepository;
+    private final ProjectNotificationService projectNotificationService;
 
     private User getLoginUser() {
         return userRepository.findById(getCurrentId())
@@ -100,6 +101,7 @@ public class ProjectReportService {
             User reportedUser = reportedParticipation.getUser();
             reportedUser.incrementWarningCnt();
             userRepository.save(reportedUser);
+            projectNotificationService.warning(reportedUser);
 
             // 처리된 신고에 대해 warningProcess = true 설정
             reportRepository.updateWarningProcessedByReportedUserAndTeamId(reportedUserId, teamId);

@@ -3,6 +3,7 @@ package com.project.Teaming.domain.project.repository;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
+import com.project.Teaming.domain.user.entity.User;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -40,6 +41,12 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
      * @param status 팀에 수락된 상태
      */
     List<ProjectParticipation> findByProjectTeamIdAndParticipationStatus(Long projectTeamId, ParticipationStatus status);
+
+    @Query("SELECT p.user FROM ProjectParticipation p WHERE p.projectTeam.id = :teamId AND p.participationStatus = :status AND p.isDeleted = :isDeleted AND p.isExport = :isExport")
+    List<User> findUsersByTeamIdAndStatus(@Param("teamId") Long teamId,
+                                          @Param("status") ParticipationStatus status,
+                                          @Param("isDeleted") boolean isDeleted,
+                                          @Param("isExport") boolean isExport);
 
     long countByProjectTeamIdAndParticipationStatusAndIsDeleted(Long teamId, ParticipationStatus status, boolean delete);
 

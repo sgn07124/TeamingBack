@@ -6,7 +6,6 @@ import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.sse.dto.NotificationResponseDto;
-import com.project.Teaming.global.sse.dto.NotificationWithTeamResponse;
 import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import java.util.List;
@@ -15,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -62,16 +62,14 @@ public class NotificationService {
 
     @Transactional
     public List<NotificationResponseDto> getNotifications() {
-        List<Notification> notifications =  notificationRepository.findByUserId(getCurrentId());
+        List<Notification> notifications =  notificationRepository.findByUserId(getCurrentId(), Sort.by(Sort.Order.desc("createdAt")));
         return notifications.stream()
                 .map(NotificationResponseDto::from).collect(Collectors.toList());
     }
 
-    @Transactional
-    public List<NotificationWithTeamResponse> getNotificationsWithTeam() {
-        List<Notification> notifications =  notificationRepository.findByUserId(getCurrentId());
-        return notifications.stream()
-                .map(NotificationWithTeamResponse::from).collect(Collectors.toList());
+    public void deleteNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_NOTIFICATION));
+        notificationRepository.delete(notification);
     }
 
     private Long getCurrentId() {
