@@ -157,6 +157,7 @@ public class ProjectParticipationService {
 
         if (joinMember.canReject() && isTeamOwner(user, teamOwner)) {
             joinMember.rejectTeam();
+            projectNotificationService.reject(joinMember);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_REJECT_MEMBER);
         }

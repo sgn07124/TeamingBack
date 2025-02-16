@@ -48,6 +48,13 @@ public class ProjectNotificationService {
         return sendSingleNotification(joinMember.getUser().getId(), joinMember.getProjectTeam().getId(), message, NotificationType.PROJECT_TEAM_ACCEPT);
     }
 
+    @NotifyAfterTransaction
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<Long> reject(ProjectParticipation joinMember) {
+        String message = "\"" + joinMember.getProjectTeam().getName() + "\" 팀의 신청이 거절되었습니다.";
+        return sendSingleNotification(joinMember.getUser().getId(), joinMember.getProjectTeam().getId(), message, NotificationType.PROJECT_TEAM_REJECT);
+    }
+
     // 한 명
     public List<Long> sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
         Notification notification = (teamId == null)
