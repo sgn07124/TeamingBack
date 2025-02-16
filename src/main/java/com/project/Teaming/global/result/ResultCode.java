@@ -73,7 +73,10 @@ public enum ResultCode {
     REVIEW_TEAM_USER(200, "M021", "멘토링 팀원에게 리뷰작성 완료"),
     FIND_MENTORING_CATEGORY(200, "M022", "멘토링 모집 카테고리 조회완료"),
     FIND_ALL_MENTORING_CATEGORY(200, "M023", "멘토링의 모든 모집 카테고리 조회완료"),
-    GET_ALL_USER_MENTORING_TEAM(200,"M024","유저의 모든 멘토링팀 모두 조회완료");
+    GET_ALL_USER_MENTORING_TEAM(200,"M024","유저의 모든 멘토링팀 모두 조회완료"),
+
+    // Notification
+    DELETE_NOTIFICATION(200, "N001", "알림 삭제 완료");
 
     private int status;
     private final String code;

@@ -1,5 +1,7 @@
 package com.project.Teaming.global.sse.controller;
 
+import com.project.Teaming.global.result.ResultCode;
+import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.sse.dto.EventPayload;
 import com.project.Teaming.global.sse.dto.NotificationResponseDto;
 import com.project.Teaming.global.sse.service.NotificationService;
@@ -8,7 +10,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,5 +44,12 @@ public class SseController {
     @Operation(summary = "알림 내역 조회", description = "로그인 한 사용자가 수신한 알림 내역을 조회한다.")
     public List<NotificationResponseDto> getNotifications() {
         return notificationService.getNotifications();
+    }
+
+    @DeleteMapping("/notification/{notificationId}")
+    @Operation(summary = "알림 삭제", description = "특정 알림을 삭제한다.")
+    public ResultDetailResponse<Void> deleteNotification(@PathVariable Long notificationId) {
+        notificationService.deleteNotification(notificationId);
+        return new ResultDetailResponse<>(ResultCode.DELETE_NOTIFICATION, null);
     }
 }

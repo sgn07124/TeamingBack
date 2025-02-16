@@ -80,7 +80,10 @@ public enum ErrorCode {
     NOT_A_TEAM_USER(404, "R005", "신고할 수 있는 권한이 없습니다."),
     ALREADY_REPORTED(404, "R006", "이미 신고한 사용자입니다."),
     ALREADY_REVIEWED(404, "R007", "이미 리뷰를 작성한 사용자입니다."),
-    CANNOT_REVIEW(404, "R008", "아직 팀 상태가 완료되지 않았거나 강퇴나 탈퇴하지 않은 사용자입니다.");
+    CANNOT_REVIEW(404, "R008", "아직 팀 상태가 완료되지 않았거나 강퇴나 탈퇴하지 않은 사용자입니다."),
+
+    // notification
+    NOT_FOUND_NOTIFICATION(404, "N001", "id에 해당되는 알림이 존재하지 않습니다.");
 
     private int status;
     private final String code;

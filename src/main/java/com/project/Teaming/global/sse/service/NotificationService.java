@@ -67,6 +67,11 @@ public class NotificationService {
                 .map(NotificationResponseDto::from).collect(Collectors.toList());
     }
 
+    public void deleteNotification(Long notificationId) {
+        Notification notification = notificationRepository.findById(notificationId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_NOTIFICATION));
+        notificationRepository.delete(notification);
+    }
+
     private Long getCurrentId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
