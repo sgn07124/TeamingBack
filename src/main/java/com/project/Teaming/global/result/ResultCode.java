@@ -76,7 +76,8 @@ public enum ResultCode {
     GET_ALL_USER_MENTORING_TEAM(200,"M024","유저의 모든 멘토링팀 모두 조회완료"),
 
     // Notification
-    DELETE_NOTIFICATION(200, "N001", "알림 삭제 완료");
+    GET_NOTIFICATIONS(200, "N001", "전체 알림 조회 완료"),
+    DELETE_NOTIFICATION(200, "N002", "알림 삭제 완료");
 
     private int status;
     private final String code;
