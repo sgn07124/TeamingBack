@@ -1,9 +1,11 @@
 package com.project.Teaming.domain.project.service;
 
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.repository.ProjectParticipationRepository;
+import com.project.Teaming.domain.project.repository.ProjectTeamRepository;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
@@ -27,6 +29,7 @@ public class ProjectNotificationService {
 
     private final ProjectParticipationRepository projectParticipationRepository;
     private final NotificationRepository notificationRepository;
+    private final ProjectTeamRepository projectTeamRepository;
     private final NotificationService notificationService;
 
     /**
@@ -53,6 +56,13 @@ public class ProjectNotificationService {
     public List<Long> reject(ProjectParticipation joinMember) {
         String message = "\"" + joinMember.getProjectTeam().getName() + "\" 팀의 신청이 거절되었습니다.";
         return sendSingleNotification(joinMember.getUser().getId(), joinMember.getProjectTeam().getId(), message, NotificationType.PROJECT_TEAM_REJECT);
+    }
+
+    public List<Long> quit(Long teamId, User quitUser) {
+        List<User> users = projectParticipationRepository.findUsersByTeamIdAndStatus(teamId, ParticipationStatus.ACCEPTED, false, false);
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        String message = "\"" + quitUser.getName() + "\" 님이 " + "\"" + projectTeam.getName() + "\" 팀에서 탈퇴 하였습니다. 신고는 7일 이내에 가능합니다.";
+        return sendBulkNotification(users, teamId, message, NotificationType.PROJECT_TEAM_QUIT);
     }
 
     // 한 명

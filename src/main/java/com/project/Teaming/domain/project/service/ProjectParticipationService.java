@@ -13,6 +13,7 @@ import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
+import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
@@ -101,7 +102,8 @@ public class ProjectParticipationService {
     }
 
     @Transactional
-    public void quitTeam(Long teamId) {
+    @NotifyAfterTransaction
+    public List<Long> quitTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
@@ -124,6 +126,7 @@ public class ProjectParticipationService {
                 projectParticipation.updateOwnerRole();
             }
             projectParticipation.quitTeam();
+            return projectNotificationService.quit(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
         }
