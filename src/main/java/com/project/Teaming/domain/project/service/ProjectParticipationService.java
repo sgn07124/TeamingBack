@@ -140,6 +140,7 @@ public class ProjectParticipationService {
 
         if (joinMember.canAccept() && isTeamOwner(user, teamOwner)) {
             joinMember.acceptTeam();
+            projectNotificationService.accept(joinMember);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_ACCEPT_MEMBER);
         }

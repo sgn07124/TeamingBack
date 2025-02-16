@@ -8,6 +8,7 @@ import lombok.Getter;
 public enum NotificationType {
 
     TEAM_JOIN_REQUEST("프로젝트"),
+    PROJECT_TEAM_ACCEPT("프로젝트"),
     MENTORING_TEAM_JOIN_REQUEST("멘토링 팀 신청 알림"),
     MENTORING_TEAM_ACCEPT("멘토링 수락 알림"),
     MENTORING_TEAM_REJECT("멘토링 거절 알림"),

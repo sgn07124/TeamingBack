@@ -12,7 +12,6 @@ import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.entity.NotificationType;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import com.project.Teaming.global.sse.service.NotificationService;
-import com.project.Teaming.global.sse.service.SseEmitterService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +39,13 @@ public class ProjectNotificationService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_OWNER));
         String message = user.getName() + " 님이 \"" + projectTeam.getName() + "\"팀에 참가 신청을 했습니다.";
         return sendSingleNotification(teamLeader.getUser().getId(), teamLeader.getProjectTeam().getId(), message, NotificationType.TEAM_JOIN_REQUEST);
+    }
+
+    @NotifyAfterTransaction
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<Long> accept(ProjectParticipation joinMember) {
+        String message = "\"" + joinMember.getProjectTeam().getName() + "\" 팀의 신청이 수락되었습니다.";
+        return sendSingleNotification(joinMember.getUser().getId(), joinMember.getProjectTeam().getId(), message, NotificationType.PROJECT_TEAM_ACCEPT);
     }
 
     // 한 명

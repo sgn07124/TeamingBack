@@ -30,7 +30,7 @@ public class UserNotificationService {
         Notification notification = (teamId == null)
                 ? notificationService.saveNotification(userId, message, type.getTitle())
                 : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle());
-        log.info("MentoringNotification Service sendSingleNotification 메서드 notification : {}", notification);
+        log.info("UserNotification Service sendSingleNotification 메서드 notification : {}", notification);
         return List.of(notification.getId());
     }
 }
