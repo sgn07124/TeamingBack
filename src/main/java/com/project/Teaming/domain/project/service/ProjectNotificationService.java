@@ -72,6 +72,13 @@ public class ProjectNotificationService {
         return sendBulkNotification(users, teamId, message, NotificationType.PROJECT_TEAM_EXPORT);
     }
 
+    @NotifyAfterTransaction
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public List<Long> warning(User reportedUser) {
+        String message = "경고 횟수가 " + reportedUser.getWarningCount() + "로 증가했습니다.";
+        return sendSingleNotification(reportedUser.getId(), null, message, NotificationType.WARNING);
+    }
+
     // 한 명
     public List<Long> sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
         Notification notification = (teamId == null)
