@@ -174,7 +174,8 @@ public class ProjectParticipationService {
     }
 
     @Transactional
-    public void exportMember(Long teamId, Long userId) {
+    @NotifyAfterTransaction
+    public List<Long> exportMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
         ProjectParticipation exportMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
@@ -184,6 +185,7 @@ public class ProjectParticipationService {
 
         if (isTeamOwner(user, teamOwner)) {
             exportMember.exportTeam();
+            return projectNotificationService.export(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
         }

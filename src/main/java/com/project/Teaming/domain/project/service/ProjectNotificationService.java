@@ -65,6 +65,13 @@ public class ProjectNotificationService {
         return sendBulkNotification(users, teamId, message, NotificationType.PROJECT_TEAM_QUIT);
     }
 
+    public List<Long> export(Long teamId, User exportUser) {
+        List<User> users = projectParticipationRepository.findUsersByTeamIdAndStatus(teamId, ParticipationStatus.ACCEPTED, false, false);
+        ProjectTeam projectTeam = projectTeamRepository.findById(teamId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        String message = "\"" + exportUser.getName() + "\" 님이 " + "\"" + projectTeam.getName() + "\" 팀에서 강퇴 되었습니다. 신고는 7일 이내에 가능합니다.";
+        return sendBulkNotification(users, teamId, message, NotificationType.PROJECT_TEAM_EXPORT);
+    }
+
     // 한 명
     public List<Long> sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
         Notification notification = (teamId == null)
