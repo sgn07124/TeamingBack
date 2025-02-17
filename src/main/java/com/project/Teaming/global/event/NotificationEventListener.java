@@ -45,7 +45,8 @@ public class NotificationEventListener {
 
     private boolean shouldProcessMultiThreading(Notification notification) {
         return
-                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle()) || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle()));
+                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle()) || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle())
+                || notification.getType().equals(NotificationType.PROJECT_TEAM_QUIT.getTitle()) || notification.getType().equals(NotificationType.PROJECT_TEAM_EXPORT.getTitle()));
     }
 
     private void sendWithMultiThreading(Notification notification) {
