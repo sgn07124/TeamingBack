@@ -110,9 +110,8 @@ public class MentoringParticipationService {
      * @param team_Id
      * @param participant_id
      */
-    @NotifyAfterTransaction
     @Transactional
-    public List<Long> acceptMentoringParticipation(Long teamId, Long participantId) {
+    public void acceptMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -127,7 +126,7 @@ public class MentoringParticipationService {
         //수락 처리
         mentoringParticipation.accept();
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(mentoringParticipation.getUser().getId()),MentoringParticipationStatus.ACCEPTED);
-        return mentoringNotificationService.accept(acceptParticipationId, teamId);
+        mentoringNotificationService.accept(acceptParticipationId, teamId);
     }
 
     /**
@@ -135,9 +134,8 @@ public class MentoringParticipationService {
      * @param teamId
      * @param participant_id
      */
-    @NotifyAfterTransaction
     @Transactional
-    public List<Long> rejectMentoringParticipation(Long teamId, Long participantId) {
+    public void rejectMentoringParticipation(Long teamId, Long participantId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
 
@@ -153,7 +151,7 @@ public class MentoringParticipationService {
         redisApplicantManagementService.updateApplicantStatus(teamId,String.valueOf(rejectParticipation.getUser().getId()),MentoringParticipationStatus.REJECTED);
         // DB에서 지원자 데이터 삭제
         removeParticipant(rejectParticipation, rejectParticipation.getUser(), mentoringTeam);
-        return mentoringNotificationService.reject(rejectedUserId,teamId);
+        mentoringNotificationService.reject(rejectedUserId,teamId);
     }
 
     /**
@@ -162,9 +160,8 @@ public class MentoringParticipationService {
      * @param userId
      */
 
-    @NotifyAfterTransaction
     @Transactional
-    public List<Long> exportTeamUser(Long teamId, Long userId) {
+    public void exportTeamUser(Long teamId, Long userId) {
         User user = userDataProvider.getUser();
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
         User exportUser = userDataProvider.findUser(userId);
@@ -181,16 +178,15 @@ public class MentoringParticipationService {
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), exportUser.getId(), exportedParticipation);
         removeTeamUser(export,exportUser,mentoringTeam);
         mentoringNotificationService.notifyExportedUser(userId,teamId);
-        return mentoringNotificationService.export(userId,teamId);
+        mentoringNotificationService.export(userId,teamId);
     }
 
     /**
      * 탈퇴하는 로직
      * @param teamId
      */
-    @NotifyAfterTransaction
     @Transactional
-    public List<Long> deleteUser(Long teamId) {
+    public void deleteUser(Long teamId) {
         User user = userDataProvider.getUser();
 
         MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
@@ -214,7 +210,7 @@ public class MentoringParticipationService {
         TeamUserResponse teamUserResponse = teamUser.deleteParticipant();
         redisTeamUserManagementService.saveParticipation(mentoringTeam.getId(), user.getId(),teamUserResponse);
         removeTeamUser(teamUser,user,mentoringTeam);
-        return mentoringNotificationService.delete(user.getId(),teamId);
+        mentoringNotificationService.delete(user.getId(),teamId);
     }
 
     /**

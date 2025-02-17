@@ -107,6 +107,8 @@ public class MentoringReportService {
             userRepository.save(reportedUser);
             log.info("Warning count updated in DB for userId: {}", reportedUser.getId());
 
+            mentoringNotificationService.warning(reportedUser.getId());
+
             // 경고 처리 상태 업데이트
             TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
                 @Override
@@ -116,13 +118,6 @@ public class MentoringReportService {
                         log.info("Redis warningProcessed updated for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId());
                     } catch (Exception e) {
                         log.error("Failed to update Redis for teamId: {}, userId: {}", mentoringTeamId, reportedUser.getId(), e);
-                    }
-
-                    try {
-                        List<Long> notificationIds = mentoringNotificationService.warning(reportedUser.getId());
-                        log.info("✅ Notifications sent: {}", notificationIds);
-                    } catch (Exception e) {
-                        log.error("❌ Failed to send notification for userId: {}", reportedUser.getId(), e);
                     }
                 }
 
