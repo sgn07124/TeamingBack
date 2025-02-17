@@ -13,7 +13,6 @@ import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
-import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
@@ -102,8 +101,7 @@ public class ProjectParticipationService {
     }
 
     @Transactional
-    @NotifyAfterTransaction
-    public List<Long> quitTeam(Long teamId) {
+    public void quitTeam(Long teamId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
 
@@ -126,7 +124,7 @@ public class ProjectParticipationService {
                 projectParticipation.updateOwnerRole();
             }
             projectParticipation.quitTeam();
-            return projectNotificationService.quit(teamId, user);
+            projectNotificationService.quit(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.CANNOT_QUIT_TEAM);
         }
@@ -174,8 +172,7 @@ public class ProjectParticipationService {
     }
 
     @Transactional
-    @NotifyAfterTransaction
-    public List<Long> exportMember(Long teamId, Long userId) {
+    public void exportMember(Long teamId, Long userId) {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
         ProjectParticipation exportMember = projectParticipationRepository.findByProjectTeamIdAndUserId(teamId, userId)
@@ -185,7 +182,7 @@ public class ProjectParticipationService {
 
         if (isTeamOwner(user, teamOwner)) {
             exportMember.exportTeam();
-            return projectNotificationService.export(teamId, user);
+            projectNotificationService.export(teamId, user);
         } else {
             throw new BusinessException(ErrorCode.FAIL_TO_EXPORT_TEAM);
         }
