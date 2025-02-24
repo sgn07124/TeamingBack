@@ -46,6 +46,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
+
         // Refresh Token 요청은 필터에서 제외
         if (path.equals("/token/refresh")) {
             filterChain.doFilter(request, response);
