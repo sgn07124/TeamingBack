@@ -45,6 +45,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        log.info("🛑 JWT 필터 실행 - 요청 경로: {}", path);
 
 
         // Refresh Token 요청은 필터에서 제외
