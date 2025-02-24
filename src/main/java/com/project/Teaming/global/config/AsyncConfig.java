@@ -16,8 +16,8 @@ public class AsyncConfig {
     public Executor notificationExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(50);  // 최소 스레드 개수
-        executor.setMaxPoolSize(200);  // 최대 스레드 개수
-        executor.setQueueCapacity(5000);  // 대기 큐 크기
+        executor.setMaxPoolSize(300);  // 최대 스레드 개수
+        executor.setQueueCapacity(3000);  // 대기 큐 크기
         executor.setKeepAliveSeconds(30);  // Idle 상태의 스레드를 유지하는 시간
         executor.setThreadNamePrefix("Notification-");
         executor.initialize();

@@ -1,5 +1,6 @@
-package com.project.Teaming.global.aspect;
+package com.project.Teaming.global.kafka.consumer;
 
+import com.project.Teaming.global.event.NotificationEvent;
 import com.project.Teaming.global.sse.dto.EventPayload;
 import com.project.Teaming.global.sse.dto.EventWithTeamPayload;
 import com.project.Teaming.global.sse.entity.Notification;
@@ -8,36 +9,28 @@ import com.project.Teaming.global.sse.repository.NotificationRepository;
 import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
-import org.springframework.stereotype.Component;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-@Slf4j
-@Aspect
-@Component
+@Service
 @RequiredArgsConstructor
-public class NotificationAspect {
+@Slf4j
+public class NotificationKafkaConsumer {
 
     private final NotificationRepository notificationRepository;
     private final SseEmitterService sseEmitterService;
     private final Executor notificationExecutor;
 
-    /**
-     * 트랜잭션이 정상적으로 커밋된 후 알림을 전송하는 AOP
-     * @param joinPoint - 실행된 메서드 정보
-     * @param notificationIds - 트랜잭션에서 저장된 알림 ID 리스트
-     */
-    @AfterReturning(value = "@annotation(com.project.Teaming.global.annotation.NotifyAfterTransaction)", returning = "notificationIds")
-    public void sendNotificationsAfterTransaction(JoinPoint joinPoint, List<Long> notificationIds) {
-        log.info("✅ 트랜잭션 종료 후 알림 전송 시작: {}", notificationIds);
-
+    @KafkaListener(topics = "notification-events", groupId = "notification-group")
+    public void consumeNotificationEvent(NotificationEvent event, Acknowledgment ack) {
+        log.info("✅ 트랜잭션 종료 후 알림 전송 시작: {}",event.getNotificationIds());
         // ID 기반으로 Notification 객체 조회
-        List<Notification> notifications = notificationRepository.findAllById(notificationIds);
+        List<Notification> notifications = notificationRepository.findAllById(event.getNotificationIds());
 
         notifications.forEach(notification -> {
             if (shouldProcessMultiThreading(notification)) {
@@ -47,15 +40,13 @@ public class NotificationAspect {
             }
         });
         log.info("✅ 트랜잭션 종료 후 알림 전송 완료!");
+        ack.acknowledge();
     }
 
-    /**
-     * ✅ 특정 알림 유형만 비동기 처리할지 여부를 판단하는 메서드
-     */
     private boolean shouldProcessMultiThreading(Notification notification) {
         return
-                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle())  || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle())
-                        || notification.getType().equals(NotificationType.WELCOME_USER.getTitle()));
+                (notification.getType().equals(NotificationType.MENTORING_EXPORT.getTitle()) || notification.getType().equals(NotificationType.MENTORING_DELETE.getTitle())
+                        || notification.getType().equals(NotificationType.PROJECT_TEAM_QUIT.getTitle()) || notification.getType().equals(NotificationType.PROJECT_TEAM_EXPORT.getTitle()));
     }
 
     private void sendWithMultiThreading(Notification notification) {
@@ -103,4 +94,3 @@ public class NotificationAspect {
         }
     }
 }
-

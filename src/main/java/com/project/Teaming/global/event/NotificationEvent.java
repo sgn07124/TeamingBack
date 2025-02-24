@@ -2,11 +2,13 @@ package com.project.Teaming.global.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class NotificationEvent {
-    private final List<Long> notificationIds;
+    private List<Long> notificationIds;
 }

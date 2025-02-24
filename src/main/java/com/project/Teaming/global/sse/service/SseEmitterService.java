@@ -11,7 +11,6 @@ import com.project.Teaming.global.sse.repository.EmitterRepository;
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -49,12 +48,11 @@ public class SseEmitterService {
     /**
      * 이벤트가 구독되어 있는 클라이언트에게 데이터를 전송
      */
-    @Async
+
     public void send(Long userId, EventPayload eventPayload) {
         sendToClient(userId, eventPayload);
     }
 
-    @Async
     public void sendWithTeamId(Long userId, EventWithTeamPayload eventWithTeamPayload) {
         sendToClient(userId, eventWithTeamPayload);
     }

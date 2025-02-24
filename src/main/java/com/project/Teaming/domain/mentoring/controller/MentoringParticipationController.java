@@ -75,6 +75,7 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
         return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
 
+
     @Override
     @PostMapping("/reviews")
     public ResultDetailResponse<Void> reviewUser(@RequestBody @Valid MentoringReviewRequest dto) {

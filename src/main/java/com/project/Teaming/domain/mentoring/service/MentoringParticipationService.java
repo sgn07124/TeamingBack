@@ -12,7 +12,6 @@ import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.service.ReportService;
 import com.project.Teaming.domain.user.service.ReviewService;
-import com.project.Teaming.global.annotation.NotifyAfterTransaction;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.*;
 import com.project.Teaming.global.sse.service.NotificationService;
