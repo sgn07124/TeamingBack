@@ -10,6 +10,7 @@ import com.project.Teaming.global.sse.service.SseEmitterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,9 +27,8 @@ public class NotificationKafkaConsumer {
     private final Executor notificationExecutor;
 
     @KafkaListener(topics = "notification-events", groupId = "notification-group")
-    public void consumeNotificationEvent(NotificationEvent event) {
+    public void consumeNotificationEvent(NotificationEvent event, Acknowledgment ack) {
         log.info("✅ 트랜잭션 종료 후 알림 전송 시작: {}",event.getNotificationIds());
-
         // ID 기반으로 Notification 객체 조회
         List<Notification> notifications = notificationRepository.findAllById(event.getNotificationIds());
 
@@ -40,6 +40,7 @@ public class NotificationKafkaConsumer {
             }
         });
         log.info("✅ 트랜잭션 종료 후 알림 전송 완료!");
+        ack.acknowledge();
     }
 
     private boolean shouldProcessMultiThreading(Notification notification) {
