@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +29,10 @@ public class NotificationKafkaConsumer {
 
     @KafkaListener(topics = "notification-events", groupId = "notification-group")
     public void consumeNotificationEvent(NotificationEvent event, Acknowledgment ack) {
+
+        //Kafka Consumer 실행 시 SecurityContext를 초기화하여 JWT 필터를 타지 않도록 함
+        SecurityContextHolder.clearContext();
+
         log.info("✅ 트랜잭션 종료 후 알림 전송 시작: {}",event.getNotificationIds());
         // ID 기반으로 Notification 객체 조회
         List<Notification> notifications = notificationRepository.findAllById(event.getNotificationIds());
