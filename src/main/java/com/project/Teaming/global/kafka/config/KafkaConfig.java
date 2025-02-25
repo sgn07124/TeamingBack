@@ -1,7 +1,9 @@
 package com.project.Teaming.global.kafka.config;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonSerializer;
 import com.project.Teaming.global.event.NotificationEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -18,8 +20,9 @@ import org.springframework.kafka.support.serializer.JsonDeserializer;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
+@Slf4j
 @EnableKafka
+@Configuration
 public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers}")
