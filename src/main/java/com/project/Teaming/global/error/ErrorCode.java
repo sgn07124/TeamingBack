@@ -83,8 +83,8 @@ public enum ErrorCode {
     CANNOT_REVIEW(404, "R008", "아직 팀 상태가 완료되지 않았거나 강퇴나 탈퇴하지 않은 사용자입니다."),
 
     // notification
-    NOT_FOUND_NOTIFICATION(404, "N001", "id에 해당되는 알림이 존재하지 않습니다.");
-
+    NOT_FOUND_NOTIFICATION(404, "N001", "id에 해당되는 알림이 존재하지 않습니다."),
+    NOT_CONNECTED(404,"N002","해당 유저는 SSE에 연결되어있지 않습니다.");
     private int status;
     private final String code;
     private final String message;
