@@ -44,25 +44,25 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     }
 
     @Override
-    @PatchMapping("/teams/{teamId}/participants/{participantId}/accept")
+    @PatchMapping("/teams/{teamId}/participants/{participantId}")
     public ResultDetailResponse<Void> acceptParticipant(@PathVariable Long teamId, @PathVariable Long participantId) {
         mentoringParticipationService.acceptMentoringParticipation(teamId, participantId);
         return new ResultDetailResponse<>(ResultCode.ACCEPT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @DeleteMapping("/teams/{teamId}/participants/{participantId}/reject")
+    @DeleteMapping("/teams/{teamId}/participants/{participantId}")
     public ResultDetailResponse<Void> rejectParticipant(@PathVariable Long teamId, @PathVariable Long participantId) {
         mentoringParticipationService.rejectMentoringParticipation(teamId, participantId);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @DeleteMapping("/teams/{teamId}/users/{userId}/export")
+    @DeleteMapping("/teams/{teamId}/users/{userId}")
     public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long teamId, @PathVariable Long userId) {
         mentoringParticipationService.exportTeamUser(teamId, userId);
         return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_USER, null);
     }
     @Override
-    @DeleteMapping("/teams/{teamId}/quit")
+    @DeleteMapping("/teams/{teamId}/users")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long teamId) {
         mentoringParticipationService.deleteUser(teamId);
         return new ResultDetailResponse<>(ResultCode.DELETE_PARTICIPATION, null);

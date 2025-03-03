@@ -217,20 +217,20 @@ public class MentoringBoardService {
 
     /**
      * 팀원이 글에서 모집 현황을 수정할 수 있는 로직
-     * @param teamId
      * @param postId
      * @return
      */
     @Transactional
-    public MentoringPostStatusResponse updatePostStatus(Long teamId, Long postId) {
+    public MentoringPostStatusResponse updatePostStatus(Long postId) {
         User user = userDataProvider.getUser();
-        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
+        MentoringBoard post = mentoringBoardDataProvider.findBoard(postId);
+        MentoringTeam mentoringTeam = post.getMentoringTeam();
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
                 () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
-        MentoringBoard post = mentoringBoardDataProvider.findBoard(postId);
+
         mentoringBoardPolicy.validatePostWithTeam(post,mentoringTeam);
 
         post.updateStatus();
