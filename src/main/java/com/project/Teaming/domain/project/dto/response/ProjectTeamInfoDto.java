@@ -26,14 +26,14 @@ public class ProjectTeamInfoDto {
     private String contents;
     private String createdDate;
     private String lastModifiedDate;
-    private Long projectId;
+    private Long id;  // projectId
     private List<String> stacks;  // 기술 스택(id로)
     private List<String> recruitCategories;  // 모집 구분(id로)
     private String userRole;
 
     public static ProjectTeamInfoDto from(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds, String userRole) {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
-        dto.setProjectId(projectTeam.getId());
+        dto.setId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());
         dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
         dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
