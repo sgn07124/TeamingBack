@@ -181,7 +181,7 @@ public class MentoringTeamService {
                 .ifPresentOrElse(
                         participation -> {
                             // 권한 설정
-                            teamResponseDto.setAuthority(participation.getAuthority());
+                            teamResponseDto.setRole(participation.getAuthority());
                         },
                         () -> handleNoAuthUser(teamResponseDto, team, user) // Participation이 없는 경우 처리
                 );
@@ -209,7 +209,8 @@ public class MentoringTeamService {
                 team, user,null, MentoringParticipationStatus.ACCEPTED,
                 () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM));
 
-        teamDto.setAuthority(teamUser.getAuthority());
+        teamDto.setRole(teamUser.getAuthority());
+        teamDto.setCreatedDate(String.valueOf(team.getCreatedDate()));
         return teamDto;
 
     }
@@ -230,12 +231,13 @@ public class MentoringTeamService {
                 () -> new BusinessException(ErrorCode.NOT_A_MEMBER_OF_TEAM)
         );
 
-        teamDto.setAuthority(teamUser.getAuthority());
+        teamDto.setRole(teamUser.getAuthority());
+        teamDto.setCreatedDate(String.valueOf(team.getCreatedDate()));
         return teamDto;
     }
 
     private void handleNoAuthUser(TeamAuthorityResponse teamResponseDto, MentoringTeam team, User user) {
-        teamResponseDto.setAuthority(MentoringAuthority.NoAuth);
+        teamResponseDto.setRole(MentoringAuthority.NoAuth);
         // 캐싱된 데이터 조회, dto 일반 사용자용으로 변환
         List<ParticipationForUserResponse> forUser = redisApplicantManagementService.getApplicants(team.getId()).stream()
                 .map(ParticipationForUserResponse::forNoAuthUser)
