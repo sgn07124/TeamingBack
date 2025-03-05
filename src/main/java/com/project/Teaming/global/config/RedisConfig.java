@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.project.Teaming.global.event.NotificationEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
@@ -14,9 +15,9 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
@@ -26,6 +27,7 @@ public class RedisConfig {
 
     private final RedisProperties redisProperties;
     @Value("${spring.data.redis.host}") String host;
+    private final RedisConnectionFactory redisConnectionFactory;
 
     private RedisConnectionFactory redisConnectionFactory(int databaseIndex) {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
@@ -82,10 +84,13 @@ public class RedisConfig {
         return template;
     }
 
+    // redis pub/sub에 사용되는 template(3번)
     @Bean
-    public StringRedisTemplate stringRedisTemplate() {
-        StringRedisTemplate template = new StringRedisTemplate();
-        template.setConnectionFactory(redisConnectionFactory(3));
+    public RedisTemplate<String, NotificationEvent> redisPubSubTemplate() {
+        RedisTemplate<String, NotificationEvent> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(NotificationEvent.class)); // JSON 직렬화 설정
         return template;
     }
 
