@@ -64,6 +64,11 @@ public class SseEmitterService {
     private void sendToClient(Long userId, Object data) {
         SseEmitter sseEmitter = emitterRepository.findById(userId);
 
+        if (sseEmitter == null) {
+            log.warn("SSE 연결 없음: userId={}", userId);
+            return;  // 연결된 SSE가 없으면 알림 전송하지 않음
+        }
+
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonData = objectMapper.writeValueAsString(data);
