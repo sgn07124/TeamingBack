@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.entity;
 
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class TeamRecruitCategory {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruit_category_id",nullable = false)

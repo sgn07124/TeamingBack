@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.domain.project.entity.AlarmStatus;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EventAlarm {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "event_alarm_id")
     private Long id;  // 일정 알림 ID
     @Column(name = "time_set", nullable = false)

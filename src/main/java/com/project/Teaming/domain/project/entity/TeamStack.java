@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.project.dto.request.CreateTeamDto;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,7 +17,7 @@ import java.nio.charset.StandardCharsets;
 public class TeamStack {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "team_stack_id")
     private Long id;
 

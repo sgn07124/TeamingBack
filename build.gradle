@@ -52,9 +52,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-	// Spring Kafka 관련 라이브러리 추가
-	implementation 'org.springframework.kafka:spring-kafka'
-	implementation 'org.apache.kafka:kafka-clients'
+	implementation 'com.github.f4b6a3:tsid-creator:5.2.0' // TSID 생성기
+	implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.5.1' // Hibernate 6.0 이상용
 
 	// jwt 관련
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")

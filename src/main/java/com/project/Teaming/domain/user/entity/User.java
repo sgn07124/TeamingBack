@@ -4,6 +4,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import java.util.List;
 public class User extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "user_id")
     private Long id;  // 사용자Id
 

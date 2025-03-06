@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.global.auditing.BaseEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Event extends BaseEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "event_id")
     private Long id;  // 일정 ID
     @Column(name = "title", nullable = false, length = 100)
