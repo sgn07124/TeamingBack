@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.mentoring.entity.*;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BoardResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long boardId;
     private String title;
     private String mentoringTeamName;

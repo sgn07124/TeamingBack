@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.project.Teaming.domain.mentoring.entity.*;
 import lombok.AccessLevel;
@@ -17,7 +18,9 @@ public class BoardSpecResponse {
     private MentoringAuthority authority;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Boolean isParticipate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long boardId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long teamId;
     private String title;
     private String mentoringTeamName;

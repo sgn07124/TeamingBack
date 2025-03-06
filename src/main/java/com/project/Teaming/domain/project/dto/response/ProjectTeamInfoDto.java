@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import jakarta.validation.constraints.NotNull;
@@ -26,7 +27,10 @@ public class ProjectTeamInfoDto {
     private String contents;
     private String createdDate;
     private String lastModifiedDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;  // projectId
+
     private List<String> stacks;  // 기술 스택(id로)
     private List<String> recruitCategories;  // 모집 구분(id로)
     private String userRole;

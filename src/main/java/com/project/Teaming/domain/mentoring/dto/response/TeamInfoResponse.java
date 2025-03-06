@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class TeamInfoResponse {
     private LocalDate endDate;  // 멘토링 종료일
     private MentoringStatus status;  //멘토링 상태
     private MentoringAuthority role;  //사용자의 권한
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
     private String createdDate;
 

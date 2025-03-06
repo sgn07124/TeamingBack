@@ -22,6 +22,7 @@ public class TeamUserResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime acceptedTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
     private String username;
     private MentoringRole role;

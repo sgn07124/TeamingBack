@@ -1,5 +1,6 @@
 package com.project.Teaming.global.sse.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.global.sse.entity.Notification;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -12,10 +13,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NotificationResponseDto {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long notificationId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
     private String message;
     private String type;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long teamId;
     private boolean isRead;
     private String createdAt;

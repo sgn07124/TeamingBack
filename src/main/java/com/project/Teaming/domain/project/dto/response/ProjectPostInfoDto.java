@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectBoard;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
@@ -13,8 +14,8 @@ public class ProjectPostInfoDto {
 
     private String title;
     private String teamName;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long teamId;
-
     private String startDate;
     private String endDate;
     private String deadline;
@@ -26,8 +27,9 @@ public class ProjectPostInfoDto {
     private boolean isMember;
     @JsonProperty("isApply")
     private boolean isApply;
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long projectTeamId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long postId;
 
     private List<String> stacks;  // 기술 스택(id 조회)
