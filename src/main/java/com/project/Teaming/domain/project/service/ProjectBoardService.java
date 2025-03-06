@@ -134,11 +134,12 @@ public class ProjectBoardService {
      * 프로젝트 팀 게시물 수정
      */
     @Transactional
-    public void updatePost(Long teamId, Long postId, CreatePostDto dto) {
+    public void updatePost(Long postId, CreatePostDto dto) {
         try {
+            ProjectBoard projectBoard = getProjectBoard(postId);
+            long teamId = projectBoard.getProjectTeam().getId();
             validateTeamMember(teamId);
             ProjectTeam projectTeam = getProjectTeam(teamId);
-            ProjectBoard projectBoard = getProjectBoard(postId);
             projectBoard.updateProjectBoard(dto, projectTeam);
         } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
             throw new BusinessException(ErrorCode.CONFLICT);
@@ -149,9 +150,9 @@ public class ProjectBoardService {
      * 프로젝트 팀 게시물 삭제
      */
     @Transactional
-    public void deletePost(Long teamId, Long postId) {
-        validateTeamMember(teamId);
+    public void deletePost(Long postId) {
         ProjectBoard projectBoard = getProjectBoard(postId);
+        validateTeamMember(projectBoard.getProjectTeam().getId());
         projectBoardRepository.delete(projectBoard);
     }
 
@@ -197,10 +198,9 @@ public class ProjectBoardService {
      * 게시글 상태 완료 처리
      */
     @Transactional
-    public ProjectPostStatusDto completePostStatus(Long teamId, Long postId) {
-        validateTeamMember(teamId);
-
+    public ProjectPostStatusDto completePostStatus(Long postId) {
         ProjectBoard projectBoard = getProjectBoard(postId);
+        validateTeamMember(projectBoard.getProjectTeam().getId());
         projectBoard.updateStatus();
         return ProjectPostStatusDto.from(projectBoard);
     }
