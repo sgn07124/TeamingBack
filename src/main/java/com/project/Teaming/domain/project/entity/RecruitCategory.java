@@ -17,7 +17,7 @@ import java.util.List;
 public class RecruitCategory {
 
     @Id
-    @Tsid
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recruit_category_id")
     private Long id;
 

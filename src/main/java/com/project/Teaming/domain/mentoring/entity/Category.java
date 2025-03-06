@@ -19,7 +19,7 @@ import java.util.List;
 public class Category {
 
     @Id
-    @Tsid
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id")
     private Long id;
     @Column(name = "category_name",unique = true)
