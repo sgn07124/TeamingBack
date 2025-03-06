@@ -3,6 +3,7 @@ package com.project.Teaming.domain.mentoring.entity;
 import com.project.Teaming.domain.mentoring.dto.response.TeamResponse;
 import com.project.Teaming.domain.mentoring.dto.request.TeamRequest;
 import com.project.Teaming.global.auditing.BaseEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -20,7 +21,7 @@ import java.util.List;
 public class MentoringTeam extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "mentoring_team_id")
     private Long id;  // 멘토링 팀 ID
     @Column(name = "mentoring_name", length = 100)

@@ -2,6 +2,7 @@ package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ProjectBoard extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "pj_post_id")
     private Long id;  // 프로젝트 모집글 ID
 
