@@ -19,8 +19,8 @@ public enum NotificationType {
     MENTORING_EXPORT2("멘토링 강퇴된 유저에게 가는 알림"),
     MENTORING_DELETE("멘토링 탈퇴 알림"),
     WARNING_COUNT_INCREMENT("멘토링 경고횟수 증가 알림"),
-    WELCOME_USER("공지"),
-    WARNING("경고");
+    WELCOME_USER("notice"),
+    WARNING("warning");
 
     private String title;
 }
