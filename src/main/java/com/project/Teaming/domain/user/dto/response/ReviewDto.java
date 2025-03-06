@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.user.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -7,6 +8,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class ReviewDto {
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long reviewerId;
     private String reviewerName;
     private String content;

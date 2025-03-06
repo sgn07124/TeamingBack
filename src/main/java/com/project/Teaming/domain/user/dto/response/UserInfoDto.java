@@ -14,6 +14,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserInfoDto {
+
     private String email;
     private String name;
     private String provider;

@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.project.entity.PostStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
@@ -22,6 +23,7 @@ public class MyProjectListDto {
     private ProjectStatus status;
     private ProjectRole role;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long projectTeamId;
     private String createdDate;
 

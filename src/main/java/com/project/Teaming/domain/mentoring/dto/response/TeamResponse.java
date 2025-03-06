@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.mentoring.entity.MentoringStatus;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
 import lombok.AccessLevel;
@@ -13,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class TeamResponse {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long id;
     private String teamName;  // 멘토링 명
     private LocalDate startDate;  // 멘토링 시작일

@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.util.Formatter;
@@ -12,8 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProjectTeamMemberDto {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long participationId;  // pk
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long projectTeamId;
     private String userName;
     private String participationStatus;

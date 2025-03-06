@@ -14,6 +14,7 @@ public class ParticipationForUserResponse {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime participatedTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
     private String username;
     private MentoringParticipationStatus status;

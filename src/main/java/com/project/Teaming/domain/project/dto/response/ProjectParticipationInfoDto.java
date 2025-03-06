@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -10,8 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ProjectParticipationInfoDto {
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long participationId;  // pk
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long projectId;
     private String participationStatus;
     private Boolean isDeleted;
