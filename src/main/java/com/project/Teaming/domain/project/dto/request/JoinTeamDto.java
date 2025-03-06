@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.project.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.NumberDeserializers;
 import jakarta.validation.constraints.NotNull;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class JoinTeamDto {
 
     @NotNull
-    @JsonDeserialize(using = NumberDeserializers.LongDeserializer.class) // String을 Long으로 변환
+    @JsonProperty("teamId")
     private Long teamId;
 
     @NotNull(message = "모집 카테고리를 입력해주세요. ex) 백엔드")
