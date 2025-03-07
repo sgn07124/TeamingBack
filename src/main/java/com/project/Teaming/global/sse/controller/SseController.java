@@ -63,4 +63,11 @@ public class SseController {
         int updatedCount = notificationService.markAsRead(dto);
         return new ResultDetailResponse<>(ResultCode.READ_NOTIFICATIONS, updatedCount + "개의 알림이 읽음 처리 되었습니다.");
     }
+
+    @DeleteMapping("/notifications")
+    @Operation(summary = "알림 삭제 처리", description = "문자열 리스트로 요청한 id값들에 해당되는 알림들을 삭제한다.")
+    public ResultDetailResponse<String> deleteNotifications(@RequestBody NotificationRequestDto dto) {
+        int deletedCount = notificationService.deleteNotifications(dto);
+        return new ResultDetailResponse<>(ResultCode.READ_NOTIFICATIONS, deletedCount + "개의 알림이 삭제되었습니다.");
+    }
 }

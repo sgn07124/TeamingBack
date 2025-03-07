@@ -84,6 +84,17 @@ public class NotificationService {
 
     @Transactional
     public int markAsRead(NotificationRequestDto dto) {
+        List<Long> ids = getLongIds(dto);
+        return notificationRepository.markNotificationsAsRead(ids);
+    }
+
+    @Transactional
+    public int deleteNotifications(NotificationRequestDto dto) {
+        List<Long> ids = getLongIds(dto);
+        return notificationRepository.deleteNotificationsByIds(ids);
+    }
+
+    private List<Long> getLongIds(NotificationRequestDto dto) {
         List<Long> ids = dto.getNotificationIds().stream()
                 .map(this::convertToLong)
                 .filter(Objects::nonNull)
@@ -92,8 +103,7 @@ public class NotificationService {
         if (ids.isEmpty()) {
             throw new BusinessException(ErrorCode.NOT_VALID_IDS);
         }
-
-        return notificationRepository.markNotificationsAsRead(ids);
+        return ids;
     }
 
     private Long convertToLong(String id) {
