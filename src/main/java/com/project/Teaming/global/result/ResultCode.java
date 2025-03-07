@@ -77,7 +77,8 @@ public enum ResultCode {
 
     // Notification
     GET_NOTIFICATIONS(200, "N001", "전체 알림 조회 완료"),
-    DELETE_NOTIFICATION(200, "N002", "알림 삭제 완료");
+    DELETE_NOTIFICATION(200, "N002", "알림 삭제 완료"),
+    READ_NOTIFICATIONS(200, "N003", "알림 읽음 처리 완료");
 
     private int status;
     private final String code;

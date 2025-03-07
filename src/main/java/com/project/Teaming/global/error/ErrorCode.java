@@ -84,7 +84,9 @@ public enum ErrorCode {
 
     // notification
     NOT_FOUND_NOTIFICATION(404, "N001", "id에 해당되는 알림이 존재하지 않습니다."),
-    NOT_CONNECTED(404,"N002","해당 유저는 SSE에 연결되어있지 않습니다.");
+    NOT_CONNECTED(404,"N002","해당 유저는 SSE에 연결되어있지 않습니다."),
+    NOT_VALID_IDS(404, "N003", "유효한 알림 ID가 없습니다.");
+
     private int status;
     private final String code;
     private final String message;

@@ -5,11 +5,13 @@ import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+import com.project.Teaming.global.sse.dto.NotificationRequestDto;
 import com.project.Teaming.global.sse.dto.NotificationResponseDto;
 import com.project.Teaming.global.sse.entity.Notification;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -78,5 +80,27 @@ public class NotificationService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         return securityUser.getUserId();
+    }
+
+    @Transactional
+    public int markAsRead(NotificationRequestDto dto) {
+        List<Long> ids = dto.getNotificationIds().stream()
+                .map(this::convertToLong)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
+        if (ids.isEmpty()) {
+            throw new BusinessException(ErrorCode.NOT_VALID_IDS);
+        }
+
+        return notificationRepository.markNotificationsAsRead(ids);
+    }
+
+    private Long convertToLong(String id) {
+        try {
+            return Long.parseLong(id);
+        } catch (NumberFormatException e) {
+            return null; // 변환 실패 시 null 반환
+        }
     }
 }
