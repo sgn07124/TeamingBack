@@ -4,6 +4,7 @@ import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
 import com.project.Teaming.global.result.ResultListResponse;
 import com.project.Teaming.global.sse.dto.EventPayload;
+import com.project.Teaming.global.sse.dto.NotificationRequestDto;
 import com.project.Teaming.global.sse.dto.NotificationResponseDto;
 import com.project.Teaming.global.sse.service.NotificationService;
 import com.project.Teaming.global.sse.service.SseEmitterService;
@@ -13,8 +14,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,10 +50,24 @@ public class SseController {
         return new ResultListResponse<>(ResultCode.GET_NOTIFICATIONS, list);
     }
 
-    @DeleteMapping("/notification/{notificationId}")
+    @DeleteMapping("/notifications/{notificationId}")
     @Operation(summary = "알림 삭제", description = "특정 알림을 삭제한다.")
     public ResultDetailResponse<Void> deleteNotification(@PathVariable Long notificationId) {
         notificationService.deleteNotification(notificationId);
         return new ResultDetailResponse<>(ResultCode.DELETE_NOTIFICATION, null);
+    }
+
+    @PutMapping("/notifications")
+    @Operation(summary = "알림 읽음 처리", description = "문자열 리스트로 요청한 id값들에 해당되는 알림들을 읽음 처리한다.")
+    public ResultDetailResponse<String> readNotifications(@RequestBody NotificationRequestDto dto) {
+        int updatedCount = notificationService.markAsRead(dto);
+        return new ResultDetailResponse<>(ResultCode.READ_NOTIFICATIONS, updatedCount + "개의 알림이 읽음 처리 되었습니다.");
+    }
+
+    @DeleteMapping("/notifications")
+    @Operation(summary = "알림 삭제 처리", description = "문자열 리스트로 요청한 id값들에 해당되는 알림들을 삭제한다.")
+    public ResultDetailResponse<String> deleteNotifications(@RequestBody NotificationRequestDto dto) {
+        int deletedCount = notificationService.deleteNotifications(dto);
+        return new ResultDetailResponse<>(ResultCode.READ_NOTIFICATIONS, deletedCount + "개의 알림이 삭제되었습니다.");
     }
 }
