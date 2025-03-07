@@ -37,25 +37,27 @@ public class NotificationService {
      * @return
      */
     @Transactional
-    public Notification saveNotification(Long userId, String message, String type) {
+    public Notification saveNotification(Long userId, String message, String type, String category) {
         Notification notification = new Notification();
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         notification.setUser(user);
         notification.setMessage(message);
         notification.setType(type);
+        notification.setCategory(category);
         notification.setTeamId(null);
         notification.setRead(false);
         return notificationRepository.save(notification);
     }
 
     @Transactional
-    public Notification saveNotificationWithTeamId(Long userId, Long teamId, String message, String type) {
+    public Notification saveNotificationWithTeamId(Long userId, Long teamId, String message, String type, String category) {
         Notification notification = new Notification();
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
         notification.setUser(user);
         notification.setMessage(message);
         notification.setTeamId(teamId);
         notification.setType(type);
+        notification.setCategory(category);
         notification.setRead(false);
         return notificationRepository.save(notification);
     }

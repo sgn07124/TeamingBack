@@ -19,6 +19,7 @@ public class NotificationResponseDto {
     private Long userId;
     private String message;
     private String type;
+    private String category;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long teamId;
     private boolean isRead;
@@ -30,6 +31,7 @@ public class NotificationResponseDto {
         dto.setUserId(notification.getUser().getId());
         dto.setMessage(notification.getMessage());
         dto.setType(notification.getType());
+        dto.setCategory(notification.getCategory());
         dto.setTeamId(notification.getTeamId());
         dto.setRead(notification.isRead());
         dto.setCreatedAt(dto.getFormattedDate(notification.getCreatedAt()));

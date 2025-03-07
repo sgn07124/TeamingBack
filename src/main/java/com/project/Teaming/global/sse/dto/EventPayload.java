@@ -13,6 +13,7 @@ public class EventPayload {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
     private String type;
+    private String category;
     private String createdAt;
     private String message;
     private boolean isRead;

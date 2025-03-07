@@ -26,8 +26,8 @@ public class UserNotificationService {
 
     public void sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
         Notification notification = (teamId == null)
-                ? notificationService.saveNotification(userId, message, type.getTitle())
-                : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle());
+                ? notificationService.saveNotification(userId, message, type.getTitle(), type.getCategory())
+                : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle(), type.getCategory());
         log.info("UserNotification Service sendSingleNotification 메서드 notification : {}", notification);
         eventPublisher.publishEvent(new NotificationEvent(List.of(notification.getId())));
     }
