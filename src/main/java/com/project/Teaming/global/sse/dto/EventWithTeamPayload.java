@@ -13,6 +13,7 @@ public class EventWithTeamPayload {
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long userId;
     private String type;
+    private String category;
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Long teamId;
     private String createdAt;

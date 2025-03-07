@@ -107,15 +107,15 @@ public class MentoringNotificationService {
 
     public void sendSingleNotification(Long userId, Long teamId, String message, NotificationType type) {
         Notification notification = (teamId == null)
-                ? notificationService.saveNotification(userId, message, type.getTitle())
-                : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle());
+                ? notificationService.saveNotification(userId, message, type.getTitle(),type.getCategory())
+                : notificationService.saveNotificationWithTeamId(userId, teamId, message, type.getTitle(),type.getCategory());
         log.info("MentoringNotification Service sendSingleNotification 메서드 notification : {}", notification);
         eventPublisher.publishEvent(new NotificationEvent(List.of(notification.getId()))); ;
     }
 
     public void sendBulkNotification(List<User> users, Long teamId, String message, NotificationType type) {
         List<Notification> notifications = users.stream()
-                .map(user -> new Notification(user, message, teamId, type.getTitle()))
+                .map(user -> new Notification(user, message, teamId, type.getTitle(), type.getCategory()))
                 .collect(Collectors.toList());
 
         List<Long> notificationIds = notificationRepository.saveAll(notifications).stream()
