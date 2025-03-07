@@ -85,12 +85,16 @@ public class NotificationService {
     @Transactional
     public int markAsRead(NotificationRequestDto dto) {
         List<Long> ids = getLongIds(dto);
+        List<Long> validIds = notificationRepository.findValidNotificationIds(ids, getCurrentId());
+        if (validIds.size() != ids.size()) throw new BusinessException(ErrorCode.NOT_AUTHORIZED);
         return notificationRepository.markNotificationsAsRead(ids);
     }
 
     @Transactional
     public int deleteNotifications(NotificationRequestDto dto) {
         List<Long> ids = getLongIds(dto);
+        List<Long> validIds = notificationRepository.findValidNotificationIds(ids, getCurrentId());
+        if (validIds.size() != ids.size()) throw new BusinessException(ErrorCode.NOT_AUTHORIZED);
         return notificationRepository.deleteNotificationsByIds(ids);
     }
 
