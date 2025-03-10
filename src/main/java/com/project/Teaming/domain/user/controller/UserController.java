@@ -89,4 +89,10 @@ public class UserController implements SwaggerUserController{
                         .collect(Collectors.toList()));
     }
 
+    @Override
+    @PatchMapping("/withdraw")
+    public ResultDetailResponse<Void> withdrawUser() {
+        userService.withdrawUser();
+        return new ResultDetailResponse<>(ResultCode.WITHDRAW_SUCCESS, null);
+    }
 }

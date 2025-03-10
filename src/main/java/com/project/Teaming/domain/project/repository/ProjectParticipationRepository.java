@@ -58,4 +58,8 @@ public interface ProjectParticipationRepository extends JpaRepository<ProjectPar
             @Param("participationStatus") ParticipationStatus participationStatus,
             @Param("role") ProjectRole role
     );
+
+    List<ProjectParticipation> findByUser(User user);
+
+    void deleteAllByProjectTeamId(Long id);
 }

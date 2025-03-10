@@ -40,6 +40,9 @@ public class User extends BaseTimeEntity {
     @Column(name = "provider")
     private String provider;
 
+    @Column(name = "isDelete")
+    private boolean isDelete;
+
     @OneToMany(mappedBy = "user")
     private List<ProjectParticipation> projectParticipations = new ArrayList<>();
 
@@ -61,6 +64,7 @@ public class User extends BaseTimeEntity {
         this.provider = provider;
         this.userRole = role;
         this.warningCount = 0;  // 처음 경고 횟수는 0으로 설정
+        this.isDelete = false;
     }
 
     // 추가 정보 기입
@@ -86,5 +90,13 @@ public class User extends BaseTimeEntity {
 
     public void incrementWarningCnt() {
         this.warningCount += 1;
+    }
+
+    public void updateUserWithdraw() {
+        this.isDelete = true;
+    }
+
+    public void userDelete() {
+        this.portfolio = null;
     }
 }

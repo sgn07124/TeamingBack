@@ -6,6 +6,7 @@ import com.project.Teaming.domain.user.dto.response.ReviewDto;
 import com.project.Teaming.domain.user.entity.Review;
 import com.project.Teaming.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -28,11 +29,11 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "where ru = :user")
     List<ReviewDto> findMentoringReviewsByUser(@Param("user") User user);
 
-    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(pu.id, pu.name, r.content, r.createdDate,r.rating) " +
+    @Query("select new com.project.Teaming.domain.user.dto.response.ReviewDto(pu.id, pu.name, r.content, r.createdDate, r.rating) " +
             "from Review r " +
             "join r.reviewee ru " +
-            "join r.projectParticipation pp " +
-            "join pp.user pu " +
+            "left join r.projectParticipation pp " +
+            "left join pp.user pu " +
             "where ru = :user")
     List<ReviewDto> findProjectReviewsByUser(@Param("user") User user);
 
@@ -42,4 +43,12 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
             "AND r.reviewee.id IN :userIds")
     Set<Long> findReviewedUserIds(@Param("currentParticipationId") Long currentParticipationId,
                                   @Param("userIds") Set<Long> userIds);
+
+    @Modifying
+    @Query("UPDATE Review r SET r.projectParticipation = NULL WHERE r.projectParticipation.id = :participationId")
+    void updateProjectParticipationNull(@Param("participationId") Long participationId);
+
+    @Modifying
+    @Query("DELETE FROM Review r WHERE r.reviewee.id = :userId")
+    void deleteByRevieweeId(@Param("userId") Long userId);
 }
