@@ -22,6 +22,7 @@ public enum ErrorCode {
     NEED_LOGIN(401, "U004", "need login"),
     AUTHENTICATION_NOT_FOUND(400, "U005", "security context에 인증정보가 없습니다"),
     USER_ALREADY_LOGOUT(400, "U006", "member already logout"),
+    WITHDRAW_USER(404, "U007", "탈퇴한 사용자 입니다."),
 
     // Auth
     REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),

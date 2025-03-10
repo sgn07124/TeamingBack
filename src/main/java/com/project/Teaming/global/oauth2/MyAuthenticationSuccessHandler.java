@@ -2,6 +2,8 @@ package com.project.Teaming.global.oauth2;
 
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
+import com.project.Teaming.global.error.ErrorCode;
+import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.GeneratedToken;
 import com.project.Teaming.global.jwt.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -15,10 +17,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 @Slf4j
 @Component
@@ -53,7 +53,10 @@ public class MyAuthenticationSuccessHandler extends SimpleUrlAuthenticationSucce
         // 회원이 존재할경우
         if (isExist) {
 
-            User user = userService.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));;
+            User user = userService.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+            if (user.isDelete()) {
+                throw new BusinessException(ErrorCode.WITHDRAW_USER);
+            }
 
             // 회원이 존재하면 jwt token 발행을 시작한다.
             GeneratedToken token = jwtUtil.generateToken(email, role);

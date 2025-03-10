@@ -19,6 +19,7 @@ public enum ResultCode {
     REGISTER_ADDITIONAL_USER_INFO(200, "U009", "추가 정보 기입 완료"),
     GET_USER_INFO(200, "U010", "회원 정보 조회 완료"),
     GET_USER_REVIEWS(200, "U011", "회원 리뷰 조회 완료"),
+    WITHDRAW_SUCCESS(200, "U012", "회원 탈퇴 완료"),
 
     // Portfolio
     REGISTER_PORTFOLIO(200, "P001", "포트폴리오 등록 완료"),

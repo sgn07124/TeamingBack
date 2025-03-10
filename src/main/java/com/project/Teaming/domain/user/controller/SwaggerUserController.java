@@ -45,4 +45,7 @@ public interface SwaggerUserController {
 
     @Operation(summary = "유저의 모든 멘토링 팀 조회", description = "유저의 모든 멘토링 팀을 조회할 수 있다. 유저페이지에서 사용")
     public ResultListResponse<TeamInfoResponse> findUserMentoringTeams(@PathVariable Long user_id);
+
+    @Operation(summary = "사용자 탈퇴", description = "서비스를 탈퇴한다. 30일 동안 재가입이 불가하다.")
+    public ResultDetailResponse<Void> withdrawUser();
 }
