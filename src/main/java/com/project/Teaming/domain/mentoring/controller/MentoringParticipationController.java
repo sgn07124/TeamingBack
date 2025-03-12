@@ -31,11 +31,9 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     @PostMapping("/posts/{postId}/participants")
     public ResultDetailResponse<String> saveMentoringParticipation(@PathVariable Long postId) {
         MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
-        MentoringTeam mentoringTeam = mentoringPost.getMentoringTeam();
         ParticipationRequest participationDto = new ParticipationRequest(MentoringAuthority.NoAuth, MentoringParticipationStatus.PENDING, mentoringPost.getRole());
-        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION,
-                String.valueOf(mentoringParticipationService.saveMentoringParticipation(
-                        mentoringTeam, participationDto).getId()));
+        return new ResultDetailResponse<>(ResultCode.REGISTER_MENTORING_PARTICIPATION, String.valueOf(mentoringParticipationService.saveMentoringParticipation(
+                mentoringPost, participationDto).getId()));
     }
 
     @Override
@@ -46,25 +44,25 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     }
 
     @Override
-    @PatchMapping("/teams/{teamId}/participants/{participantId}/accept")
+    @PatchMapping("/teams/{teamId}/participants/{participantId}")
     public ResultDetailResponse<Void> acceptParticipant(@PathVariable Long teamId, @PathVariable Long participantId) {
         mentoringParticipationService.acceptMentoringParticipation(teamId, participantId);
         return new ResultDetailResponse<>(ResultCode.ACCEPT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/participants/{participantId}/reject")
+    @DeleteMapping("/teams/{teamId}/participants/{participantId}")
     public ResultDetailResponse<Void> rejectParticipant(@PathVariable Long teamId, @PathVariable Long participantId) {
         mentoringParticipationService.rejectMentoringParticipation(teamId, participantId);
         return new ResultDetailResponse<>(ResultCode.REJECT_MENTORING_PARTICIPATION, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/users/{userId}/export")
+    @DeleteMapping("/teams/{teamId}/users/{userId}")
     public ResultDetailResponse<Void> exportTeamUser(@PathVariable Long teamId, @PathVariable Long userId) {
         mentoringParticipationService.exportTeamUser(teamId, userId);
         return new ResultDetailResponse<>(ResultCode.EXPORT_TEAM_USER, null);
     }
     @Override
-    @PatchMapping("/teams/{teamId}/quit")
+    @DeleteMapping("/teams/{teamId}/users")
     public ResultDetailResponse<Void> deleteParticipant(@PathVariable Long teamId) {
         mentoringParticipationService.deleteUser(teamId);
         return new ResultDetailResponse<>(ResultCode.DELETE_PARTICIPATION, null);
@@ -76,6 +74,7 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
         mentoringReportService.reportTeamUser(dto);
         return new ResultDetailResponse<>(ResultCode.REPORT_TEAM_USER, null);
     }
+
 
     @Override
     @PostMapping("/reviews")
@@ -89,5 +88,4 @@ public class MentoringParticipationController implements SwaggerMentoringPartici
     public ResultDetailResponse<?> getParticipationAppliers(@PathVariable Long teamId) {
         return new ResultDetailResponse<>(ResultCode.GET_MEMBER_INFO, mentoringParticipationService.getParticipantsInfo(teamId));
     }
-
 }

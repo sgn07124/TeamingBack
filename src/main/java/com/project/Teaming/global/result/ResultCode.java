@@ -19,6 +19,7 @@ public enum ResultCode {
     REGISTER_ADDITIONAL_USER_INFO(200, "U009", "추가 정보 기입 완료"),
     GET_USER_INFO(200, "U010", "회원 정보 조회 완료"),
     GET_USER_REVIEWS(200, "U011", "회원 리뷰 조회 완료"),
+    WITHDRAW_SUCCESS(200, "U012", "회원 탈퇴 완료"),
 
     // Portfolio
     REGISTER_PORTFOLIO(200, "P001", "포트폴리오 등록 완료"),
@@ -73,7 +74,12 @@ public enum ResultCode {
     REVIEW_TEAM_USER(200, "M021", "멘토링 팀원에게 리뷰작성 완료"),
     FIND_MENTORING_CATEGORY(200, "M022", "멘토링 모집 카테고리 조회완료"),
     FIND_ALL_MENTORING_CATEGORY(200, "M023", "멘토링의 모든 모집 카테고리 조회완료"),
-    GET_ALL_USER_MENTORING_TEAM(200,"M024","유저의 모든 멘토링팀 모두 조회완료");
+    GET_ALL_USER_MENTORING_TEAM(200,"M024","유저의 모든 멘토링팀 모두 조회완료"),
+
+    // Notification
+    GET_NOTIFICATIONS(200, "N001", "전체 알림 조회 완료"),
+    DELETE_NOTIFICATION(200, "N002", "알림 삭제 완료"),
+    READ_NOTIFICATIONS(200, "N003", "알림 읽음 처리 완료");
 
     private int status;
     private final String code;

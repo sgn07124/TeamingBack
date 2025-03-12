@@ -1,5 +1,6 @@
 package com.project.Teaming.domain.mentoring.service.policy;
 
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.ReportRepository;
@@ -24,6 +25,12 @@ public class MentoringReportPolicy {
     public void validateSelfReport(User reporter, User reportedUser) {
         if (reporter.getId().equals(reportedUser.getId())) {
             throw new BusinessException(ErrorCode.INVALID_SELF_ACTION);
+        }
+    }
+
+    public void validateParticipationExists(TeamUserResponse participation) {
+        if (participation == null) {
+            throw new BusinessException(ErrorCode.INVALID_REPORT_TARGET);
         }
     }
 }

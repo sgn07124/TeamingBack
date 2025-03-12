@@ -2,6 +2,7 @@ package com.project.Teaming.domain.user.entity;
 
 import com.project.Teaming.domain.project.entity.Stack;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,8 +17,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Portfolio extends BaseTimeEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "portfolio_id")
     private Long id;  // 포트폴리오 ID
 

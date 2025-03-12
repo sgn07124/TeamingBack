@@ -6,6 +6,7 @@ import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,8 +18,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Report extends BaseTimeEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "report_id")
     private Long id;  // 신고 ID
 
@@ -65,4 +67,5 @@ public class Report extends BaseTimeEntity {
         report.status = ReportStatus.REPORTED;
         return report;
     }
+
 }

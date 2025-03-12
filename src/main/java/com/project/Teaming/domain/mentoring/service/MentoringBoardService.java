@@ -23,6 +23,7 @@ import com.project.Teaming.global.error.exception.NoAuthorityException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,7 +71,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         MentoringBoard mentoringBoard = MentoringBoard.from(boardDto);
         mentoringBoard.link(Optional.ofNullable(boardDto.getLink())
@@ -88,10 +89,7 @@ public class MentoringBoardService {
      */
     @Transactional(readOnly = true)
     public MentoringBoard findMentoringPost(Long postId) {
-
-        MentoringBoard mentoringBoard = mentoringBoardDataProvider.findBoard(postId);
-
-        return mentoringBoard;
+        return mentoringBoardDataProvider.findBoard(postId);
     }
     @Transactional
     public MentoringBoard findMentoringPostForUpdate(Long postId) {
@@ -124,8 +122,7 @@ public class MentoringBoardService {
      */
     @Transactional(readOnly = true)
     public List<BoardResponse> findAllMyMentoringPost(Long teamId) {
-        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
-        mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
+        mentoringTeamPolicy.validateTeamStatus(mentoringTeamDataProvider.findMentoringTeam(teamId));
 
         List<BoardResponse> boards = mentoringBoardRepository.findAllByMentoringTeamId(teamId);
         List<String> categories = categoryRepository.findCategoryIdsByTeamId(teamId);
@@ -189,15 +186,20 @@ public class MentoringBoardService {
      */
     @Transactional
     public void updateMentoringPost(Long postId, BoardRequest dto) {
-        User user = userDataProvider.getUser();
-        MentoringBoard mentoringBoard = mentoringBoardDataProvider.findBoard(postId);
-        MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
+        try {
+            User user = userDataProvider.getUser();
+            MentoringBoard mentoringBoard = mentoringBoardDataProvider.findBoard(postId);
 
-        mentoringParticipationPolicy.validateParticipation(
-                mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+            MentoringTeam mentoringTeam = mentoringBoard.getMentoringTeam();
+            mentoringParticipationPolicy.validateParticipation(
+                    mentoringTeam, user, null, MentoringParticipationStatus.ACCEPTED,
+                    () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
-        mentoringBoard.updateBoard(dto);
+            mentoringBoard.updateBoard(dto);
+
+        } catch (OptimisticLockException e) {
+            throw new BusinessException(ErrorCode.CONFLICT);
+        }
     }
 
     /**
@@ -211,7 +213,7 @@ public class MentoringBoardService {
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringBoard.getMentoringTeam(), user, null,MentoringParticipationStatus.ACCEPTED,
-                null,false,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
         mentoringBoardRepository.delete(mentoringBoard);
 
@@ -219,20 +221,20 @@ public class MentoringBoardService {
 
     /**
      * 팀원이 글에서 모집 현황을 수정할 수 있는 로직
-     * @param teamId
      * @param postId
      * @return
      */
     @Transactional
-    public MentoringPostStatusResponse updatePostStatus(Long teamId, Long postId) {
+    public MentoringPostStatusResponse updatePostStatus(Long postId) {
         User user = userDataProvider.getUser();
-        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(teamId);
+        MentoringBoard post = mentoringBoardDataProvider.findBoard(postId);
+        MentoringTeam mentoringTeam = post.getMentoringTeam();
 
         mentoringParticipationPolicy.validateParticipation(
                 mentoringTeam, user,null, MentoringParticipationStatus.ACCEPTED,
-                null, false,() -> new BusinessException(ErrorCode.NO_AUTHORITY));
+                () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
-        MentoringBoard post = mentoringBoardDataProvider.findBoard(postId);
+
         mentoringBoardPolicy.validatePostWithTeam(post,mentoringTeam);
 
         post.updateStatus();
@@ -250,8 +252,7 @@ public class MentoringBoardService {
     private void setAuthorityForUser(BoardSpecResponse dto, MentoringTeam mentoringTeam, User user) {
         Optional<MentoringParticipation> participations = mentoringParticipationRepository.findDynamicMentoringParticipation(
                 mentoringTeam,
-                user,null,null,
-                List.of(MentoringParticipationStatus.ACCEPTED, MentoringParticipationStatus.PENDING),false);
+                user,null,null);
 
         if (participations.isPresent()) {
             MentoringParticipation mp = participations.get();

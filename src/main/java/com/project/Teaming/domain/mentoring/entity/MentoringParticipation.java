@@ -1,9 +1,11 @@
 package com.project.Teaming.domain.mentoring.entity;
 
 import com.project.Teaming.domain.mentoring.dto.request.ParticipationRequest;
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
 import com.project.Teaming.domain.user.entity.Report;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -21,7 +23,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MentoringParticipation {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "mp_id")
     private Long id;  // 신청 ID
     @Column(name = "status")
@@ -35,12 +37,6 @@ public class MentoringParticipation {
     private MentoringRole role;  // 역할
     @Enumerated(EnumType.STRING)  //리더, 크루
     private MentoringAuthority authority;
-    @Column(name = "reporting_count")
-    private int reportingCount;
-    @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
-    @Column(name = "warning_processed", nullable = false)
-    private Boolean warningProcessed = false; // 경고 처리 여부
     // 외래키 : 신청한 사용자 ID, 멘토링 팀 ID
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -57,61 +53,46 @@ public class MentoringParticipation {
         this.decisionDate = decisionDate;
         this.role = role;
         this.authority = authority;
-        this.reportingCount = reportingCount;
-        this.isDeleted = false;
-        this.warningProcessed = false;
         this.user = user;
         this.mentoringTeam = mentoringTeam;
     }
 
-    public MentoringParticipation(MentoringParticipationStatus participationStatus, LocalDateTime requestDate, MentoringRole role, MentoringAuthority authority, int reportingCount) {
+    public MentoringParticipation(MentoringParticipationStatus participationStatus, LocalDateTime requestDate, MentoringRole role, MentoringAuthority authority) {
         this.participationStatus = participationStatus;
         this.requestDate = requestDate;
         this.role = role;
         this.authority = authority;
-        this.reportingCount = reportingCount;
-        this.isDeleted = false;
-        this.warningProcessed = false;
     }
 
     public static MentoringParticipation from(ParticipationRequest request) {
         return new MentoringParticipation(request.getStatus(),LocalDateTime.now(),
-                request.getRole(),request.getAuthority(),0);
+                request.getRole(),request.getAuthority());
     }
 
     public void accept() {
         this.participationStatus = MentoringParticipationStatus.ACCEPTED;
+        this.authority = MentoringAuthority.CREW;
+        this.decisionDate = LocalDateTime.now();
     }
     public void reject() {
         this.participationStatus = MentoringParticipationStatus.REJECTED;
     }
 
-    public void export() {
+    public TeamUserResponse export() {
         this.participationStatus = MentoringParticipationStatus.EXPORT;
+        return TeamUserResponse.toDto(this,this.getUser());
     }
 
     public void setLeader() {
         this.authority = MentoringAuthority.LEADER;
     }
 
-    public void setCrew() {
-        this.authority = MentoringAuthority.CREW;
-    }
-
     public void setDecisionDate(LocalDateTime decisionDate) {
         this.decisionDate = decisionDate;
     }
 
-    public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    public void addReportingCount() {
-        this.reportingCount = this.reportingCount + 1;
-    }
-
-    public void setWarningProcessed() {
-        this.warningProcessed = true;
+    public TeamUserResponse deleteParticipant() {
+        return TeamUserResponse.toDto(this,this.getUser());
     }
 
     /**

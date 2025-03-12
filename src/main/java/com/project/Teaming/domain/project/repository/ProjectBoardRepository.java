@@ -20,4 +20,6 @@ public interface ProjectBoardRepository extends JpaRepository<ProjectBoard, Long
             + "WHERE (:cursor IS NULL OR pb.id <= :cursor) "
             + "ORDER BY pb.createdDate DESC ")
     List<ProjectBoard> findAllByCursor(@Param("cursor") Long cursor, Pageable pageable);
+
+    void deleteByProjectTeamId(Long teamId);
 }

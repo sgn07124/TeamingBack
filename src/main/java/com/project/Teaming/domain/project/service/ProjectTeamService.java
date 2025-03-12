@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -98,11 +99,44 @@ public class ProjectTeamService {
         List<String> recruitCategoryIds = projectTeam.getRecruitCategories().stream()
                 .map(teamRecruitCategory -> String.valueOf(teamRecruitCategory.getRecruitCategory().getId()))
                 .collect(Collectors.toList());
-
-        return ProjectTeamInfoDto.from(projectTeam, stackIds, recruitCategoryIds);
+        String userRole = isProjectOwner(teamId);
+        return ProjectTeamInfoDto.from(projectTeam, stackIds, recruitCategoryIds, userRole);
     }
 
+    /**
+     * 프로젝트 팀의 멤버인지 확인(인증이 안된 유저, 인증이 됬지만 팀원이 아닌 유저, 인증이 됬으며 팀원인 유저 중 판별)
+     */
+    public String isProjectOwner(Long projectTeamId) {
+        User user = getAuthenticatedUser();
+        if (user == null) {
+            return "VISITOR";  // 인증되지 않은 사용자(일반 사용자)
+        }
+        if (isOwner(user.getId(), projectTeamId)) {  // 로그인 한 사용자들 중 팀장 여부
+            return "OWNER";
+        } else if (isMember(user.getId(), projectTeamId)) {  // 로그인 한 사용자들 중 팀원 여부
+            return "MEMBER";
+        } else return "VISITOR";  // 로그인 한 사용자들 중 일반 사용자
+    }
 
+    /**
+     * 해당 메서드를 조회한 사용자의 토큰(인증) 유무를 확인
+     */
+    private User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)) {
+            return userRepository.findById(getCurrentId()).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+        }
+        return null;  // 인증되지 않은 사용자
+    }
+
+    private boolean isOwner(Long userId, Long projectTeamId) {
+        return projectParticipationRepository.existsByProjectTeamIdAndUserIdAndRole(projectTeamId, userId, ProjectRole.OWNER);
+    }
+
+    private boolean isMember(Long userId, Long projectTeamId) {
+        return projectParticipationRepository.existsByProjectTeamIdAndUserIdAndParticipationStatusAndIsDeleted(projectTeamId, userId,
+                ParticipationStatus.ACCEPTED, false);
+    }
 
     public void editTeam(Long teamId, UpdateTeamDto dto) {
         ProjectTeam projectTeam = findProjectTeamById(teamId);
@@ -158,6 +192,21 @@ public class ProjectTeamService {
         User user = userRepository.findById(getCurrentId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
         List<ProjectParticipation> participations = projectParticipationRepository.findByUserIdAndParticipationStatus(user.getId(),
+                ParticipationStatus.ACCEPTED);
+
+        List<MyProjectListDto> projectLists = participations.stream()
+                .map(participation -> {
+                    ProjectTeam projectTeam = projectTeamRepository.findById(participation.getProjectTeam().getId())
+                            .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_PROJECT_TEAM));
+                    return MyProjectListDto.from(projectTeam, participation);
+                })
+                .collect(Collectors.toList());
+        return projectLists;
+    }
+
+    public List<MyProjectListDto> getSpecificProjectList(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER));
+        List<ProjectParticipation> participations = projectParticipationRepository.findByUserIdAndParticipationStatus(userId,
                 ParticipationStatus.ACCEPTED);
 
         List<MyProjectListDto> projectLists = participations.stream()

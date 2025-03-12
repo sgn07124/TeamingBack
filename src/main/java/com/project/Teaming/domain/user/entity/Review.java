@@ -7,6 +7,7 @@ import com.project.Teaming.global.auditing.BaseEntity;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class   Review extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "review_id")
     private Long id;  // 리뷰 ID
 

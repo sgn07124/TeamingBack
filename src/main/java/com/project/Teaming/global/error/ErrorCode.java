@@ -22,6 +22,7 @@ public enum ErrorCode {
     NEED_LOGIN(401, "U004", "need login"),
     AUTHENTICATION_NOT_FOUND(400, "U005", "security context에 인증정보가 없습니다"),
     USER_ALREADY_LOGOUT(400, "U006", "member already logout"),
+    WITHDRAW_USER(404, "U007", "탈퇴한 사용자 입니다."),
 
     // Auth
     REFRESH_TOKEN_INVALID(400, "A001", "refresh token invalid"),
@@ -67,6 +68,8 @@ public enum ErrorCode {
     NO_ELIGIBLE_MEMBER_FOR_LEADER(404, "M012", "리더의 권한을 받을 팀원이 없습니다. 팀을 삭제해주세요."),
     NOT_A_MEMBER_OF_TEAM(404, "M013", "유저가 포함되지 않은 팀입니다."),
     NOT_A_POST_OF_TEAM(404, "M014", "해당 팀에 포함되지 않은 글입니다."),
+    ASYNC_OPERATION_FAILED(404, "M015", "비동기 작업 중 오류 발생"),
+    CONFLICT(404, "M016", "수정하는 동안 게시글이 삭제되었거나, 업데이트 되었습니다. 다시 확인해주세요."),
 
     //MentoringCategory
     NO_SUCH_CATEGORY(404, "MC001", "해당하는 카테고리가 존재하지 않습니다"),
@@ -78,7 +81,13 @@ public enum ErrorCode {
     NOT_A_TEAM_USER(404, "R005", "신고할 수 있는 권한이 없습니다."),
     ALREADY_REPORTED(404, "R006", "이미 신고한 사용자입니다."),
     ALREADY_REVIEWED(404, "R007", "이미 리뷰를 작성한 사용자입니다."),
-    STILL_IN_PROGRESS(404, "R008", "아직 완료되지 않은 팀 입니다.");
+    CANNOT_REVIEW(404, "R008", "아직 팀 상태가 완료되지 않았거나 강퇴나 탈퇴하지 않은 사용자입니다."),
+
+    // notification
+    NOT_FOUND_NOTIFICATION(404, "N001", "id에 해당되는 알림이 존재하지 않습니다."),
+    NOT_CONNECTED(404,"N002","해당 유저는 SSE에 연결되어있지 않습니다."),
+    NOT_VALID_IDS(404, "N003", "유효한 알림 ID가 없습니다."),
+    NOT_AUTHORIZED(404, "N004", "권한이 없는 ID가 포함되어 있습니다.");
 
     private int status;
     private final String code;

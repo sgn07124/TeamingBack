@@ -5,6 +5,7 @@ import com.project.Teaming.domain.project.dto.response.ProjectPostInfoDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostListDto;
 import com.project.Teaming.domain.project.dto.response.ProjectPostStatusDto;
 import com.project.Teaming.domain.project.service.ProjectBoardService;
+import com.project.Teaming.domain.project.service.ProjectCacheService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.pagenateResponse.PaginatedCursorResponse;
 import com.project.Teaming.global.result.ResultListResponse;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -35,39 +37,41 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProjectBoardController {
 
     private final ProjectBoardService projectBoardService;
+    private final ProjectCacheService projectCacheService;
 
-    @PostMapping("/post/{team_id}")
-    @Operation(summary = "프로젝트 팀 게시물 작성", description = "프로젝트 팀에 대한 모집 게시글 작성")
-    public ResultDetailResponse<Void> createPost(@PathVariable Long team_id, @Valid @RequestBody CreatePostDto createPostDto) {
-        projectBoardService.createPost(team_id, createPostDto);
+    @PostMapping("/teams/{teamId}/posts")
+    @Operation(summary = "프로젝트 글 등록", description = "프로젝트 팀에 대한 글 작성")
+    public ResultDetailResponse<Void> createPost(@PathVariable Long teamId, @Valid @RequestBody CreatePostDto createPostDto) {
+        projectBoardService.createPost(teamId, createPostDto);
         return new ResultDetailResponse<>(ResultCode.REGISTER_PROJECT_POST, null);
     }
 
-    @GetMapping("/post/{post_id}")
-    @Operation(summary = "프로젝트 팀 게시물 상세 조회", description = "프로젝트 팀에서 작성한 게시물들 중 하나에 대한 상세 조회")
-    public ResultDetailResponse<ProjectPostInfoDto> getPostInfo(@PathVariable Long post_id) {
-        ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(post_id);
+    @GetMapping("/posts/{postId}")
+    @Operation(summary = "프로젝트 글 조회", description = "프로젝트 팀에서 작성한 게시물 상세 조회. isMember: 팀원 여부, isApply: 신청 여부")
+    public ResultDetailResponse<ProjectPostInfoDto> getPostInfo(@PathVariable Long postId) {
+        log.debug("success");
+        ProjectPostInfoDto postInfoDto = projectBoardService.getPostInfo(postId);
         return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_INFO, postInfoDto);
     }
 
-    @PutMapping("/post/{team_id}/{post_id}/edit")
-    @Operation(summary = "프로젝트 팀 게시물 수정", description = "게시물 수정")
-    public ResultDetailResponse<Void> updatePost(@PathVariable Long team_id, @PathVariable Long post_id, @Valid @RequestBody CreatePostDto createPostDto) {
-        projectBoardService.updatePost(team_id, post_id, createPostDto);
+    @PutMapping("/posts/{postId}")
+    @Operation(summary = "프로젝트 글 수정", description = "팀원은 게시물 수정 가능. ")
+    public ResultDetailResponse<Void> updatePost(@PathVariable Long postId, @Valid @RequestBody CreatePostDto createPostDto) {
+        projectBoardService.updatePost(postId, createPostDto);
         return new ResultDetailResponse<>(ResultCode.UPDATE_PROJECT_POST_INFO, null);
     }
 
-    @PutMapping("/post/{team_id}/{post_id}/complete")
+    @PatchMapping("/posts/{postId}")
     @Operation(summary = "게시물 모집 완료", description = "게시물을 팀원 또는 팀장이 모집 완료 처리를 직접 할 수 있다.")
-    public ResultDetailResponse<ProjectPostStatusDto> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id) {
-        ProjectPostStatusDto dto = projectBoardService.completePostStatus(team_id, post_id);
+    public ResultDetailResponse<ProjectPostStatusDto> completePostStatus(@PathVariable Long postId) {
+        ProjectPostStatusDto dto = projectBoardService.completePostStatus(postId);
         return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_STATUS, dto);
     }
 
-    @DeleteMapping("/post/{team_id}/{post_id}")
-    @Operation(summary = "프로젝트 팀 게시물 삭제", description = "프로젝트 팀에서 작성한 모집 게시글 삭제.")
-    public ResultDetailResponse<Void> deletePost(@PathVariable Long team_id, @PathVariable Long post_id) {
-        projectBoardService.deletePost(team_id, post_id);
+    @DeleteMapping("/posts/{postId}")
+    @Operation(summary = "프로젝트 글 삭제", description = "팀에서 작성한 글 삭제.")
+    public ResultDetailResponse<Void> deletePost(@PathVariable Long postId) {
+        projectBoardService.deletePost(postId);
         return new ResultDetailResponse<>(ResultCode.DELETE_PROJECT_POST_INFO, null);
     }
 
@@ -93,14 +97,23 @@ public class ProjectBoardController {
             @RequestParam(required = false) Long cursor, // 마지막 게시글 ID
             @RequestParam(defaultValue = "10") int pageSize) {
 
-        PaginatedCursorResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(cursor, pageSize);
-        return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
+        // 캐시에서 먼저 조회
+        PaginatedCursorResponse<ProjectPostListDto> cachePosts = projectCacheService.getCachePosts(cursor, pageSize);
+
+        if (cachePosts != null) {
+            return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, cachePosts);
+        } else {
+            // 캐시가 없으면 DB에서 조회하여 캐시에 저장
+            PaginatedCursorResponse<ProjectPostListDto> posts = projectBoardService.getProjectPosts(cursor, pageSize);
+            projectCacheService.cachePosts(cursor, pageSize, posts);
+            return new ResultDetailResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
+        }
     }
 
-    @GetMapping("/posts/{team_id}")
-    @Operation(summary = "프로젝트 팀의 게시글 조회", description = "특정 프로젝트 팀에서 작성한 게시글 목록을 조회")
-    public ResultListResponse<ProjectPostListDto> getTeamPosts(@PathVariable Long team_id) {
-        List<ProjectPostListDto> posts = projectBoardService.getTeamProjectPosts(team_id);
+    @GetMapping("/teams/{teamId}/posts")
+    @Operation(summary = "특정 프로젝트 팀의 모든 글 조회", description = "특정 프로젝트 팀에서 작성한 글들을 조회")
+    public ResultListResponse<ProjectPostListDto> getTeamPosts(@PathVariable Long teamId) {
+        List<ProjectPostListDto> posts = projectBoardService.getTeamProjectPosts(teamId);
         return new ResultListResponse<>(ResultCode.GET_PROJECT_POST_LIST, posts);
     }
 }

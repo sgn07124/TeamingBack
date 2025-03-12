@@ -1,7 +1,13 @@
 package com.project.Teaming.domain.user.service;
 
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import com.project.Teaming.domain.project.entity.ParticipationStatus;
+import com.project.Teaming.domain.project.entity.ProjectParticipation;
+import com.project.Teaming.domain.project.entity.ProjectRole;
+import com.project.Teaming.domain.project.entity.ProjectTeam;
 import com.project.Teaming.domain.project.entity.Stack;
+import com.project.Teaming.domain.project.repository.ProjectBoardRepository;
+import com.project.Teaming.domain.project.repository.ProjectParticipationRepository;
+import com.project.Teaming.domain.project.repository.ProjectTeamRepository;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
@@ -12,19 +18,22 @@ import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.entity.Portfolio;
 import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.repository.PortfolioRepository;
+import com.project.Teaming.domain.user.repository.ReportRepository;
 import com.project.Teaming.domain.user.repository.ReviewRepository;
 import com.project.Teaming.domain.user.repository.UserRepository;
 import com.project.Teaming.domain.user.repository.UserStackRepository;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import com.project.Teaming.global.jwt.dto.SecurityUserDto;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +42,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
@@ -41,6 +49,11 @@ public class UserService {
     private final StackRepository stackRepository;
     private final UserStackRepository userStackRepository;
     private final ReviewRepository reviewRepository;
+    private final ProjectTeamRepository projectTeamRepository;
+    private final ProjectParticipationRepository projectParticipationRepository;
+    private final ProjectBoardRepository projectBoardRepository;
+    private final ReportRepository reportRepository;
+    private final UserNotificationService userNotificationService;
 
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
@@ -56,7 +69,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-
+    @Transactional
     public void saveUserInfo(RegisterDto dto) {
         log.info("email : " + getSecurityUserDto().getEmail());
         User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
@@ -73,6 +86,7 @@ public class UserService {
 
         portfolioRepository.save(portfolio);
         userRepository.save(user);
+        userNotificationService.join(user);
     }
 
     private void saveUserStacks(RegisterDto dto, Portfolio portfolio) {
@@ -141,7 +155,18 @@ public class UserService {
 
     public List<ReviewDto> getReviews(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
-        return reviewRepository.findAllByUser(user);
+
+        List<ReviewDto> projectReviewsByUser = reviewRepository.findProjectReviewsByUser(user);
+        List<ReviewDto> mentoringReviewsByUser = reviewRepository.findMentoringReviewsByUser(user);
+
+        List<ReviewDto> allReviews = new ArrayList<>();
+        allReviews.addAll(projectReviewsByUser);
+        allReviews.addAll(mentoringReviewsByUser);
+
+        allReviews = allReviews.stream()
+                .sorted(Comparator.comparing(ReviewDto::getCreatedDate))
+                .collect(Collectors.toList());
+        return allReviews;
     }
 
     public UserReportCnt getWarningCnt() {
@@ -155,5 +180,41 @@ public class UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         SecurityUserDto securityUser = (SecurityUserDto) authentication.getPrincipal();
         return securityUser;
+    }
+
+    @Transactional
+    public void withdrawUser() {
+        User user = findByEmail(getSecurityUserDto().getEmail()).orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_EXIST));
+        user.updateUserWithdraw();
+
+        List<ProjectParticipation> projectParticipations = projectParticipationRepository.findByUser(user);
+        quitProjectTeams(projectParticipations);
+    }
+
+    private void quitProjectTeams(List<ProjectParticipation> projectParticipations) {
+        for (ProjectParticipation participation : projectParticipations) {
+            ProjectTeam team = participation.getProjectTeam();
+
+            if (participation.getRole().equals(ProjectRole.OWNER)) {
+                Optional<ProjectParticipation> firstMember = projectParticipationRepository.findTeamUsers(team.getId(), ParticipationStatus.ACCEPTED, ProjectRole.MEMBER)
+                        .stream().findFirst();
+                firstMember.ifPresentOrElse(
+                        nextLeader -> nextLeader.setRole(ProjectRole.OWNER),
+                        () -> { // 팀장 받을 유저가 없는 경우 - 팀 삭제
+                            // Report, Review 테이블에서 project_participation_id를 null로 설정
+                            reportRepository.updateProjectParticipationNull(participation.getId());
+                            reviewRepository.updateProjectParticipationNull(participation.getId());
+                            // 팀원이 없다면 모든 참여 기록 삭제 후 팀 삭제
+                            projectBoardRepository.deleteByProjectTeamId(team.getId());
+                            projectParticipationRepository.deleteAllByProjectTeamId(team.getId());
+                            projectTeamRepository.delete(team);
+                        }
+                );
+            }
+            reportRepository.updateProjectParticipationNull(participation.getId());
+            reviewRepository.updateProjectParticipationNull(participation.getId());
+            // 해당 팀 탈퇴
+            projectParticipationRepository.delete(participation);
+        }
     }
 }

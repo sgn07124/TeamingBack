@@ -53,9 +53,9 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
         return new ResultListResponse<>(ResultCode.GET_ALL_MY_MENTORING_POSTS, mentoringBoardService.findAllMyMentoringPost(teamId));
     }
     @Override
-    @PatchMapping("/teams/{teamId}/posts/{postId}/complete")
-    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatus(@PathVariable Long teamId, @PathVariable Long postId) {
-        return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,mentoringBoardService.updatePostStatus(teamId, postId));
+    @PatchMapping("/posts/{postId}")
+    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatus(@PathVariable Long postId) {
+        return new ResultDetailResponse<>(ResultCode.UPDATE_POST_STATUS,mentoringBoardService.updatePostStatus(postId));
     }
     @Override
     @GetMapping("/posts/{postId}")

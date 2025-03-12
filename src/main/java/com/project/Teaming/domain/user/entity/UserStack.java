@@ -1,6 +1,7 @@
 package com.project.Teaming.domain.user.entity;
 
 import com.project.Teaming.domain.project.entity.Stack;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class UserStack {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)

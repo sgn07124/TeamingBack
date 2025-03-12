@@ -1,17 +1,13 @@
 package com.project.Teaming.domain.project.entity;
 
 import com.project.Teaming.domain.project.dto.request.CreatePostDto;
-import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
@@ -20,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProjectBoard extends BaseTimeEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "pj_post_id")
     private Long id;  // 프로젝트 모집글 ID
 
@@ -41,6 +37,9 @@ public class ProjectBoard extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     private PostStatus status;  // 프로젝트 게시글 모집 상태
+
+    @Version
+    private Integer version;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")

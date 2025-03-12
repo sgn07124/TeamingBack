@@ -1,5 +1,7 @@
 package com.project.Teaming.domain.project.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.project.Teaming.domain.project.entity.ProjectTeam;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -25,13 +27,15 @@ public class ProjectTeamInfoDto {
     private String contents;
     private String createdDate;
     private String lastModifiedDate;
-    private Long projectId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Long id;  // projectId
     private List<String> stacks;  // 기술 스택(id로)
     private List<String> recruitCategories;  // 모집 구분(id로)
+    private String userRole;
 
-    public static ProjectTeamInfoDto from(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds) {
+    public static ProjectTeamInfoDto from(ProjectTeam projectTeam, List<String> stackIds, List<String> recruitCategoryIds, String userRole) {
         ProjectTeamInfoDto dto = new ProjectTeamInfoDto();
-        dto.setProjectId(projectTeam.getId());
+        dto.setId(projectTeam.getId());
         dto.setProjectName(projectTeam.getName());
         dto.setStartDate(String.valueOf(projectTeam.getStartDate()));
         dto.setEndDate(String.valueOf(projectTeam.getEndDate()));
@@ -43,6 +47,7 @@ public class ProjectTeamInfoDto {
         dto.setLastModifiedDate(dto.getFormattedDate(projectTeam.getLastModifiedDate()));
         dto.setStacks(stackIds);
         dto.setRecruitCategories(recruitCategoryIds);
+        dto.setUserRole(userRole);
         return dto;
     }
 

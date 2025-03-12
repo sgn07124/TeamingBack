@@ -31,7 +31,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             MentoringTeam team,
             MentoringStatus teamStatus,
             MentoringParticipationStatus status,
-            MentoringParticipationStatus status2,
             Long reviewerParticipationId) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
@@ -47,7 +46,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         u.name,
                         mp.role,
                         mp.participationStatus,
-                        mp.isDeleted,
                         new CaseBuilder()
                                 .when(mt.status.eq(teamStatus)
                                         .and(r.id.isNotNull()))
@@ -62,7 +60,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         .and(r.mentoringParticipation.id.eq(reviewerParticipationId)))
                 .where(
                         mt.eq(team),
-                        mp.participationStatus.in(status, status2)
+                        mp.participationStatus.eq(status)
                 )
                 .orderBy(mp.decisionDate.asc())
                 .fetch();
@@ -71,7 +69,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
 
     @Override
     public Optional<MentoringParticipation> findDynamicMentoringParticipation(MentoringTeam mentoringTeam, User user, MentoringAuthority authority,
-                                                                              MentoringParticipationStatus status, List<MentoringParticipationStatus> statuses, Boolean isDeleted) {
+                                                                              MentoringParticipationStatus status) {
 
         QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
 
@@ -86,20 +84,12 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
             builder.and(mp.user.eq(user));
         }
 
-        if (authority != null) {
-            builder.and(mp.authority.eq(authority));
-        }
-
         if (status != null) {
             builder.and(mp.participationStatus.eq(status));
         }
 
-        if (statuses != null && !statuses.isEmpty()) {
-            builder.and(mp.participationStatus.in(statuses));
-        }
-
-        if (isDeleted != null) {
-            builder.and(mp.isDeleted.eq(isDeleted));
+        if (authority != null) {
+            builder.and(mp.authority.eq(authority));
         }
 
         MentoringParticipation result = queryFactory
@@ -108,69 +98,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .fetchOne();
 
         return Optional.ofNullable(result);
-    }
-
-    @Override
-    public List<TeamParticipationResponse> findAllForLeader(Long teamId, MentoringAuthority authority) {
-        return findParticipationResponses(
-                teamId,
-                authority,
-                TeamParticipationResponse.class
-        );
-    }
-
-    @Override
-    public List<ParticipationForUserResponse> findAllForUser(Long teamId, MentoringAuthority authority) {
-        return findParticipationResponses(
-                teamId,
-                authority,
-                ParticipationForUserResponse.class
-        );
-    }
-
-    private <T> List<T> findParticipationResponses(Long teamId, MentoringAuthority authority, Class<T> dtoClass) {
-        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
-        QUser u = QUser.user;
-        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
-
-        BooleanBuilder builder = new BooleanBuilder();
-        builder.and(mt.id.eq(teamId));
-        builder.and(mp.authority.ne(authority));
-
-
-        if (dtoClass.equals(TeamParticipationResponse.class)) {
-            return queryFactory
-                    .select(Projections.constructor(
-                            dtoClass,
-                            mp.requestDate,
-                            u.id,
-                            u.name,
-                            u.warningCount,
-                            mp.participationStatus
-                    ))
-                    .from(mp)
-                    .join(mp.user, u)
-                    .join(mp.mentoringTeam, mt)
-                    .where(builder)
-                    .orderBy(mp.requestDate.asc())
-                    .fetch();
-        }
-        else {
-            return queryFactory
-                    .select(Projections.constructor(
-                            dtoClass,
-                            mp.requestDate,
-                            u.id,
-                            u.name,
-                            mp.participationStatus
-                    ))
-                    .from(mp)
-                    .join(mp.user, u)
-                    .join(mp.mentoringTeam, mt)
-                    .where(builder)
-                    .orderBy(mp.requestDate.asc())
-                    .fetch();
-        }
     }
 
     @Override
@@ -184,7 +111,6 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                         .join(mp.mentoringTeam, mt).fetchJoin()
                         .where(
                                 mt.id.eq(teamId),
-                                mp.isDeleted.isFalse(),
                                 mp.participationStatus.eq(participationStatus),
                                 mp.authority.eq(authority)
                         )
@@ -205,10 +131,30 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .where(
                         mp.user.eq(user),
                         mp.participationStatus.eq(status),
-                        mp.isDeleted.isFalse(),
                         mt.flag.eq(Status.FALSE)
                 )
                 .distinct()
+                .fetch();
+    }
+    @Override
+    public List<User> findMemberUser(Long teamId, MentoringAuthority mentoringAuthority) {
+
+        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
+        QUser u = QUser.user;
+        BooleanBuilder builder = new BooleanBuilder();
+
+        builder.and(mp.mentoringTeam.id.eq(teamId));
+        builder.and(mp.participationStatus.eq(MentoringParticipationStatus.ACCEPTED));
+
+        if (mentoringAuthority != null) {
+            builder.and(mp.authority.eq(mentoringAuthority));
+        }
+
+        return queryFactory
+                .select(u)
+                .from(mp)
+                .join(mp.user, u)
+                .where(builder)
                 .fetch();
     }
 
@@ -222,8 +168,7 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .from(mp)
                 .where(
                         mp.mentoringTeam.id.eq(teamId), // teamId 조건
-                        mp.participationStatus.eq(status), // participationStatus 조건
-                        mp.isDeleted.isFalse() // isDeleted = false 조건
+                        mp.participationStatus.eq(status) // participationStatus 조건
                 )
                 .fetchOne(); // 단일 값 반환
     }

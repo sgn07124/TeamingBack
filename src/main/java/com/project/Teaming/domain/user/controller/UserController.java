@@ -2,12 +2,14 @@ package com.project.Teaming.domain.user.controller;
 
 import com.project.Teaming.domain.mentoring.dto.response.TeamInfoResponse;
 import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.provider.UserDataProvider;
 import com.project.Teaming.domain.mentoring.service.MentoringTeamService;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.domain.user.dto.request.UpdateUserInfoDto;
 import com.project.Teaming.domain.user.dto.response.ReviewDto;
 import com.project.Teaming.domain.user.dto.response.UserInfoDto;
 import com.project.Teaming.domain.user.dto.response.UserReportCnt;
+import com.project.Teaming.domain.user.entity.User;
 import com.project.Teaming.domain.user.service.UserService;
 import com.project.Teaming.global.result.ResultCode;
 import com.project.Teaming.global.result.ResultDetailResponse;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class UserController implements SwaggerUserController{
 
     private final UserService userService;
+    private final UserDataProvider userDataProvider;
     private final MentoringTeamService mentoringTeamService;
 
     @Override
@@ -78,11 +81,18 @@ public class UserController implements SwaggerUserController{
     @Override
     @GetMapping("/{userId}/mentoring/teams")
     public ResultListResponse<TeamInfoResponse> findUserMentoringTeams(@PathVariable Long userId) {
+        User targetUser = userDataProvider.findUser(userId);
         List<MentoringTeam> myMentoringTeams = mentoringTeamService.findMyMentoringTeams(userId);
         return new ResultListResponse<>(ResultCode.GET_ALL_USER_MENTORING_TEAM,
                 myMentoringTeams.stream()
-                        .map(mentoringTeamService::getMyTeam)
+                        .map(team -> mentoringTeamService.getTeamInfoWithAuthority(team, targetUser))
                         .collect(Collectors.toList()));
     }
 
+    @Override
+    @PatchMapping("/withdraw")
+    public ResultDetailResponse<Void> withdrawUser() {
+        userService.withdrawUser();
+        return new ResultDetailResponse<>(ResultCode.WITHDRAW_SUCCESS, null);
+    }
 }

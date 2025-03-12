@@ -5,11 +5,10 @@ import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
 import lombok.Data;
 
 import java.util.List;
-
 @Data
 public class TeamAuthorityResponse {
 
-    private MentoringAuthority Authority;
+    private MentoringAuthority role;
     private TeamResponse dto;
     @JsonInclude(JsonInclude.Include.NON_NULL) // null인 경우 직렬화하지 않음
     private List<ParticipationForUserResponse> userParticipations;

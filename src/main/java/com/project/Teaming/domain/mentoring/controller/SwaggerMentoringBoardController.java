@@ -50,7 +50,7 @@ public interface SwaggerMentoringBoardController {
     public ResultListResponse<BoardResponse> findMyAllPosts(@PathVariable Long team_id);
 
     @Operation(summary = "게시물 모집 완료 처리", description = "게시물에서 팀구성원이 모집 완료 처리를 직접 할 수 있다.")
-    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatus(@PathVariable Long team_id, @PathVariable Long post_id);
+    public ResultDetailResponse<MentoringPostStatusResponse> completePostStatus(@PathVariable Long post_id);
 
     @Operation(summary = "멘토링 글 조희" , description = "멘토링 게시판에서 특정 멘토링 글을 조회할 수 있다. " +
             "Authority가 LEADER와 CREW이면 수정할 수 있는 페이지, NoAuth이면 수정이 불가능 한 일반사용자용 페이지 보여주세요.")

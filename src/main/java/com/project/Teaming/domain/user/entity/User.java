@@ -4,6 +4,7 @@ import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.user.dto.request.RegisterDto;
 import com.project.Teaming.global.auditing.BaseTimeEntity;
+import io.hypersistence.utils.hibernate.id.Tsid;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,7 +21,7 @@ import java.util.List;
 public class User extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Tsid
     @Column(name = "user_id")
     private Long id;  // 사용자Id
 
@@ -38,6 +39,9 @@ public class User extends BaseTimeEntity {
 
     @Column(name = "provider")
     private String provider;
+
+    @Column(name = "isDelete")
+    private boolean isDelete;
 
     @OneToMany(mappedBy = "user")
     private List<ProjectParticipation> projectParticipations = new ArrayList<>();
@@ -60,6 +64,7 @@ public class User extends BaseTimeEntity {
         this.provider = provider;
         this.userRole = role;
         this.warningCount = 0;  // 처음 경고 횟수는 0으로 설정
+        this.isDelete = false;
     }
 
     // 추가 정보 기입
@@ -85,5 +90,13 @@ public class User extends BaseTimeEntity {
 
     public void incrementWarningCnt() {
         this.warningCount += 1;
+    }
+
+    public void updateUserWithdraw() {
+        this.isDelete = true;
+    }
+
+    public void userDelete() {
+        this.portfolio = null;
     }
 }

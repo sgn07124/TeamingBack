@@ -52,6 +52,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        // ELB Health Check 경로 제외
+        if (path.equals("/") || path.equals("/health")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+
         // 쿠키에서 AccessToken을 가져온다.
         String accessToken = resolveTokenFromCookie(request);
         log.info("AccessToken from Cookie: {}", accessToken);
