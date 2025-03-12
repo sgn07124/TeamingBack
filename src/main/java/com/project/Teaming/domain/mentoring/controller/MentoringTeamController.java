@@ -34,7 +34,7 @@ public class MentoringTeamController implements SwaggerMentoringTeamController {
 
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_TEAM,
                 mentoringTeamService.getMentoringTeam(
-                        mentoringTeamService.findMentoringTeam(teamId)));
+                        mentoringTeamService.findMentoringTeamForUpdate(teamId)));
     }
     @Override
     @GetMapping("/teams/{teamId}")
