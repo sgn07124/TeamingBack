@@ -36,7 +36,7 @@ public class MentoringBoardController implements SwaggerMentoringBoardController
     public ResultDetailResponse<BoardSpecResponse> updatePost(@PathVariable Long postId,
                                                               @RequestBody @Valid BoardRequest dto) {
         mentoringBoardService.updateMentoringPost(postId, dto);
-        MentoringBoard mentoringPost = mentoringBoardService.findMentoringPost(postId);
+        MentoringBoard mentoringPost = mentoringBoardService.findMentoringPostForUpdate(postId);
         return new ResultDetailResponse<>(ResultCode.UPDATE_MENTORING_POST, mentoringBoardService.toDto(mentoringPost));
     }
 

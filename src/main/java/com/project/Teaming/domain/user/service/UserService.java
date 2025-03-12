@@ -1,5 +1,13 @@
 package com.project.Teaming.domain.user.service;
 
+import com.project.Teaming.domain.mentoring.dto.response.TeamUserResponse;
+import com.project.Teaming.domain.mentoring.entity.MentoringAuthority;
+import com.project.Teaming.domain.mentoring.entity.MentoringParticipation;
+import com.project.Teaming.domain.mentoring.entity.MentoringParticipationStatus;
+import com.project.Teaming.domain.mentoring.entity.MentoringTeam;
+import com.project.Teaming.domain.mentoring.repository.MentoringBoardRepository;
+import com.project.Teaming.domain.mentoring.repository.MentoringParticipationRepository;
+import com.project.Teaming.domain.mentoring.repository.MentoringTeamRepository;
 import com.project.Teaming.domain.project.entity.ParticipationStatus;
 import com.project.Teaming.domain.project.entity.ProjectParticipation;
 import com.project.Teaming.domain.project.entity.ProjectRole;
@@ -54,6 +62,8 @@ public class UserService {
     private final ProjectBoardRepository projectBoardRepository;
     private final ReportRepository reportRepository;
     private final UserNotificationService userNotificationService;
+    private final MentoringParticipationRepository mentoringParticipationRepository;
+    private final MentoringTeamRepository mentoringTeamRepository;
 
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
@@ -188,7 +198,9 @@ public class UserService {
         user.updateUserWithdraw();
 
         List<ProjectParticipation> projectParticipations = projectParticipationRepository.findByUser(user);
+        List<MentoringParticipation> mentoringParticipations = mentoringParticipationRepository.findByUserId(user.getId());
         quitProjectTeams(projectParticipations);
+        quitMentoringTeams(mentoringParticipations);
     }
 
     private void quitProjectTeams(List<ProjectParticipation> projectParticipations) {
@@ -215,6 +227,33 @@ public class UserService {
             reviewRepository.updateProjectParticipationNull(participation.getId());
             // 해당 팀 탈퇴
             projectParticipationRepository.delete(participation);
+        }
+    }
+
+    private void quitMentoringTeams(List<MentoringParticipation> mentoringParticipations) {
+
+        for (MentoringParticipation participation : mentoringParticipations) {
+            MentoringTeam team = participation.getMentoringTeam();
+
+            if (participation.getAuthority() == MentoringAuthority.LEADER) {
+                //제일 일찍 들어온 팀원 조회
+                Optional<MentoringParticipation> firstMember = mentoringParticipationRepository.findFirstUser(
+                        team.getId(), MentoringParticipationStatus.ACCEPTED, MentoringAuthority.CREW);
+                // 새로운 리더 설정
+                firstMember.ifPresentOrElse(
+                        MentoringParticipation::setLeader,
+                        () -> {
+                            // 팀장 받을 유저가 없는 경우 - 팀 삭제
+                            // Report, Review 테이블에서 mentoring_participation_id를 null로 설정
+                            reportRepository.updateProjectParticipationNull(participation.getId());
+                            reviewRepository.updateProjectParticipationNull(participation.getId());
+                            // 팀원이 없다면 모든 참여 기록 삭제 후 팀 삭제
+                            mentoringTeamRepository.delete(team);
+                        }
+                );
+            }
+            reportRepository.updateMentoringParticipationNull(participation.getId());
+            reviewRepository.updateMentoringParticipationNull(participation.getId());
         }
     }
 }

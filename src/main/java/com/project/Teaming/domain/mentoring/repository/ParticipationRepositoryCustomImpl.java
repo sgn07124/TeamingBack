@@ -158,6 +158,20 @@ public class ParticipationRepositoryCustomImpl implements ParticipationRepositor
                 .fetch();
     }
 
+    @Override
+    public List<MentoringParticipation> findByUserId(Long userId) {
+
+        QMentoringParticipation mp = QMentoringParticipation.mentoringParticipation;
+        QMentoringTeam mt = QMentoringTeam.mentoringTeam;
+
+        return queryFactory
+                .selectFrom(mp)
+                .join(mp.mentoringTeam,mt).fetchJoin()
+                .where(mp.user.id.eq(userId))
+                .fetch();
+
+    }
+
 
     @Override
     public long countBy(Long teamId, MentoringParticipationStatus status) {

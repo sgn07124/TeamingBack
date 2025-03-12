@@ -91,6 +91,10 @@ public class MentoringBoardService {
     public MentoringBoard findMentoringPost(Long postId) {
         return mentoringBoardDataProvider.findBoard(postId);
     }
+    @Transactional
+    public MentoringBoard findMentoringPostForUpdate(Long postId) {
+        return mentoringBoardDataProvider.findBoard(postId);
+    }
 
     @Transactional(readOnly = true)
     public BoardSpecResponse toDto(MentoringBoard mentoringPost) {

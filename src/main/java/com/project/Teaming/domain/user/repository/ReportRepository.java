@@ -44,6 +44,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     void updateProjectParticipationNull(@Param("participationId") Long participationId);
 
     @Modifying
+    @Query("UPDATE Report r SET r.mentoringParticipation = NULL WHERE r.mentoringParticipation.id = :participationId")
+    void updateMentoringParticipationNull(@Param("participationId") Long participationId);
+
+    @Modifying
     @Query("DELETE FROM Report r WHERE r.reportedUser.id = :userId")
     void deleteByReportedUserId(@Param("userId") Long userId);
 }

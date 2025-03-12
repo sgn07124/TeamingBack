@@ -112,6 +112,13 @@ public class MentoringTeamService {
         return mentoringTeam;
     }
 
+    @Transactional
+    public MentoringTeam findMentoringTeamForUpdate(Long mentoringTeamId) {
+        MentoringTeam mentoringTeam = mentoringTeamDataProvider.findMentoringTeam(mentoringTeamId);
+        mentoringTeamPolicy.validateTeamStatus(mentoringTeam);
+        return mentoringTeam;
+    }
+
     /**
      * 내 멘토링 팀들을 모두 찾는 로직
      * @return
