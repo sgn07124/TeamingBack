@@ -22,8 +22,10 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id")
     private Long id;
+
     @Column(name = "category_name",unique = true)
     private String name;
+
     @OneToMany(mappedBy = "category")
     private List<TeamCategory> categories = new ArrayList<>();
 

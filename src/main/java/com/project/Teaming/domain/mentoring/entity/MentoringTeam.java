@@ -24,34 +24,43 @@ public class MentoringTeam extends BaseEntity {
     @Tsid
     @Column(name = "mentoring_team_id")
     private Long id;  // 멘토링 팀 ID
+
     @Column(name = "mentoring_name", length = 100)
     private String name;  // 멘토링 명
+
     @Column(name = "start_date", length = 50)
     private LocalDate startDate;  // 멘토링 시작일
+
     @Column(name = "end_date", length = 50)
     private LocalDate endDate;  // 멘토링 종료일
+
     @Column(name = "mentoring_cnt")
     private Integer mentoringCnt;
+
     @Column(name = "content")
     private String content;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private MentoringStatus status;
+
     @Column(name = "link")
     private String link;
+
     @Column(name = "flag")
     @Enumerated(EnumType.STRING)
     private Status flag;
-    @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST)
+
+    @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<MentoringParticipation> mentoringParticipationList = new ArrayList<>();
+
     @OneToMany(mappedBy = "mentoringTeam",orphanRemoval = true)
     private List<MentoringBoard> mentoringBoardList = new ArrayList<>();
-    @OneToMany(mappedBy = "mentoringTeam")
-    private List<Event> eventList = new ArrayList<>();
-    @OneToMany(mappedBy = "mentoringTeam")
+
+    @OneToMany(mappedBy = "mentoringTeam",cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<TeamCategory> categories = new ArrayList<>();
 
-    public MentoringTeam(Long id, String name, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<Event> eventList, List<TeamCategory> categories) {
+    public MentoringTeam(Long id, String name, LocalDate startDate, LocalDate endDate, Integer mentoringCnt, String content, MentoringStatus status, String link, Status flag, List<MentoringParticipation> mentoringParticipationList, List<MentoringBoard> mentoringBoardList, List<TeamCategory> categories) {
         this.id = id;
         this.name = name;
         this.startDate = startDate;
@@ -63,7 +72,6 @@ public class MentoringTeam extends BaseEntity {
         this.flag = flag;
         this.mentoringParticipationList = mentoringParticipationList;
         this.mentoringBoardList = mentoringBoardList;
-        this.eventList = eventList;
         this.categories = categories;
     }
 
