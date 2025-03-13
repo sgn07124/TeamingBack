@@ -55,6 +55,8 @@ dependencies {
 	implementation 'com.github.f4b6a3:tsid-creator:5.2.0' // TSID 생성기
 	implementation 'io.hypersistence:hypersistence-utils-hibernate-60:3.5.1' // Hibernate 6.0 이상용
 
+	//RabbitMQ 의존성 주입
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 	// jwt 관련
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")

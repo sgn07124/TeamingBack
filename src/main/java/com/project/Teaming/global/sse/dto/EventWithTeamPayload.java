@@ -4,10 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@NoArgsConstructor
 public class EventWithTeamPayload {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -19,4 +20,15 @@ public class EventWithTeamPayload {
     private String createdAt;
     private String message;
     private boolean isRead;
+
+    @Builder
+    public EventWithTeamPayload(Long userId, String type, String category, Long teamId, String createdAt, String message, boolean isRead) {
+        this.userId = userId;
+        this.type = type;
+        this.category = category;
+        this.teamId = teamId;
+        this.createdAt = createdAt;
+        this.message = message;
+        this.isRead = isRead;
+    }
 }
