@@ -15,10 +15,9 @@ public class AsyncConfig {
     @Bean(name = "notificationExecutor")
     public Executor notificationExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(50);  // 최소 스레드 개수
-        executor.setMaxPoolSize(300);  // 최대 스레드 개수
-        executor.setQueueCapacity(3000);  // 대기 큐 크기
-        executor.setKeepAliveSeconds(30);  // Idle 상태의 스레드를 유지하는 시간
+        executor.setCorePoolSize(100);  // 최소 스레드 개수
+        executor.setMaxPoolSize(150);  // 최대 스레드 개수
+        executor.setQueueCapacity(200);  // 대기 큐 크기
         executor.setThreadNamePrefix("Notification-");
         executor.initialize();
         return executor;

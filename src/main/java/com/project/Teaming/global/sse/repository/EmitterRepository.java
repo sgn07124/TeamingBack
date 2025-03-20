@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.project.Teaming.global.error.ErrorCode;
 import com.project.Teaming.global.error.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -18,7 +19,9 @@ public class EmitterRepository {
     private static final Long DEFAULT_TIMEOUT = 60L * 1000 * 60 ;
     private final StringRedisTemplate stringRedisTemplate;
     private static final String SSE_EMITTER_KEY = "sse_server:";
-    private final String serverId = System.getenv("SERVER_ID");
+
+    @Value("${server.id}") // application.yml에서 설정된 SERVER_ID 값을 주입
+    private String serverId;
 
     public SseEmitter findById(Long userId) {
         return emitters.get(userId);

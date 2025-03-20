@@ -1,44 +1,53 @@
 package com.project.Teaming.global.messageQueue.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 @Configuration
 public class RabbitMQConfig {
 
-    private final String serverId = System.getenv("SERVER_ID"); // 현재 서버 ID 가져오기
-
+    @Value("${server.id}") // application.yml에서 설정된 SERVER_ID 값을 주입
+    private String serverId;
     @Bean
     public Queue queue() {
-        return new Queue(serverId, true); // 서버별 큐 생성
+        return new Queue(serverId, true);
     }
-
     @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange("notification.exchange");
+    public Binding binding(FanoutExchange exchange, Queue queue) {
+        return BindingBuilder.bind(queue).to(exchange);
     }
-
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(serverId); // 서버별 Routing Key 바인딩
+    public FanoutExchange exchange() {
+        return new FanoutExchange("notification.exchange");
     }
     @Bean
     public Jackson2JsonMessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter(); // JSON 변환기 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        return new Jackson2JsonMessageConverter(objectMapper);
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(jsonMessageConverter());
+    public RabbitTemplate rabbitTemplate(CachingConnectionFactory cachingConnectionFactory) {
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);
+        rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter()); // ✅ JSON 메시지 변환기 적용
         return rabbitTemplate;
+    }
+
+    @Bean
+    public CachingConnectionFactory cachingConnectionFactory() {
+        CachingConnectionFactory cachingConnectionFactory = new CachingConnectionFactory("localhost");
+        cachingConnectionFactory.setUsername("guest");
+        cachingConnectionFactory.setPassword("guest");
+        cachingConnectionFactory.setChannelCacheSize(50);
+        cachingConnectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CHANNEL);
+        return cachingConnectionFactory;
     }
 }
 
