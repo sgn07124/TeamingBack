@@ -4,6 +4,7 @@ import com.project.Teaming.global.event.NotificationEvent;
 import com.project.Teaming.global.sse.dto.EventPayload;
 import com.project.Teaming.global.sse.dto.EventWithTeamPayload;
 import com.project.Teaming.global.sse.entity.Notification;
+import com.project.Teaming.global.sse.repository.EmitterRepository;
 import com.project.Teaming.global.sse.repository.NotificationRepository;
 import com.project.Teaming.global.sse.service.SseEmitterService;
 import com.rabbitmq.client.Channel;
@@ -12,10 +13,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,7 +28,7 @@ import java.util.List;
 public class RabbitMQNotificationConsumer {
 
     private final SseEmitterService sseEmitterService;
-    private final StringRedisTemplate stringRedisTemplate;
+    private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
 
     @Value("${server.id}") // application.yml에서 설정된 SERVER_ID 값을 주입
@@ -42,9 +43,9 @@ public class RabbitMQNotificationConsumer {
             List<Notification> notifications = notificationRepository.findAllById(event.getNotificationIds());
             notifications.forEach(notification -> {
                 Long userId = notification.getUser().getId();
-                String targetServerId = stringRedisTemplate.opsForValue().get("sse_server:" + userId);
+                SseEmitter emitter = emitterRepository.findById(userId);
 
-                if (targetServerId != null && targetServerId.equals(serverId)) {
+                if (emitter != null) {
                     // ✅ SSE 연결된 서버라면 알림 전송
                     sendNotification(userId, notification);
                     log.info("🚀 SSE 알림 전송 완료 → User: {}", userId);
