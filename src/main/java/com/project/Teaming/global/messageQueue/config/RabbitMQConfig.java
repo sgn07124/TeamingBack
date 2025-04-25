@@ -3,9 +3,11 @@ package com.project.Teaming.global.messageQueue.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -33,6 +35,15 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter(objectMapper);
     }
 
+    @Bean
+    public RabbitAdmin rabbitAdmin(CachingConnectionFactory cachingConnectionFactory) {
+        return new RabbitAdmin(cachingConnectionFactory);
+    }
+
+    @Bean
+    public ApplicationRunner runner(RabbitAdmin rabbitAdmin) {
+        return args -> rabbitAdmin.initialize();
+    }
     @Bean
     public RabbitTemplate rabbitTemplate(CachingConnectionFactory cachingConnectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);
