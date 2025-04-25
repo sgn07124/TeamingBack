@@ -196,6 +196,7 @@ public class MentoringBoardService {
                     () -> new BusinessException(ErrorCode.NO_AUTHORITY));
 
             mentoringBoard.updateBoard(dto);
+            mentoringBoardRepository.flush();
 
         } catch (OptimisticLockException e) {
             throw new BusinessException(ErrorCode.CONFLICT);
