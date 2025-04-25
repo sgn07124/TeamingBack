@@ -36,15 +36,6 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public RabbitAdmin rabbitAdmin(CachingConnectionFactory cachingConnectionFactory) {
-        return new RabbitAdmin(cachingConnectionFactory);
-    }
-
-    @Bean
-    public ApplicationRunner runner(RabbitAdmin rabbitAdmin) {
-        return args -> rabbitAdmin.initialize();
-    }
-    @Bean
     public RabbitTemplate rabbitTemplate(CachingConnectionFactory cachingConnectionFactory) {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory);
         rabbitTemplate.setMessageConverter(new Jackson2JsonMessageConverter()); // ✅ JSON 메시지 변환기 적용
