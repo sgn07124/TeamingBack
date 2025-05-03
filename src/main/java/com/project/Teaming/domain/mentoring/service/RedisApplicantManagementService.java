@@ -34,7 +34,7 @@ public class RedisApplicantManagementService {
     public void saveApplicantWithTTL(Long teamId, TeamParticipationResponse response, LocalDate deadLine) {
         // 현재 시간과 deadLine 간의 차이를 계산
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime deadlineDateTime = deadLine.atStartOfDay();
+        LocalDateTime deadlineDateTime = deadLine.atTime(23, 59, 59);
         Duration duration = Duration.between(now, deadlineDateTime);
 
         long ttlSeconds = duration.getSeconds();

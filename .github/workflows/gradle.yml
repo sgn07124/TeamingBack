@@ -59,7 +59,6 @@ jobs:
       - name: Docker 이미지 생성
         run: docker build -t ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest .
 
-
       - name: Docker 이미지 Push하기
         run: docker push ${{ secrets.DOCKER_USERNAME }}/teaming-server:latest
 

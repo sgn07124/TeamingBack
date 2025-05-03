@@ -85,14 +85,6 @@ public class RedisConfig {
         return template;
     }
 
-    // sse 연결한 사용자 공유용
-    @Bean
-    public StringRedisTemplate stringRedisTemplate() {
-        StringRedisTemplate template = new StringRedisTemplate();
-        template.setConnectionFactory(redisConnectionFactory(3));
-        return template;
-    }
-
     @Bean
     public ObjectMapper redisObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
